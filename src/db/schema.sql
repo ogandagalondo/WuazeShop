@@ -1,0 +1,54 @@
+-- Categories table
+CREATE TABLE IF NOT EXISTS categories (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  slug TEXT NOT NULL UNIQUE,
+  icon TEXT NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Products table
+CREATE TABLE IF NOT EXISTS products (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  title TEXT NOT NULL,
+  slug TEXT NOT NULL UNIQUE,
+  category TEXT NOT NULL,
+  price INTEGER NOT NULL,          -- Price in FCFA (XAF)
+  original_price INTEGER,          -- Strikethrough price in FCFA
+  image_url TEXT NOT NULL,
+  specs TEXT,                      -- JSON string of bullet points
+  colors TEXT,                     -- JSON string of colors
+  in_stock INTEGER DEFAULT 1,      -- 1 for in stock, 0 for out
+  is_active INTEGER DEFAULT 1,     -- Soft delete flag
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (category) REFERENCES categories (slug)
+);
+
+-- Orders table
+CREATE TABLE IF NOT EXISTS orders (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  order_number TEXT NOT NULL UNIQUE,
+  customer_name TEXT NOT NULL,
+  customer_phone TEXT NOT NULL,          -- WhatsApp number
+  customer_neighborhood TEXT NOT NULL,   -- Gabon neighborhood (ex: Louis, Glass, Akébé)
+  product_id INTEGER NOT NULL,
+  product_title TEXT NOT NULL,
+  quantity INTEGER NOT NULL DEFAULT 1,
+  total_amount INTEGER NOT NULL,         -- FCFA
+  payment_status TEXT NOT NULL DEFAULT 'PENDING',  -- PENDING, CONFIRMED_CLEARED, FAILED
+  fulfillment_status TEXT NOT NULL DEFAULT 'AWAITING_PROCUREMENT', -- AWAITING_PROCUREMENT, PURCHASED_IN_CHINA, IN_TRANSIT, ARRIVED_GABON, DELIVERED
+  payment_method TEXT NOT NULL,          -- AIRTEL_MONEY, MOOV_MONEY, SIMULATOR
+  transaction_reference TEXT UNIQUE,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (product_id) REFERENCES products (id)
+);
+
+-- Admin users table
+CREATE TABLE IF NOT EXISTS admin_users (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  username TEXT NOT NULL UNIQUE,
+  password_hash TEXT NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
