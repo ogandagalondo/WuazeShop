@@ -31,6 +31,13 @@ h1, h2, h3, h4, h5, .font-heading {
   box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
 }
 
+/* Admin segmented tab active state */
+.admin-tab-btn.active {
+  background-color: var(--surface) !important;
+  color: var(--primary) !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
 /* Smooth modal transitions */
 .modal-overlay {
   transition: opacity 0.25s ease, visibility 0.25s ease;
