@@ -3,6 +3,7 @@ import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { config } from './config/env.js';
+import { productRouter } from './modules/products/product.controller.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -17,6 +18,9 @@ app.use(express.urlencoded({ extended: true }));
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', service: 'WuazeShop' });
 });
+
+// Products & Categories API
+app.use('/api', productRouter);
 
 // Static assets (front-end public folder)
 app.use(express.static(path.join(__dirname, 'public')));
