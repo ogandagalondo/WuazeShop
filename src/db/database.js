@@ -23,6 +23,7 @@ export function initDb(dbPath = 'wuazeshop.db') {
   // Seed default data
   seedData(db);
 
+  globalDb = db;
   return db;
 }
 

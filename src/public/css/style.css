@@ -1,0 +1,60 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
+
+:root {
+  --primary: #006c49;
+  --primary-container: #10b981;
+  --secondary: #2d6a48;
+  --secondary-container: #b0f1c7;
+  --background: #faf8ff;
+  --surface: #ffffff;
+  --text-main: #131b2e;
+  --text-muted: #6c7a71;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: var(--background);
+  color: var(--text-main);
+  -webkit-tap-highlight-color: transparent;
+}
+
+h1, h2, h3, h4, h5, .font-heading {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+/* Category pills active state */
+.cat-pill.active {
+  background-color: var(--primary-container) !important;
+  color: #ffffff !important;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+}
+
+/* Smooth modal transitions */
+.modal-overlay {
+  transition: opacity 0.25s ease, visibility 0.25s ease;
+}
+.modal-overlay.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.modal-overlay:not(.hidden) {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+/* Cart slide-over drawer */
+.drawer {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.drawer-closed {
+  transform: translateX(100%);
+}
+@media (max-width: 640px) {
+  .drawer-closed {
+    transform: translateY(100%);
+  }
+}
