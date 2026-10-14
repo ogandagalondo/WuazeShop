@@ -220,9 +220,9 @@ async function loadAdminProducts() {
 }
 
 function updateStats() {
-  const clearedOrders = currentOrders.filter(o => o.payment_status === 'CONFIRMED_CLEARED');
-  const pendingOrders = currentOrders.filter(o => o.payment_status === 'PENDING_PAYMENT');
-  const totalRevenue = clearedOrders.reduce((sum, o) => sum + (o.total_amount || 0), 0);
+  const clearedOrders = currentOrders.filter(o => (o.paymentStatus || o.payment_status) === 'CONFIRMED_CLEARED');
+  const pendingOrders = currentOrders.filter(o => (o.paymentStatus || o.payment_status) === 'PENDING_PAYMENT');
+  const totalRevenue = clearedOrders.reduce((sum, o) => sum + (o.totalAmount || o.total_amount || 0), 0);
 
   statTotalRevenue.textContent = formatFCFA(totalRevenue);
   statClearedCount.textContent = clearedOrders.length;
@@ -239,22 +239,23 @@ function renderOrders() {
 
   // Filter pill
   if (activeOrderFilter === 'CLEARED') {
-    filtered = filtered.filter(o => o.payment_status === 'CONFIRMED_CLEARED');
+    filtered = filtered.filter(o => (o.paymentStatus || o.payment_status) === 'CONFIRMED_CLEARED');
   } else if (activeOrderFilter === 'PENDING') {
-    filtered = filtered.filter(o => o.payment_status === 'PENDING_PAYMENT');
+    filtered = filtered.filter(o => (o.paymentStatus || o.payment_status) === 'PENDING_PAYMENT');
   } else if (activeOrderFilter === 'SHIPPED') {
-    filtered = filtered.filter(o => ['IN_PREPARATION_CHINA', 'SHIPPED_GABON', 'ARRIVED_LIBREVILLE'].includes(o.fulfillment_status));
+    filtered = filtered.filter(o => ['IN_PREPARATION_CHINA', 'SHIPPED_GABON', 'ARRIVED_LIBREVILLE'].includes(o.fulfillmentStatus || o.fulfillment_status));
   }
 
   // Search input
   const query = document.getElementById('orders-search-input')?.value.toLowerCase().trim();
   if (query) {
-    filtered = filtered.filter(o => 
-      o.order_number.toLowerCase().includes(query) ||
-      o.customer_name.toLowerCase().includes(query) ||
-      o.customer_phone.toLowerCase().includes(query) ||
-      (o.customer_neighborhood && o.customer_neighborhood.toLowerCase().includes(query))
-    );
+    filtered = filtered.filter(o => {
+      const orderNum = (o.orderNumber || o.order_number || '').toLowerCase();
+      const clientName = (o.customerName || o.customer_name || '').toLowerCase();
+      const phone = (o.customerPhone || o.customer_phone || '').toLowerCase();
+      const hood = (o.customerNeighborhood || o.customer_neighborhood || '').toLowerCase();
+      return orderNum.includes(query) || clientName.includes(query) || phone.includes(query) || hood.includes(query);
+    });
   }
 
   if (filtered.length === 0) {
@@ -268,11 +269,20 @@ function renderOrders() {
   }
 
   ordersCardsContainer.innerHTML = filtered.map(order => {
-    const isCleared = order.payment_status === 'CONFIRMED_CLEARED';
-    const isPending = order.payment_status === 'PENDING_PAYMENT';
+    const orderNum = order.orderNumber || order.order_number;
+    const clientName = order.customerName || order.customer_name;
+    const clientPhone = order.customerPhone || order.customer_phone;
+    const neighborhood = order.customerNeighborhood || order.customer_neighborhood || 'Libreville';
+    const paymentStatus = order.paymentStatus || order.payment_status;
+    const fulfillmentStatus = order.fulfillmentStatus || order.fulfillment_status;
+    const totalAmount = order.totalAmount || order.total_amount || 0;
+    const createdAt = order.createdAt || order.created_at;
+
+    const isCleared = paymentStatus === 'CONFIRMED_CLEARED';
+    const isPending = paymentStatus === 'PENDING_PAYMENT' || paymentStatus === 'PENDING';
     
     // Payment badge
-    let paymentBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-gray-100 text-gray-700">${order.payment_status}</span>`;
+    let paymentBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-gray-100 text-gray-700">${paymentStatus}</span>`;
     if (isCleared) {
       paymentBadge = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#d1fae5] text-[#065f46] flex items-center gap-1">
         <span class="material-symbols-outlined text-[13px]">check_circle</span>
@@ -288,22 +298,30 @@ function renderOrders() {
     // Fulfillment label
     let fulfillmentLabel = 'En attente confirmation';
     let fulfillmentBadgeClass = 'bg-surface-low text-outline';
-    if (order.fulfillment_status === 'IN_PREPARATION_CHINA') {
+    if (fulfillmentStatus === 'IN_PREPARATION_CHINA') {
       fulfillmentLabel = '🇨🇳 En préparation Chine';
       fulfillmentBadgeClass = 'bg-blue-50 text-blue-700 border border-blue-200 font-bold';
-    } else if (order.fulfillment_status === 'SHIPPED_GABON') {
+    } else if (fulfillmentStatus === 'SHIPPED_GABON') {
       fulfillmentLabel = '✈️ En vol vers Gabon';
       fulfillmentBadgeClass = 'bg-indigo-50 text-indigo-700 border border-indigo-200 font-bold';
-    } else if (order.fulfillment_status === 'ARRIVED_LIBREVILLE') {
+    } else if (fulfillmentStatus === 'ARRIVED_LIBREVILLE') {
       fulfillmentLabel = '🇬🇦 Arrivé Libreville';
       fulfillmentBadgeClass = 'bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold';
-    } else if (order.fulfillment_status === 'DELIVERED') {
+    } else if (fulfillmentStatus === 'DELIVERED') {
       fulfillmentLabel = '✅ Livré au client';
       fulfillmentBadgeClass = 'bg-green-100 text-green-800 font-bold';
     }
 
     // Items list
-    const itemsHtml = (order.items || []).map(item => `
+    const items = order.items && order.items.length > 0 
+      ? order.items 
+      : [{
+          quantity: order.quantity || 1,
+          title: order.productTitle || order.product_title || 'Article commandé',
+          price: totalAmount / (order.quantity || 1)
+        }];
+
+    const itemsHtml = items.map(item => `
       <div class="flex items-center justify-between text-xs py-1 border-b border-surface-low last:border-0">
         <div class="flex items-center gap-2 truncate">
           <span class="w-5 h-5 rounded bg-surface-low flex items-center justify-center font-bold text-[10px] shrink-0">${item.quantity}x</span>
@@ -314,8 +332,8 @@ function renderOrders() {
     `).join('');
 
     // WhatsApp Direct Link
-    const cleanPhone = cleanPhoneForWhatsApp(order.customer_phone);
-    const waMessage = `Bonjour ${order.customer_name}, c'est l'équipe WuazeShop concernant votre commande ${order.order_number} (${formatFCFA(order.total_amount)}). Statut actuel : ${fulfillmentLabel}.`;
+    const cleanPhone = cleanPhoneForWhatsApp(clientPhone);
+    const waMessage = `Bonjour ${clientName}, c'est l'équipe WuazeShop concernant votre commande ${orderNum} (${formatFCFA(totalAmount)}). Statut actuel : ${fulfillmentLabel}.`;
     const waUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(waMessage)}`;
 
     return `
@@ -323,8 +341,8 @@ function renderOrders() {
         <!-- Card Header: Order Number & Payment Badge -->
         <div class="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-surface-low">
           <div class="flex items-center gap-2">
-            <span class="font-black text-sm text-primary tracking-tight">${order.order_number}</span>
-            <span class="text-[10px] text-outline">${new Date(order.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
+            <span class="font-black text-sm text-primary tracking-tight">${orderNum}</span>
+            <span class="text-[10px] text-outline">${new Date(createdAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
           </div>
           <div>${paymentBadge}</div>
         </div>
@@ -334,18 +352,18 @@ function renderOrders() {
           <div class="space-y-1">
             <div class="flex items-center gap-1.5 font-bold text-on-surface">
               <span class="material-symbols-outlined text-outline text-[16px]">person</span>
-              <span>${order.customer_name}</span>
+              <span>${clientName}</span>
             </div>
             <div class="flex items-center gap-1.5 text-on-surface-variant">
               <span class="material-symbols-outlined text-outline text-[16px]">location_on</span>
-              <span>Quartier : <strong>${order.customer_neighborhood || 'Libreville'}</strong></span>
+              <span>Quartier : <strong>${neighborhood}</strong></span>
             </div>
           </div>
 
           <div class="flex flex-col sm:items-end justify-between gap-1.5">
             <div class="flex items-center gap-2">
               <span class="text-outline text-[11px]">Contact :</span>
-              <a href="tel:${order.customer_phone}" class="font-bold text-on-surface hover:text-primary">${order.customer_phone}</a>
+              <a href="tel:${clientPhone}" class="font-bold text-on-surface hover:text-primary">${clientPhone}</a>
             </div>
             <a href="${waUrl}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#25D366] hover:bg-[#20ba5a] text-white text-[11px] font-bold shadow-sm transition-all w-fit">
               <span class="material-symbols-outlined text-[15px]">chat</span>
@@ -360,7 +378,7 @@ function renderOrders() {
           ${itemsHtml}
           <div class="pt-2 mt-1 border-t border-surface-border flex justify-between items-center text-xs">
             <span class="font-semibold text-outline">Total Commande :</span>
-            <span class="font-black text-sm text-primary">${formatFCFA(order.total_amount)}</span>
+            <span class="font-black text-sm text-primary">${formatFCFA(totalAmount)}</span>
           </div>
         </div>
 
@@ -371,7 +389,7 @@ function renderOrders() {
             <span class="px-2.5 py-1 rounded-xl text-xs ${fulfillmentBadgeClass}">${fulfillmentLabel}</span>
           </div>
 
-          <button onclick="openStatusModal('${order.order_number}', '${order.customer_name}', '${order.fulfillment_status}', '${order.payment_status}')" class="px-3 py-1.5 rounded-xl bg-surface-low hover:bg-surface-border text-on-surface text-xs font-bold border border-surface-border flex items-center gap-1 transition-colors">
+          <button onclick="openStatusModal('${orderNum}', '${clientName}', '${fulfillmentStatus}', '${paymentStatus}')" class="px-3 py-1.5 rounded-xl bg-surface-low hover:bg-surface-border text-on-surface text-xs font-bold border border-surface-border flex items-center gap-1 transition-colors">
             <span class="material-symbols-outlined text-[15px]">edit</span>
             <span>Mettre à jour statut</span>
           </button>
