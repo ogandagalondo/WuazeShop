@@ -2,8 +2,9 @@ import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { getDb } from '../../db/database.js';
 
-// Stockage sécurisé des tokens en mémoire
+// Stockage des tokens en mémoire et support stateless HMAC
 const activeSessions = new Map();
+const AUTH_SECRET = process.env.JWT_SECRET || 'wuazeshop-admin-hmac-secret-gabon-2026';
 
 export const authService = {
   login(identifier, password) {
@@ -18,29 +19,56 @@ export const authService = {
       throw new Error('Identifiants incorrects');
     }
 
-    const token = crypto.randomBytes(32).toString('hex');
-    activeSessions.set(token, {
+    const sessionPayload = {
       userId: user.id,
       username: user.username,
       email: user.email,
       createdAt: Date.now()
-    });
+    };
+
+    const encoded = Buffer.from(JSON.stringify(sessionPayload)).toString('base64url');
+    const signature = crypto.createHmac('sha256', AUTH_SECRET).update(encoded).digest('base64url');
+    const token = `${encoded}.${signature}`;
+
+    activeSessions.set(token, sessionPayload);
 
     return { token, username: user.username, email: user.email };
   },
 
   verifyToken(token) {
     if (!token) return null;
+
+    // 1. Vérification en mémoire si disponible
     const session = activeSessions.get(token);
-    if (!session) return null;
-    // Expiration de session après 24 heures
-    if (Date.now() - session.createdAt > 24 * 60 * 60 * 1000) {
-      activeSessions.delete(token);
-      return null;
+    if (session) {
+      if (Date.now() - session.createdAt > 24 * 60 * 60 * 1000) {
+        activeSessions.delete(token);
+        return null;
+      }
+      return session;
     }
-    return session;
+
+    // 2. Vérification stateless (HMAC) pour environnement serverless / multi-instance
+    if (token.includes('.')) {
+      try {
+        const [encoded, signature] = token.split('.');
+        const expectedSig = crypto.createHmac('sha256', AUTH_SECRET).update(encoded).digest('base64url');
+        if (signature !== expectedSig) return null;
+
+        const payload = JSON.parse(Buffer.from(encoded, 'base64url').toString('utf8'));
+        if (Date.now() - payload.createdAt > 24 * 60 * 60 * 1000) {
+          return null;
+        }
+        return payload;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    return null;
   }
 };
+
 
 export function requireAdminAuth(req, res, next) {
   const authHeader = req.headers['authorization'];

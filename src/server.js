@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { config } from './config/env.js';
@@ -28,10 +29,24 @@ app.use('/api', paymentRouter);
 app.use('/api', orderRouter);
 app.use('/api', adminRouter);
 
+// Explicit root route for storefront
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/index.html'));
+});
+
 // Shopify-style Admin portal route: /admin directly serves admin.html
 app.get(['/admin', '/admin/'], (req, res) => {
   res.sendFile(path.join(__dirname, 'public/admin.html'));
 });
+
+// Uploaded images (supports local & serverless /tmp)
+const uploadsPath = process.env.VERCEL
+  ? path.resolve('/tmp', 'uploads')
+  : path.join(__dirname, 'public/uploads');
+
+if (fs.existsSync(uploadsPath)) {
+  app.use('/uploads', express.static(uploadsPath));
+}
 
 // Static assets (front-end public folder)
 app.use(express.static(path.join(__dirname, 'public')));
@@ -42,3 +57,6 @@ if (process.env.NODE_ENV !== 'test' && process.argv[1] === __filename) {
     console.log(`[WuazeShop] Server running on http://localhost:${config.port}`);
   });
 }
+
+export default app;
+

@@ -8,10 +8,17 @@ import { orderService } from '../orders/order.service.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const uploadDir = path.resolve(__dirname, '../../public/uploads');
+const isServerless = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
+export const uploadDir = isServerless
+  ? path.resolve('/tmp', 'uploads')
+  : path.resolve(__dirname, '../../public/uploads');
 
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
+try {
+  if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+  }
+} catch (err) {
+  console.warn('[Admin] Note: uploads dir initialization deferred:', err.message);
 }
 
 export const adminRouter = Router();
@@ -87,6 +94,9 @@ adminRouter.post('/admin/upload', (req, res) => {
       .replace(/[^a-z0-9_-]/g, '-')
       .slice(0, 30) || 'image';
     const uniqueFileName = `${Date.now()}-${safeBaseName}${ext}`;
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
     const filePath = path.join(uploadDir, uniqueFileName);
 
     fs.writeFileSync(filePath, buffer);
