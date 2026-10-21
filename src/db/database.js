@@ -20,6 +20,17 @@ export function initDb(dbPath = 'wuazeshop.db') {
   const schemaSql = fs.readFileSync(schemaPath, 'utf8');
   db.exec(schemaSql);
 
+  // Migration: Ensure email column exists on admin_users
+  try {
+    const tableInfo = db.prepare(`PRAGMA table_info(admin_users)`).all();
+    const hasEmail = tableInfo.some(col => col.name === 'email');
+    if (!hasEmail) {
+      db.exec(`ALTER TABLE admin_users ADD COLUMN email TEXT;`);
+    }
+  } catch (err) {
+    // Column may already exist or table not ready
+  }
+
   // Seed default data
   seedData(db);
 

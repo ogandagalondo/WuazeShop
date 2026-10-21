@@ -15,19 +15,35 @@ describe('Admin CMS API', () => {
     expect(res.status).toBe(401);
   });
 
-  it('authenticates admin with valid credentials and returns token', async () => {
+  it('authenticates admin with valid email and returns token (Shopify style)', async () => {
+    const res = await request(app).post('/api/admin/login').send({
+      email: 'admin@wuazeshop.ga',
+      password: 'adminpassword123'
+    });
+    expect(res.status).toBe(200);
+    expect(res.body.token).toBeDefined();
+    expect(res.body.email).toBe('admin@wuazeshop.ga');
+    authToken = res.body.token;
+  });
+
+  it('authenticates admin with username for backward compatibility', async () => {
     const res = await request(app).post('/api/admin/login').send({
       username: 'admin',
       password: 'adminpassword123'
     });
     expect(res.status).toBe(200);
     expect(res.body.token).toBeDefined();
-    authToken = res.body.token;
+  });
+
+  it('serves admin back-office on dedicated Shopify-style route /admin', async () => {
+    const res = await request(app).get('/admin');
+    expect(res.status).toBe(200);
+    expect(res.headers['content-type']).toContain('text/html');
   });
 
   it('rejects login with invalid password', async () => {
     const res = await request(app).post('/api/admin/login').send({
-      username: 'admin',
+      email: 'admin@wuazeshop.ga',
       password: 'wrongpassword'
     });
     expect(res.status).toBe(401);
@@ -88,11 +104,185 @@ describe('Admin CMS API', () => {
     expect(publicList.body.some(p => p.id === createdId)).toBe(false);
   });
 
+  it('allows authenticated admin to upload a base64 product image', async () => {
+    // 1x1 transparent png in base64
+    const sampleBase64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+    const uploadRes = await request(app)
+      .post('/api/admin/upload')
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({
+        image: sampleBase64,
+        filename: 'smartphone-test.png'
+      });
+
+    expect(uploadRes.status).toBe(200);
+    expect(uploadRes.body.success).toBe(true);
+    expect(uploadRes.body.imageUrl).toMatch(/^\/uploads\/\d+-smartphone-test\.png$/);
+  });
+
+  it('allows authenticated admin to add a product with a custom description and uploaded image', async () => {
+    const res = await request(app)
+      .post('/api/admin/products')
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({
+        title: 'OnePlus 12 5G Edition Spéciale',
+        description: 'Smartphone haut de gamme importé directement de Shenzhen avec processeur Snapdragon 8 Gen 3 et optique Hasselblad.',
+        category: 'smartphones',
+        price: 520000,
+        originalPrice: 580000,
+        imageUrl: '/uploads/oneplus12.png',
+        specs: ['16GB RAM', '512GB Stockage', 'Charge 100W SuperVOOC'],
+        colors: ['#0d7252', '#000000'],
+        inStock: true
+      });
+
+    expect(res.status).toBe(201);
+    expect(res.body.id).toBeDefined();
+    expect(res.body.description).toContain('Shenzhen');
+
+    const getRes = await request(app).get(`/api/products/${res.body.id}`);
+    expect(getRes.status).toBe(200);
+    expect(getRes.body.description).toBe('Smartphone haut de gamme importé directement de Shenzhen avec processeur Snapdragon 8 Gen 3 et optique Hasselblad.');
+    expect(getRes.body.image_url).toBe('/uploads/oneplus12.png');
+  });
+
+  it('allows authenticated admin to update a product description', async () => {
+    const listRes = await request(app).get('/api/products');
+    const targetProduct = listRes.body[0];
+
+    const updatedDesc = 'Nouvelle description mise à jour avec garantie locale 6 mois.';
+    const updateRes = await request(app)
+      .put(`/api/admin/products/${targetProduct.id}`)
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({
+        description: updatedDesc
+      });
+
+    expect(updateRes.status).toBe(200);
+    expect(updateRes.body.description).toBe(updatedDesc);
+  });
+
   it('allows admin to list customer orders with WhatsApp numbers and neighborhoods', async () => {
     const res = await request(app)
       .get('/api/admin/orders')
       .set('Authorization', `Bearer ${authToken}`);
     expect(res.status).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
+  });
+
+  it('allows public retrieval of site showcase settings', async () => {
+    const res = await request(app).get('/api/settings');
+    expect(res.status).toBe(200);
+    expect(res.body.hero_section).toBeDefined();
+    expect(res.body.promo_section).toBeDefined();
+    expect(res.body.contact_section).toBeDefined();
+    expect(res.body.hero_section.title).toContain('La technologie');
+  });
+
+  it('allows authenticated admin to update a showcase section', async () => {
+    const updateRes = await request(app)
+      .put('/api/admin/settings/hero_section')
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({
+        badge: '✦ Spécial Libreville',
+        title: 'Le meilleur de la tech chinoise au Gabon',
+        subtitle: 'Livraison express et service après-vente garanti.',
+        ctaText: 'Acheter maintenant',
+        ctaLink: '#products-section',
+        imageUrl: '/uploads/custom-hero.jpg',
+        prop1Title: 'Livraison 24h',
+        prop1Sub: 'partout à Libreville',
+        prop2Title: 'Airtel & Moov',
+        prop2Sub: 'Paiement sécurisé',
+        prop3Title: 'Assistance VIP',
+        prop3Sub: '7j/7 WhatsApp'
+      });
+
+    expect(updateRes.status).toBe(200);
+    expect(updateRes.body.success).toBe(true);
+
+    const publicRes = await request(app).get('/api/settings');
+    expect(publicRes.body.hero_section.badge).toBe('✦ Spécial Libreville');
+    expect(publicRes.body.hero_section.title).toBe('Le meilleur de la tech chinoise au Gabon');
+  });
+
+  it('allows authenticated admin to update social media links', async () => {
+    const updateRes = await request(app)
+      .put('/api/admin/settings/social_links')
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({
+        facebook: 'https://facebook.com/wuazeshop_test',
+        instagram: 'https://instagram.com/wuazeshop_test',
+        tiktok: 'https://tiktok.com/@wuazeshop_test',
+        whatsapp: 'https://wa.me/241074001122'
+      });
+
+    expect(updateRes.status).toBe(200);
+    expect(updateRes.body.success).toBe(true);
+
+    const publicRes = await request(app).get('/api/settings');
+    expect(publicRes.body.social_links).toBeDefined();
+    expect(publicRes.body.social_links.facebook).toBe('https://facebook.com/wuazeshop_test');
+    expect(publicRes.body.social_links.instagram).toBe('https://instagram.com/wuazeshop_test');
+    expect(publicRes.body.social_links.tiktok).toBe('https://tiktok.com/@wuazeshop_test');
+    expect(publicRes.body.social_links.whatsapp).toBe('https://wa.me/241074001122');
+  });
+
+  it('allows authenticated admin to update legal terms and privacy policy', async () => {
+    const updateRes = await request(app)
+      .put('/api/admin/settings/legal_section')
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({
+        terms: 'Nouvelles Conditions Générales de Vente WuazeShop 2026',
+        privacy: 'Nouvelle Politique de Confidentialité et Protection des Données Gabon'
+      });
+
+    expect(updateRes.status).toBe(200);
+    expect(updateRes.body.success).toBe(true);
+
+    const publicRes = await request(app).get('/api/settings');
+    expect(publicRes.body.legal_section).toBeDefined();
+    expect(publicRes.body.legal_section.terms).toBe('Nouvelles Conditions Générales de Vente WuazeShop 2026');
+    expect(publicRes.body.legal_section.privacy).toBe('Nouvelle Politique de Confidentialité et Protection des Données Gabon');
+  });
+
+  it('keeps public storefront separate with no visible admin links (Shopify architecture)', async () => {
+    const storefrontRes = await request(app).get('/');
+    expect(storefrontRes.status).toBe(200);
+    // Public customers should not see /admin.html links in header, footer or mobile nav
+    expect(storefrontRes.text).not.toContain('/admin.html');
+    expect(storefrontRes.text).not.toContain('Espace Administrateur CMS');
+    // Storefront must contain FAQ section
+    expect(storefrontRes.text).toContain('id="faq-section"');
+    expect(storefrontRes.text).toContain('Foire Aux Questions');
+  });
+
+  it('allows authenticated admin to update FAQ section with questions and answers', async () => {
+    const testFaq = [
+      {
+        id: 'faq_test_1',
+        question: 'Comment contacter le service client à Libreville ?',
+        answer: 'Notre service client est disponible 7j/7 directement sur WhatsApp au (+241) 074 00 11 22.'
+      },
+      {
+        id: 'faq_test_2',
+        question: 'Quel est le mode de transport utilisé depuis Shenzhen ?',
+        answer: 'Nous utilisons le fret aérien cargo express avec dédouanement sécurisé à Libreville.'
+      }
+    ];
+
+    const updateRes = await request(app)
+      .put('/api/admin/settings/faq_section')
+      .set('Authorization', `Bearer ${authToken}`)
+      .send(testFaq);
+
+    expect(updateRes.status).toBe(200);
+    expect(updateRes.body.success).toBe(true);
+
+    const publicRes = await request(app).get('/api/settings');
+    expect(Array.isArray(publicRes.body.faq_section)).toBe(true);
+    expect(publicRes.body.faq_section.length).toBe(2);
+    expect(publicRes.body.faq_section[0].question).toBe('Comment contacter le service client à Libreville ?');
+    expect(publicRes.body.faq_section[1].answer).toContain('fret aérien cargo express');
   });
 });

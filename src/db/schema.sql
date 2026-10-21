@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS categories (
 CREATE TABLE IF NOT EXISTS products (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   title TEXT NOT NULL,
+  description TEXT,
   slug TEXT NOT NULL UNIQUE,
   category TEXT NOT NULL,
   price INTEGER NOT NULL,          -- Price in FCFA (XAF)
@@ -48,7 +49,16 @@ CREATE TABLE IF NOT EXISTS orders (
 -- Admin users table
 CREATE TABLE IF NOT EXISTS admin_users (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
+  email TEXT UNIQUE,
   username TEXT NOT NULL UNIQUE,
   password_hash TEXT NOT NULL,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Site settings / CMS showcase configuration table
+CREATE TABLE IF NOT EXISTS site_settings (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+

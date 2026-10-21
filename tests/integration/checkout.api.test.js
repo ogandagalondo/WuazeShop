@@ -67,5 +67,22 @@ describe('Checkout API', () => {
     expect(getRes.body.orderNumber).toBe(orderNumber);
     expect(getRes.body.customerName).toBe('Alice Ondo');
     expect(getRes.body.paymentStatus).toBe('PENDING');
+    expect(getRes.body.fulfillmentStatus).toBe('AWAITING_PROCUREMENT');
+    expect(getRes.body.productTitle).toBeDefined();
+    expect(getRes.body.customerNeighborhood).toBe('Akébé');
+  });
+
+  it('returns 404 when tracking a non-existent order reference', async () => {
+    const res = await request(app).get('/api/orders/WZ-999999999');
+    expect(res.status).toBe(404);
+    expect(res.body.error).toContain('non trouvée');
+  });
+
+  it('serves interactive tracking section and search form on storefront', async () => {
+    const res = await request(app).get('/');
+    expect(res.status).toBe(200);
+    expect(res.text).toContain('id="tracking-section"');
+    expect(res.text).toContain('id="tracking-search-form"');
+    expect(res.text).toContain('Suivre mon Colis en Direct');
   });
 });

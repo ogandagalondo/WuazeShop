@@ -14,8 +14,8 @@ const __dirname = path.dirname(__filename);
 export const app = express();
 
 app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '25mb' }));
+app.use(express.urlencoded({ extended: true, limit: '25mb' }));
 
 // Healthcheck endpoint
 app.get('/api/health', (req, res) => {
@@ -27,6 +27,11 @@ app.use('/api', productRouter);
 app.use('/api', paymentRouter);
 app.use('/api', orderRouter);
 app.use('/api', adminRouter);
+
+// Shopify-style Admin portal route: /admin directly serves admin.html
+app.get(['/admin', '/admin/'], (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/admin.html'));
+});
 
 // Static assets (front-end public folder)
 app.use(express.static(path.join(__dirname, 'public')));

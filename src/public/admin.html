@@ -12,97 +12,105 @@
       theme: {
         extend: {
           colors: {
-            "primary": "#006c49",
-            "primary-container": "#10b981",
-            "on-primary": "#ffffff",
-            "secondary": "#2d6a48",
-            "secondary-container": "#b0f1c7",
-            "on-secondary-container": "#33704e",
-            "surface": "#ffffff",
-            "background": "#faf8ff",
-            "surface-low": "#f2f3ff",
-            "surface-border": "#dae2fd",
-            "on-surface": "#131b2e",
-            "on-surface-variant": "#3c4a42",
-            "outline": "#6c7a71"
+            "emerald-brand": "#0d7252",
+            "emerald-brand-hover": "#08553d",
+            "emerald-mint": "#e6f7f0",
+            "emerald-accent": "#10b981",
+            "footer-dark": "#063828",
+            "page-bg": "#fbfcfd"
           }
         }
       }
     };
   </script>
 </head>
-<body class="bg-background text-on-surface antialiased flex flex-col min-h-screen pb-20 md:pb-8">
+<body class="bg-[#fbfcfd] text-[#111827] antialiased flex flex-col min-h-screen pb-20 md:pb-8">
 
-  <!-- Admin Top Navigation -->
-  <header class="fixed top-0 inset-x-0 z-40 bg-surface shadow-sm border-b border-surface-border">
-    <div class="h-16 max-w-7xl mx-auto px-3 sm:px-6 flex items-center justify-between gap-3">
-      <!-- Brand & Section Label -->
-      <div class="flex items-center gap-2.5">
-        <a href="/" class="flex items-center gap-2">
-          <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-primary-container flex items-center justify-center text-white font-black text-base shadow-sm">W</div>
-          <div class="flex flex-col">
-            <span class="text-base sm:text-lg font-extrabold text-primary tracking-tight leading-none">WUAZE<span class="text-primary-container">SHOP</span></span>
-            <span class="text-[9px] uppercase tracking-wider text-secondary font-bold">Admin Back-Office</span>
-          </div>
-        </a>
-      </div>
+  <!-- ==================== ADMIN TOP NAVIGATION ==================== -->
+  <header class="fixed top-0 inset-x-0 z-40 bg-white border-b border-gray-100 shadow-sm">
+    <div class="h-16 max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between gap-3">
+      
+      <!-- Brand Logo -->
+      <a href="/" class="flex items-center gap-2.5">
+        <div class="w-9 h-9 rounded-xl bg-emerald-50 text-[#0d7252] border border-emerald-200/60 flex items-center justify-center shadow-sm">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 14c1 1 3 1 4 0" stroke-width="2.2"/>
+          </svg>
+        </div>
+        <div class="flex flex-col">
+          <span class="text-base sm:text-lg font-extrabold tracking-tight text-gray-900 leading-none">
+            Wuaze<span class="text-[#0d7252]">Shop</span>
+          </span>
+          <span class="text-[9px] uppercase tracking-wider text-gray-400 font-bold mt-0.5">Admin Back-Office</span>
+        </div>
+      </a>
 
       <!-- Quick Action Controls (Authenticated State) -->
       <div id="admin-header-actions" class="hidden flex items-center gap-2 sm:gap-3">
-        <a href="/" target="_blank" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-outline hover:text-primary hover:bg-surface-low border border-surface-border transition-colors">
-          <span class="material-symbols-outlined text-[16px]">storefront</span>
+        <a href="/" target="_blank" class="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold text-gray-600 hover:text-[#0d7252] hover:bg-emerald-50 border border-gray-200 transition-colors">
+          <span class="material-symbols-outlined text-base">storefront</span>
           <span>Voir la boutique</span>
         </a>
-        <button id="admin-logout-btn" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold bg-[#fee2e2] text-[#b91c1c] hover:bg-[#fecaca] transition-colors">
-          <span class="material-symbols-outlined text-[16px]">logout</span>
+        <button id="admin-logout-btn" class="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-full text-xs font-bold bg-red-50 text-red-700 hover:bg-red-100 transition-colors">
+          <span class="material-symbols-outlined text-base">logout</span>
           <span class="hidden sm:inline">Déconnexion</span>
         </button>
       </div>
+
     </div>
   </header>
 
-  <!-- Main View Container -->
-  <main class="w-full pt-20 flex-1 max-w-7xl mx-auto px-3 sm:px-6">
+  <!-- ==================== MAIN VIEW CONTAINER ==================== -->
+  <main class="w-full pt-20 flex-1 max-w-7xl mx-auto px-4 sm:px-6">
 
-    <!-- 1. LOGIN SCREEN (Visible when unauthenticated) -->
-    <section id="login-section" class="py-10 max-w-md mx-auto">
-      <div class="bg-surface rounded-2xl p-6 sm:p-8 shadow-xl border border-surface-border text-center space-y-6">
-        <div class="w-16 h-16 rounded-2xl bg-secondary-container/50 mx-auto flex items-center justify-center text-primary shadow-sm">
-          <span class="material-symbols-outlined text-[32px]">shield_person</span>
+    <!-- 1. LOGIN SCREEN (Visible when unauthenticated - Shopify style) -->
+    <section id="login-section" class="py-12 max-w-md mx-auto">
+      <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-xl border border-gray-100 text-center space-y-6">
+        <div class="w-16 h-16 rounded-2xl bg-[#e6f7f0] mx-auto flex items-center justify-center text-[#0d7252] shadow-sm">
+          <span class="material-symbols-outlined text-3xl">store</span>
         </div>
 
         <div>
-          <h2 class="text-xl sm:text-2xl font-black text-on-surface">Espace Promoteur</h2>
-          <p class="text-xs text-outline mt-1">Connectez-vous pour gérer le catalogue de Chine et suivre les commandes du Gabon.</p>
+          <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-emerald-50 text-[#0d7252] border border-emerald-200/60 mb-2">
+            <span class="material-symbols-outlined text-xs">lock</span>
+            <span>Portail Marchand</span>
+          </span>
+          <h2 class="text-xl sm:text-2xl font-extrabold text-gray-900">Connexion Administrateur</h2>
+          <p class="text-xs text-gray-500 mt-1">Gérez le catalogue, les prix, les commandes et personnalisez la vitrine en temps réel.</p>
         </div>
 
         <form id="login-form" class="space-y-4 text-left">
           <div id="login-error" class="hidden p-3 rounded-xl bg-red-50 text-red-700 text-xs font-semibold border border-red-200"></div>
 
           <div>
-            <label class="block text-xs font-bold text-on-surface mb-1">Identifiant</label>
-            <div class="flex items-center bg-surface-low rounded-xl px-3 py-2 border border-surface-border focus-within:ring-2 focus-within:ring-primary-container">
-              <span class="material-symbols-outlined text-outline text-[18px] mr-2">person</span>
-              <input id="login-username" required class="w-full bg-transparent text-xs sm:text-sm text-on-surface focus:outline-none" placeholder="Ex: admin" type="text" autocomplete="username"/>
+            <label class="block text-xs font-bold text-gray-700 mb-1">Adresse e-mail</label>
+            <div class="flex items-center bg-gray-50 rounded-xl px-3.5 py-2.5 border border-gray-200 focus-within:ring-2 focus-within:ring-[#0d7252] focus-within:bg-white">
+              <span class="material-symbols-outlined text-gray-400 text-lg mr-2">mail</span>
+              <input id="login-email" required class="w-full bg-transparent text-xs sm:text-sm text-gray-900 focus:outline-none" placeholder="admin@wuazeshop.ga" type="email" autocomplete="email"/>
             </div>
           </div>
 
           <div>
-            <label class="block text-xs font-bold text-on-surface mb-1">Mot de passe</label>
-            <div class="flex items-center bg-surface-low rounded-xl px-3 py-2 border border-surface-border focus-within:ring-2 focus-within:ring-primary-container">
-              <span class="material-symbols-outlined text-outline text-[18px] mr-2">lock</span>
-              <input id="login-password" required class="w-full bg-transparent text-xs sm:text-sm text-on-surface focus:outline-none" placeholder="Mot de passe secret" type="password" autocomplete="current-password"/>
+            <label class="block text-xs font-bold text-gray-700 mb-1">Mot de passe</label>
+            <div class="flex items-center bg-gray-50 rounded-xl px-3.5 py-2.5 border border-gray-200 focus-within:ring-2 focus-within:ring-[#0d7252] focus-within:bg-white">
+              <span class="material-symbols-outlined text-gray-400 text-lg mr-2">lock</span>
+              <input id="login-password" required class="w-full bg-transparent text-xs sm:text-sm text-gray-900 focus:outline-none" placeholder="••••••••••••" type="password" autocomplete="current-password"/>
             </div>
           </div>
 
-          <button type="submit" class="w-full py-3 rounded-xl bg-primary hover:bg-primary-container text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2">
-            <span class="material-symbols-outlined text-[18px]">login</span>
-            <span>Accéder au Tableau de Bord</span>
+          <button type="submit" class="w-full py-3.5 rounded-full bg-[#0d7252] hover:bg-[#08553d] text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-base">login</span>
+            <span>Se connecter à la boutique</span>
           </button>
         </form>
 
-        <div class="text-[11px] text-outline pt-2 border-t border-surface-border">
-          <span>Identifiants par défaut : <strong>admin</strong> / <strong>adminpassword123</strong></span>
+        <div class="pt-3 border-t border-gray-100 flex flex-col items-center gap-1 text-[11px] text-gray-400">
+          <div class="flex items-center gap-1 text-gray-500 font-medium">
+            <span class="material-symbols-outlined text-xs text-[#0d7252]">shield</span>
+            <span>Accès sécurisé réservé aux administrateurs</span>
+          </div>
+          <span class="text-[10px] text-gray-400">Identifiants : <strong>admin@wuazeshop.ga</strong> / <strong>adminpassword123</strong></span>
         </div>
       </div>
     </section>
@@ -110,68 +118,73 @@
     <!-- 2. DASHBOARD VIEW (Visible when authenticated) -->
     <section id="dashboard-section" class="hidden space-y-6 pb-6">
 
-      <!-- Top KPI Stats Row (Mobile scrollable / Desktop grid) -->
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-4">
+      <!-- Top KPI Stats Row -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3.5 sm:gap-4">
         <!-- Stat 1: Total Encaissé -->
-        <div class="p-3.5 sm:p-4 bg-surface rounded-2xl border border-surface-border shadow-sm">
-          <div class="flex items-center justify-between text-outline mb-1">
-            <span class="text-[10px] sm:text-xs font-bold uppercase">Total Encaissé</span>
-            <span class="material-symbols-outlined text-primary text-[18px]">payments</span>
+        <div class="p-4 bg-white rounded-2xl border border-gray-100 shadow-sm">
+          <div class="flex items-center justify-between text-gray-400 mb-1">
+            <span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider">Total Encaissé</span>
+            <span class="material-symbols-outlined text-[#0d7252] text-xl">payments</span>
           </div>
-          <div id="stat-total-revenue" class="text-base sm:text-xl font-extrabold text-primary truncate">0 FCFA</div>
-          <span class="text-[9px] text-outline">Paiements 100% validés</span>
+          <div id="stat-total-revenue" class="text-base sm:text-xl font-extrabold text-[#0d7252] truncate">0 FCFA</div>
+          <span class="text-[10px] text-gray-400">Paiements 100% validés</span>
         </div>
 
         <!-- Stat 2: Prêt Commande Chine -->
-        <div class="p-3.5 sm:p-4 bg-surface rounded-2xl border border-surface-border shadow-sm">
-          <div class="flex items-center justify-between text-outline mb-1">
-            <span class="text-[10px] sm:text-xs font-bold uppercase">Prêt Chine</span>
-            <span class="material-symbols-outlined text-[#10b981] text-[18px]">flight_takeoff</span>
+        <div class="p-4 bg-white rounded-2xl border border-gray-100 shadow-sm">
+          <div class="flex items-center justify-between text-gray-400 mb-1">
+            <span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider">Prêt Chine</span>
+            <span class="material-symbols-outlined text-[#10b981] text-xl">flight_takeoff</span>
           </div>
           <div id="stat-cleared-count" class="text-base sm:text-xl font-extrabold text-[#10b981]">0</div>
-          <span class="text-[9px] text-outline">Encaissées à commander</span>
+          <span class="text-[10px] text-gray-400">Encaissées à commander</span>
         </div>
 
         <!-- Stat 3: En attente Mobile Money -->
-        <div class="p-3.5 sm:p-4 bg-surface rounded-2xl border border-surface-border shadow-sm">
-          <div class="flex items-center justify-between text-outline mb-1">
-            <span class="text-[10px] sm:text-xs font-bold uppercase">En attente</span>
-            <span class="material-symbols-outlined text-[#d97706] text-[18px]">hourglass_top</span>
+        <div class="p-4 bg-white rounded-2xl border border-gray-100 shadow-sm">
+          <div class="flex items-center justify-between text-gray-400 mb-1">
+            <span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider">En attente</span>
+            <span class="material-symbols-outlined text-[#d97706] text-xl">hourglass_top</span>
           </div>
           <div id="stat-pending-count" class="text-base sm:text-xl font-extrabold text-[#d97706]">0</div>
-          <span class="text-[9px] text-outline">Non encore payées</span>
+          <span class="text-[10px] text-gray-400">Non encore payées</span>
         </div>
 
         <!-- Stat 4: Articles Actifs -->
-        <div class="p-3.5 sm:p-4 bg-surface rounded-2xl border border-surface-border shadow-sm">
-          <div class="flex items-center justify-between text-outline mb-1">
-            <span class="text-[10px] sm:text-xs font-bold uppercase">Catalogue</span>
-            <span class="material-symbols-outlined text-secondary text-[18px]">devices</span>
+        <div class="p-4 bg-white rounded-2xl border border-gray-100 shadow-sm">
+          <div class="flex items-center justify-between text-gray-400 mb-1">
+            <span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider">Catalogue</span>
+            <span class="material-symbols-outlined text-gray-600 text-xl">devices</span>
           </div>
-          <div id="stat-products-count" class="text-base sm:text-xl font-extrabold text-secondary">0</div>
-          <span class="text-[9px] text-outline">Articles actifs en ligne</span>
+          <div id="stat-products-count" class="text-base sm:text-xl font-extrabold text-gray-900">0</div>
+          <span class="text-[10px] text-gray-400">Articles actifs en ligne</span>
         </div>
       </div>
 
-      <!-- Segmented Navigation Tabs (Mobile-First Pill Switcher) -->
-      <div class="flex items-center justify-between border-b border-surface-border pb-3 gap-2">
-        <div class="flex items-center gap-1.5 sm:gap-2 bg-surface-low p-1 rounded-2xl border border-surface-border">
-          <button id="tab-orders-btn" class="admin-tab-btn active px-3.5 sm:px-5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all">
-            <span class="material-symbols-outlined text-[18px]">receipt_long</span>
+      <!-- Segmented Navigation Tabs -->
+      <div class="flex items-center justify-between border-b border-gray-200/80 pb-3 gap-2">
+        <div class="flex items-center gap-1.5 sm:gap-2 bg-gray-100/80 p-1 rounded-2xl border border-gray-200/60 overflow-x-auto no-scrollbar">
+          <button id="tab-orders-btn" class="admin-tab-btn active px-3 sm:px-5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all">
+            <span class="material-symbols-outlined text-lg">receipt_long</span>
             <span>Commandes</span>
-            <span id="tab-orders-badge" class="bg-primary-container text-white text-[10px] px-1.5 py-0.2 rounded-full font-bold ml-1">0</span>
+            <span id="tab-orders-badge" class="bg-[#0d7252] text-white text-[10px] px-2 py-0.5 rounded-full font-bold ml-1">0</span>
           </button>
 
-          <button id="tab-products-btn" class="admin-tab-btn px-3.5 sm:px-5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 text-outline hover:text-on-surface transition-all">
-            <span class="material-symbols-outlined text-[18px]">inventory_2</span>
+          <button id="tab-products-btn" class="admin-tab-btn px-3 sm:px-5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 text-gray-500 hover:text-gray-900 transition-all">
+            <span class="material-symbols-outlined text-lg">inventory_2</span>
             <span>Catalogue</span>
-            <span id="tab-products-badge" class="bg-surface-border text-on-surface-variant text-[10px] px-1.5 py-0.2 rounded-full font-bold ml-1">0</span>
+            <span id="tab-products-badge" class="bg-gray-200 text-gray-700 text-[10px] px-2 py-0.5 rounded-full font-bold ml-1">0</span>
+          </button>
+
+          <button id="tab-cms-btn" class="admin-tab-btn px-3 sm:px-5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 text-gray-500 hover:text-gray-900 transition-all">
+            <span class="material-symbols-outlined text-lg">web</span>
+            <span>Vitrine / CMS</span>
           </button>
         </div>
 
-        <!-- Add Product CTA Button (Quick access) -->
-        <button id="open-add-product-btn" class="py-2 px-3 sm:px-4 rounded-xl bg-primary hover:bg-primary-container text-white text-xs font-bold flex items-center gap-1.5 shadow-md active:scale-95 transition-all shrink-0">
-          <span class="material-symbols-outlined text-[18px]">add_circle</span>
+        <!-- Add Product CTA Button -->
+        <button id="open-add-product-btn" class="py-2.5 px-4 rounded-full bg-[#0d7252] hover:bg-[#08553d] text-white text-xs font-bold flex items-center gap-1.5 shadow-md active:scale-95 transition-all shrink-0">
+          <span class="material-symbols-outlined text-base">add_circle</span>
           <span class="hidden sm:inline">Nouveau Produit</span>
           <span class="sm:hidden">+ Produit</span>
         </button>
@@ -182,154 +195,705 @@
         <!-- Filter Controls -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
-            <button data-order-filter="all" class="order-filter-pill active px-3 py-1 rounded-full text-xs font-semibold bg-surface-low text-on-surface-variant shrink-0">Toutes</button>
-            <button data-order-filter="CLEARED" class="order-filter-pill px-3 py-1 rounded-full text-xs font-semibold bg-surface-low text-on-surface-variant shrink-0">Encaissées (Prêt Chine)</button>
-            <button data-order-filter="PENDING" class="order-filter-pill px-3 py-1 rounded-full text-xs font-semibold bg-surface-low text-on-surface-variant shrink-0">En attente paiement</button>
-            <button data-order-filter="SHIPPED" class="order-filter-pill px-3 py-1 rounded-full text-xs font-semibold bg-surface-low text-on-surface-variant shrink-0">En cours d'expédition</button>
+            <button data-order-filter="all" class="order-filter-pill active px-3.5 py-1.5 rounded-full text-xs font-bold bg-[#0d7252] text-white shrink-0">Toutes</button>
+            <button data-order-filter="CLEARED" class="order-filter-pill px-3.5 py-1.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-600 shrink-0">Encaissées (Prêt Chine)</button>
+            <button data-order-filter="PENDING" class="order-filter-pill px-3.5 py-1.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-600 shrink-0">En attente paiement</button>
+            <button data-order-filter="SHIPPED" class="order-filter-pill px-3.5 py-1.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-600 shrink-0">En cours d'expédition</button>
           </div>
 
           <!-- Search order by WhatsApp, Name or Reference -->
           <div class="relative w-full sm:w-72">
-            <div class="flex items-center bg-surface rounded-xl px-3 py-1.5 border border-surface-border text-xs focus-within:ring-2 focus-within:ring-primary-container">
-              <span class="material-symbols-outlined text-outline text-[16px] mr-1.5">search</span>
-              <input id="orders-search-input" class="w-full bg-transparent focus:outline-none text-on-surface placeholder:text-outline" placeholder="Filtrer client, quartier, réf..." type="text"/>
+            <div class="flex items-center bg-white rounded-full px-3.5 py-2 border border-gray-200 text-xs focus-within:ring-2 focus-within:ring-[#0d7252]">
+              <span class="material-symbols-outlined text-gray-400 text-base mr-1.5">search</span>
+              <input id="orders-search-input" class="w-full bg-transparent focus:outline-none text-gray-900 placeholder:text-gray-400" placeholder="Filtrer client, quartier, réf..." type="text"/>
             </div>
           </div>
         </div>
 
-        <!-- Orders List Container (Mobile-first Cards) -->
+        <!-- Orders List Container -->
         <div id="orders-cards-container" class="space-y-3">
-          <!-- Injecté dynamiquement par admin.js -->
+          <!-- Rendered by admin.js -->
         </div>
       </div>
 
-      <!-- TAB 2: CATALOGUE PRODUITS -->
+      <!-- TAB 2: CATALOGUE PRODUITS (With all 6 categories supported) -->
       <div id="tab-products-content" class="hidden space-y-4">
-        <!-- Products Search and Filter -->
+        <!-- Products Search and 6 Category Filters -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
-            <button data-cat-filter="all" class="admin-cat-pill active px-3 py-1 rounded-full text-xs font-semibold bg-surface-low text-on-surface-variant shrink-0">Tous</button>
-            <button data-cat-filter="smartphones" class="admin-cat-pill px-3 py-1 rounded-full text-xs font-semibold bg-surface-low text-on-surface-variant shrink-0">Smartphones</button>
-            <button data-cat-filter="ordinateurs" class="admin-cat-pill px-3 py-1 rounded-full text-xs font-semibold bg-surface-low text-on-surface-variant shrink-0">Ordinateurs</button>
-            <button data-cat-filter="televiseurs" class="admin-cat-pill px-3 py-1 rounded-full text-xs font-semibold bg-surface-low text-on-surface-variant shrink-0">Téléviseurs</button>
+            <button data-cat-filter="all" class="admin-cat-pill active px-3.5 py-1.5 rounded-full text-xs font-bold bg-[#0d7252] text-white shrink-0">Tous</button>
+            <button data-cat-filter="smartphones" class="admin-cat-pill px-3.5 py-1.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-600 shrink-0">Smartphones</button>
+            <button data-cat-filter="ordinateurs" class="admin-cat-pill px-3.5 py-1.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-600 shrink-0">Ordinateurs</button>
+            <button data-cat-filter="televiseurs" class="admin-cat-pill px-3.5 py-1.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-600 shrink-0">Téléviseurs</button>
+            <button data-cat-filter="audio" class="admin-cat-pill px-3.5 py-1.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-600 shrink-0">Audio</button>
+            <button data-cat-filter="montres" class="admin-cat-pill px-3.5 py-1.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-600 shrink-0">Montres</button>
+            <button data-cat-filter="accessoires" class="admin-cat-pill px-3.5 py-1.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-600 shrink-0">Accessoires</button>
           </div>
 
           <div class="relative w-full sm:w-72">
-            <div class="flex items-center bg-surface rounded-xl px-3 py-1.5 border border-surface-border text-xs focus-within:ring-2 focus-within:ring-primary-container">
-              <span class="material-symbols-outlined text-outline text-[16px] mr-1.5">search</span>
-              <input id="admin-product-search-input" class="w-full bg-transparent focus:outline-none text-on-surface placeholder:text-outline" placeholder="Rechercher produit..." type="text"/>
+            <div class="flex items-center bg-white rounded-full px-3.5 py-2 border border-gray-200 text-xs focus-within:ring-2 focus-within:ring-[#0d7252]">
+              <span class="material-symbols-outlined text-gray-400 text-base mr-1.5">search</span>
+              <input id="admin-product-search-input" class="w-full bg-transparent focus:outline-none text-gray-900 placeholder:text-gray-400" placeholder="Rechercher produit..." type="text"/>
             </div>
           </div>
         </div>
 
-        <!-- Products Cards Grid (Mobile 1-2 columns, Desktop 3 columns) -->
-        <div id="admin-products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
-          <!-- Injecté dynamiquement par admin.js -->
+        <!-- Products Cards Grid -->
+        <div id="admin-products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- Rendered by admin.js -->
         </div>
+      </div>
+
+      <!-- TAB 3: GESTION VITRINE / CMS (MODIFICATION DU SITE) -->
+      <div id="tab-cms-content" class="hidden space-y-6">
+
+        <!-- Top Overview Banner -->
+        <div class="bg-gradient-to-r from-[#e6f7f0] to-[#f4faf7] rounded-3xl p-5 sm:p-6 border border-emerald-200/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-2xl bg-[#0d7252] text-white flex items-center justify-center shadow-md shrink-0">
+              <span class="material-symbols-outlined text-2xl">auto_fix_high</span>
+            </div>
+            <div>
+              <h3 class="font-extrabold text-base sm:text-lg text-gray-900">Personnalisation de la Vitrine</h3>
+              <p class="text-xs text-gray-500">Modifiez en temps réel chaque texte, image et bannière affichés sur la page d'accueil de WuazeShop.</p>
+            </div>
+          </div>
+          <a href="/" target="_blank" class="px-4 py-2 rounded-full bg-white text-[#0d7252] border border-emerald-200 text-xs font-bold hover:bg-emerald-50 transition-colors shadow-sm flex items-center gap-1.5 shrink-0">
+            <span class="material-symbols-outlined text-sm">open_in_new</span>
+            <span>Voir la boutique</span>
+          </a>
+        </div>
+
+        <!-- 1. HERO SECTION CARD -->
+        <div class="bg-white rounded-3xl p-5 sm:p-6 border border-gray-100 shadow-sm space-y-5">
+          <div class="flex items-center justify-between pb-3 border-b border-gray-100">
+            <div class="flex items-center gap-2.5">
+              <span class="w-8 h-8 rounded-xl bg-emerald-50 text-[#0d7252] flex items-center justify-center font-bold text-sm">1</span>
+              <div>
+                <h4 class="font-extrabold text-sm sm:text-base text-gray-900">Bannière Principale (Haut de page)</h4>
+                <p class="text-[11px] text-gray-400">Titre, sous-titre, image et boutons de la première vue.</p>
+              </div>
+            </div>
+            <span id="cms-hero-saved" class="hidden text-xs font-bold text-green-700 bg-green-50 px-3 py-1 rounded-full border border-green-200 flex items-center gap-1">
+              <span class="material-symbols-outlined text-sm">check_circle</span>
+              <span>Enregistré !</span>
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block font-bold text-xs text-gray-700 mb-1">Badge du haut</label>
+              <input id="cms-hero-badge" type="text" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-[#0d7252]" placeholder="✦ Nouveauté"/>
+            </div>
+
+            <div>
+              <label class="block font-bold text-xs text-gray-700 mb-1">Bouton d'appel à l'action (CTA)</label>
+              <div class="grid grid-cols-2 gap-2">
+                <input id="cms-hero-cta-text" type="text" class="bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#0d7252]" placeholder="Texte du bouton"/>
+                <input id="cms-hero-cta-link" type="text" class="bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#0d7252]" placeholder="#products-section"/>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label class="block font-bold text-xs text-gray-700 mb-1">Grand Titre (utilisez Entrée pour un saut de ligne)</label>
+            <textarea id="cms-hero-title" rows="2" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-[#0d7252] resize-none" placeholder="La technologie&#10;à portée de main"></textarea>
+          </div>
+
+          <div>
+            <label class="block font-bold text-xs text-gray-700 mb-1">Sous-titre / Description</label>
+            <textarea id="cms-hero-subtitle" rows="2" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-[#0d7252] resize-none" placeholder="Découvrez les derniers smartphones..."></textarea>
+          </div>
+
+          <!-- Hero Image Upload & URL -->
+          <div class="space-y-2">
+            <label class="block font-bold text-xs text-gray-700">Image d'illustration Hero</label>
+            <div class="flex flex-col sm:flex-row items-center gap-4 p-3 bg-gray-50 rounded-2xl border border-gray-200">
+              <img id="cms-hero-preview-img" src="/images/hero-devices.jpg" alt="Aperçu Hero" class="w-24 h-20 object-cover rounded-xl border border-gray-200 bg-white shrink-0"/>
+              <div class="flex-1 w-full space-y-2">
+                <div class="flex flex-wrap items-center gap-2">
+                  <label class="cursor-pointer py-1.5 px-3.5 rounded-full bg-[#0d7252] hover:bg-[#08553d] text-white text-xs font-bold flex items-center gap-1.5 transition-colors shadow-sm">
+                    <span class="material-symbols-outlined text-sm">upload_file</span>
+                    <span>Téléverser une image</span>
+                    <input type="file" id="cms-hero-file-input" accept="image/*" class="hidden"/>
+                  </label>
+                  <span id="cms-hero-upload-status" class="text-[11px] text-gray-500">PNG, JPG, WEBP jusqu'à 25 Mo</span>
+                </div>
+                <input id="cms-hero-img-url" type="text" class="w-full bg-white border border-gray-200 rounded-xl px-3 py-1.5 text-xs text-gray-600 focus:outline-none focus:border-[#0d7252]" placeholder="Ou coller une URL d'image (/images/... ou https://...)"/>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3 Value Props -->
+          <div>
+            <label class="block font-bold text-xs text-gray-700 mb-2">Les 3 points forts (sous le bouton)</label>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div class="p-3 bg-gray-50 rounded-xl border border-gray-200 space-y-1.5">
+                <span class="text-[10px] font-bold text-gray-400 uppercase">Point 1</span>
+                <input id="cms-hero-prop1-title" type="text" class="w-full bg-white border border-gray-200 rounded-lg px-2.5 py-1 text-xs font-bold" placeholder="Livraison rapide"/>
+                <input id="cms-hero-prop1-sub" type="text" class="w-full bg-white border border-gray-200 rounded-lg px-2.5 py-1 text-[11px] text-gray-500" placeholder="en 24/48h"/>
+              </div>
+              <div class="p-3 bg-gray-50 rounded-xl border border-gray-200 space-y-1.5">
+                <span class="text-[10px] font-bold text-gray-400 uppercase">Point 2</span>
+                <input id="cms-hero-prop2-title" type="text" class="w-full bg-white border border-gray-200 rounded-lg px-2.5 py-1 text-xs font-bold" placeholder="Paiement sécurisé"/>
+                <input id="cms-hero-prop2-sub" type="text" class="w-full bg-white border border-gray-200 rounded-lg px-2.5 py-1 text-[11px] text-gray-500" placeholder="100% fiable"/>
+              </div>
+              <div class="p-3 bg-gray-50 rounded-xl border border-gray-200 space-y-1.5">
+                <span class="text-[10px] font-bold text-gray-400 uppercase">Point 3</span>
+                <input id="cms-hero-prop3-title" type="text" class="w-full bg-white border border-gray-200 rounded-lg px-2.5 py-1 text-xs font-bold" placeholder="Service client"/>
+                <input id="cms-hero-prop3-sub" type="text" class="w-full bg-white border border-gray-200 rounded-lg px-2.5 py-1 text-[11px] text-gray-500" placeholder="dédié 7j/7"/>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-2 flex justify-end">
+            <button id="save-cms-hero-btn" type="button" class="py-2.5 px-6 rounded-full bg-[#0d7252] hover:bg-[#08553d] text-white text-xs font-bold flex items-center gap-1.5 shadow-md transition-all">
+              <span class="material-symbols-outlined text-sm">save</span>
+              <span>Enregistrer la Bannière Principale</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 2. SPECIAL OFFER PROMO SECTION CARD -->
+        <div class="bg-white rounded-3xl p-5 sm:p-6 border border-gray-100 shadow-sm space-y-5">
+          <div class="flex items-center justify-between pb-3 border-b border-gray-100">
+            <div class="flex items-center gap-2.5">
+              <span class="w-8 h-8 rounded-xl bg-emerald-50 text-[#0d7252] flex items-center justify-center font-bold text-sm">2</span>
+              <div>
+                <h4 class="font-extrabold text-sm sm:text-base text-gray-900">Bannière Offre Spéciale (Promotion)</h4>
+                <p class="text-[11px] text-gray-400">Encadré promotionnel vert menthe au milieu de la boutique.</p>
+              </div>
+            </div>
+            <span id="cms-promo-saved" class="hidden text-xs font-bold text-green-700 bg-green-50 px-3 py-1 rounded-full border border-green-200 flex items-center gap-1">
+              <span class="material-symbols-outlined text-sm">check_circle</span>
+              <span>Enregistré !</span>
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block font-bold text-xs text-gray-700 mb-1">Badge Promo</label>
+              <input id="cms-promo-badge" type="text" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-[#0d7252]" placeholder="Offre spéciale"/>
+            </div>
+            <div>
+              <label class="block font-bold text-xs text-gray-700 mb-1">Titre principal (Gros texte)</label>
+              <input id="cms-promo-title" type="text" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-[#0d7252]" placeholder="Jusqu'à -20%"/>
+            </div>
+            <div>
+              <label class="block font-bold text-xs text-gray-700 mb-1">Complément de titre</label>
+              <input id="cms-promo-subtitle" type="text" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-[#0d7252]" placeholder="sur une sélection de produits"/>
+            </div>
+          </div>
+
+          <div>
+            <label class="block font-bold text-xs text-gray-700 mb-1">Description explicative</label>
+            <textarea id="cms-promo-desc" rows="2" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-[#0d7252] resize-none" placeholder="Équipez-vous avec les meilleures marques..."></textarea>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block font-bold text-xs text-gray-700 mb-1">Bouton de l'offre</label>
+              <div class="grid grid-cols-2 gap-2">
+                <input id="cms-promo-cta-text" type="text" class="bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#0d7252]" placeholder="Voir l'offre"/>
+                <input id="cms-promo-cta-link" type="text" class="bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#0d7252]" placeholder="#products-section"/>
+              </div>
+            </div>
+
+            <!-- Promo Image Upload -->
+            <div>
+              <label class="block font-bold text-xs text-gray-700 mb-1">Image de la Promotion</label>
+              <div class="flex items-center gap-3 p-2 bg-gray-50 rounded-xl border border-gray-200">
+                <img id="cms-promo-preview-img" src="/images/promo-banner.jpg" alt="Aperçu Promo" class="w-16 h-12 object-cover rounded-lg border border-gray-200 bg-white shrink-0"/>
+                <div class="flex-1 space-y-1 min-w-0">
+                  <label class="cursor-pointer inline-flex items-center gap-1 py-1 px-3 rounded-full bg-[#0d7252] text-white text-[10px] font-bold hover:bg-[#08553d] transition-colors">
+                    <span class="material-symbols-outlined text-xs">upload_file</span>
+                    <span>Changer image</span>
+                    <input type="file" id="cms-promo-file-input" accept="image/*" class="hidden"/>
+                  </label>
+                  <input id="cms-promo-img-url" type="text" class="w-full bg-white border border-gray-200 rounded-lg px-2 py-1 text-[11px] text-gray-600 focus:outline-none focus:border-[#0d7252]" placeholder="URL de l'image"/>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-2 flex justify-end">
+            <button id="save-cms-promo-btn" type="button" class="py-2.5 px-6 rounded-full bg-[#0d7252] hover:bg-[#08553d] text-white text-xs font-bold flex items-center gap-1.5 shadow-md transition-all">
+              <span class="material-symbols-outlined text-sm">save</span>
+              <span>Enregistrer la Bannière Promo</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 3. TRUST PILLARS CARD -->
+        <div class="bg-white rounded-3xl p-5 sm:p-6 border border-gray-100 shadow-sm space-y-5">
+          <div class="flex items-center justify-between pb-3 border-b border-gray-100">
+            <div class="flex items-center gap-2.5">
+              <span class="w-8 h-8 rounded-xl bg-emerald-50 text-[#0d7252] flex items-center justify-center font-bold text-sm">3</span>
+              <div>
+                <h4 class="font-extrabold text-sm sm:text-base text-gray-900">Les 4 Piliers de Confiance (Réassurance)</h4>
+                <p class="text-[11px] text-gray-400">Les 4 cartes d'avantages affichées au-dessus du footer.</p>
+              </div>
+            </div>
+            <span id="cms-pillars-saved" class="hidden text-xs font-bold text-green-700 bg-green-50 px-3 py-1 rounded-full border border-green-200 flex items-center gap-1">
+              <span class="material-symbols-outlined text-sm">check_circle</span>
+              <span>Enregistré !</span>
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <!-- Pillar 1 -->
+            <div class="p-4 bg-gray-50 rounded-2xl border border-gray-200 space-y-2">
+              <span class="text-[10px] font-bold text-gray-400 uppercase">Pilier 1</span>
+              <div>
+                <label class="block text-[10px] font-semibold text-gray-600 mb-0.5">Icône Material</label>
+                <input id="cms-pillar1-icon" type="text" class="w-full bg-white border border-gray-200 rounded-lg px-2.5 py-1 text-xs" value="verified"/>
+              </div>
+              <div>
+                <label class="block text-[10px] font-semibold text-gray-600 mb-0.5">Titre</label>
+                <input id="cms-pillar1-title" type="text" class="w-full bg-white border border-gray-200 rounded-lg px-2.5 py-1 text-xs font-bold" value="Produits originaux"/>
+              </div>
+              <div>
+                <label class="block text-[10px] font-semibold text-gray-600 mb-0.5">Sous-titre</label>
+                <input id="cms-pillar1-sub" type="text" class="w-full bg-white border border-gray-200 rounded-lg px-2.5 py-1 text-[11px] text-gray-500" value="Garantie constructeur"/>
+              </div>
+            </div>
+
+            <!-- Pillar 2 -->
+            <div class="p-4 bg-gray-50 rounded-2xl border border-gray-200 space-y-2">
+              <span class="text-[10px] font-bold text-gray-400 uppercase">Pilier 2</span>
+              <div>
+                <label class="block text-[10px] font-semibold text-gray-600 mb-0.5">Icône Material</label>
+                <input id="cms-pillar2-icon" type="text" class="w-full bg-white border border-gray-200 rounded-lg px-2.5 py-1 text-xs" value="local_shipping"/>
+              </div>
+              <div>
+                <label class="block text-[10px] font-semibold text-gray-600 mb-0.5">Titre</label>
+                <input id="cms-pillar2-title" type="text" class="w-full bg-white border border-gray-200 rounded-lg px-2.5 py-1 text-xs font-bold" value="Livraison rapide"/>
+              </div>
+              <div>
+                <label class="block text-[10px] font-semibold text-gray-600 mb-0.5">Sous-titre</label>
+                <input id="cms-pillar2-sub" type="text" class="w-full bg-white border border-gray-200 rounded-lg px-2.5 py-1 text-[11px] text-gray-500" value="Partout au Gabon"/>
+              </div>
+            </div>
+
+            <!-- Pillar 3 -->
+            <div class="p-4 bg-gray-50 rounded-2xl border border-gray-200 space-y-2">
+              <span class="text-[10px] font-bold text-gray-400 uppercase">Pilier 3</span>
+              <div>
+                <label class="block text-[10px] font-semibold text-gray-600 mb-0.5">Icône Material</label>
+                <input id="cms-pillar3-icon" type="text" class="w-full bg-white border border-gray-200 rounded-lg px-2.5 py-1 text-xs" value="lock"/>
+              </div>
+              <div>
+                <label class="block text-[10px] font-semibold text-gray-600 mb-0.5">Titre</label>
+                <input id="cms-pillar3-title" type="text" class="w-full bg-white border border-gray-200 rounded-lg px-2.5 py-1 text-xs font-bold" value="Paiement sécurisé"/>
+              </div>
+              <div>
+                <label class="block text-[10px] font-semibold text-gray-600 mb-0.5">Sous-titre</label>
+                <input id="cms-pillar3-sub" type="text" class="w-full bg-white border border-gray-200 rounded-lg px-2.5 py-1 text-[11px] text-gray-500" value="100% fiable Airtel & Moov"/>
+              </div>
+            </div>
+
+            <!-- Pillar 4 -->
+            <div class="p-4 bg-gray-50 rounded-2xl border border-gray-200 space-y-2">
+              <span class="text-[10px] font-bold text-gray-400 uppercase">Pilier 4</span>
+              <div>
+                <label class="block text-[10px] font-semibold text-gray-600 mb-0.5">Icône Material</label>
+                <input id="cms-pillar4-icon" type="text" class="w-full bg-white border border-gray-200 rounded-lg px-2.5 py-1 text-xs" value="headset_mic"/>
+              </div>
+              <div>
+                <label class="block text-[10px] font-semibold text-gray-600 mb-0.5">Titre</label>
+                <input id="cms-pillar4-title" type="text" class="w-full bg-white border border-gray-200 rounded-lg px-2.5 py-1 text-xs font-bold" value="Support client"/>
+              </div>
+              <div>
+                <label class="block text-[10px] font-semibold text-gray-600 mb-0.5">Sous-titre</label>
+                <input id="cms-pillar4-sub" type="text" class="w-full bg-white border border-gray-200 rounded-lg px-2.5 py-1 text-[11px] text-gray-500" value="Toujours à votre écoute"/>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-2 flex justify-end">
+            <button id="save-cms-pillars-btn" type="button" class="py-2.5 px-6 rounded-full bg-[#0d7252] hover:bg-[#08553d] text-white text-xs font-bold flex items-center gap-1.5 shadow-md transition-all">
+              <span class="material-symbols-outlined text-sm">save</span>
+              <span>Enregistrer les Piliers de Confiance</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 4. CONTACT & WHATSAPP CARD -->
+        <div class="bg-white rounded-3xl p-5 sm:p-6 border border-gray-100 shadow-sm space-y-5">
+          <div class="flex items-center justify-between pb-3 border-b border-gray-100">
+            <div class="flex items-center gap-2.5">
+              <span class="w-8 h-8 rounded-xl bg-emerald-50 text-[#0d7252] flex items-center justify-center font-bold text-sm">4</span>
+              <div>
+                <h4 class="font-extrabold text-sm sm:text-base text-gray-900">Bannière Assistance WhatsApp & Contact</h4>
+                <p class="text-[11px] text-gray-400">Le bandeau vert émeraude avec le lien direct WhatsApp.</p>
+              </div>
+            </div>
+            <span id="cms-contact-saved" class="hidden text-xs font-bold text-green-700 bg-green-50 px-3 py-1 rounded-full border border-green-200 flex items-center gap-1">
+              <span class="material-symbols-outlined text-sm">check_circle</span>
+              <span>Enregistré !</span>
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block font-bold text-xs text-gray-700 mb-1">Badge d'assistance</label>
+              <input id="cms-contact-badge" type="text" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-[#0d7252]" placeholder="Assistance WhatsApp Directe"/>
+            </div>
+            <div>
+              <label class="block font-bold text-xs text-gray-700 mb-1">Numéro WhatsApp officiel (sans espaces ni +)</label>
+              <input id="cms-contact-phone" type="text" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-[#0d7252]" placeholder="241074001122"/>
+            </div>
+          </div>
+
+          <div>
+            <label class="block font-bold text-xs text-gray-700 mb-1">Titre de la bannière</label>
+            <input id="cms-contact-title" type="text" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-[#0d7252]" placeholder="Une question sur un produit ou son expédition ?"/>
+          </div>
+
+          <div>
+            <label class="block font-bold text-xs text-gray-700 mb-1">Texte d'explication</label>
+            <textarea id="cms-contact-desc" rows="2" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-[#0d7252] resize-none" placeholder="Notre équipe au Gabon et notre acheteur en Chine vous conseillent..."></textarea>
+          </div>
+
+          <div>
+            <label class="block font-bold text-xs text-gray-700 mb-1">Texte complet sur le bouton</label>
+            <input id="cms-contact-btn-text" type="text" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-[#0d7252]" placeholder="Écrire sur WhatsApp (+241) 074 00 11 22"/>
+          </div>
+
+          <div class="pt-2 flex justify-end">
+            <button id="save-cms-contact-btn" type="button" class="py-2.5 px-6 rounded-full bg-[#0d7252] hover:bg-[#08553d] text-white text-xs font-bold flex items-center gap-1.5 shadow-md transition-all">
+              <span class="material-symbols-outlined text-sm">save</span>
+              <span>Enregistrer le Contact & WhatsApp</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 5. FOOTER & SITE IDENTITY CARD -->
+        <div class="bg-white rounded-3xl p-5 sm:p-6 border border-gray-100 shadow-sm space-y-5">
+          <div class="flex items-center justify-between pb-3 border-b border-gray-100">
+            <div class="flex items-center gap-2.5">
+              <span class="w-8 h-8 rounded-xl bg-emerald-50 text-[#0d7252] flex items-center justify-center font-bold text-sm">5</span>
+              <div>
+                <h4 class="font-extrabold text-sm sm:text-base text-gray-900">Pied de page & Identité du Site</h4>
+                <p class="text-[11px] text-gray-400">Description générale et mention de copyright.</p>
+              </div>
+            </div>
+            <span id="cms-footer-saved" class="hidden text-xs font-bold text-green-700 bg-green-50 px-3 py-1 rounded-full border border-green-200 flex items-center gap-1">
+              <span class="material-symbols-outlined text-sm">check_circle</span>
+              <span>Enregistré !</span>
+            </span>
+          </div>
+
+          <div>
+            <label class="block font-bold text-xs text-gray-700 mb-1">Description dans le pied de page</label>
+            <textarea id="cms-footer-desc" rows="2" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-[#0d7252] resize-none" placeholder="Votre univers technologique d'importation directe..."></textarea>
+          </div>
+
+          <div>
+            <label class="block font-bold text-xs text-gray-700 mb-1">Mention légale de copyright</label>
+            <input id="cms-footer-copyright" type="text" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-[#0d7252]" placeholder="© 2026 WuazeShop. Tous droits réservés."/>
+          </div>
+
+          <div class="pt-2 flex justify-end">
+            <button id="save-cms-footer-btn" type="button" class="py-2.5 px-6 rounded-full bg-[#0d7252] hover:bg-[#08553d] text-white text-xs font-bold flex items-center gap-1.5 shadow-md transition-all">
+              <span class="material-symbols-outlined text-sm">save</span>
+              <span>Enregistrer le Pied de page</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 6. SOCIAL MEDIA LINKS CARD -->
+        <div class="bg-white rounded-3xl p-5 sm:p-6 border border-gray-100 shadow-sm space-y-5">
+          <div class="flex items-center justify-between pb-3 border-b border-gray-100">
+            <div class="flex items-center gap-2.5">
+              <span class="w-8 h-8 rounded-xl bg-emerald-50 text-[#0d7252] flex items-center justify-center font-bold text-sm">6</span>
+              <div>
+                <h4 class="font-extrabold text-sm sm:text-base text-gray-900">Réseaux Sociaux (« Suivez-nous »)</h4>
+                <p class="text-[11px] text-gray-400">Liens vers vos pages Facebook, Instagram, TikTok et WhatsApp dans le footer.</p>
+              </div>
+            </div>
+            <span id="cms-social-saved" class="hidden text-xs font-bold text-green-700 bg-green-50 px-3 py-1 rounded-full border border-green-200 flex items-center gap-1">
+              <span class="material-symbols-outlined text-sm">check_circle</span>
+              <span>Enregistré !</span>
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block font-bold text-xs text-gray-700 mb-1 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-[#1877F2]"></span>
+                <span>Page Facebook</span>
+              </label>
+              <input id="cms-social-facebook" type="url" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-[#0d7252]" placeholder="https://facebook.com/votrepage"/>
+            </div>
+
+            <div>
+              <label class="block font-bold text-xs text-gray-700 mb-1 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-[#E4405F]"></span>
+                <span>Profil Instagram</span>
+              </label>
+              <input id="cms-social-instagram" type="url" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-[#0d7252]" placeholder="https://instagram.com/votreprofil"/>
+            </div>
+
+            <div>
+              <label class="block font-bold text-xs text-gray-700 mb-1 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-black"></span>
+                <span>Compte TikTok</span>
+              </label>
+              <input id="cms-social-tiktok" type="url" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-[#0d7252]" placeholder="https://tiktok.com/@votrecompte"/>
+            </div>
+
+            <div>
+              <label class="block font-bold text-xs text-gray-700 mb-1 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-[#25D366]"></span>
+                <span>Lien WhatsApp direct</span>
+              </label>
+              <input id="cms-social-whatsapp" type="url" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-[#0d7252]" placeholder="https://wa.me/241074001122"/>
+            </div>
+          </div>
+
+          <div class="pt-2 flex justify-end">
+            <button id="save-cms-social-btn" type="button" class="py-2.5 px-6 rounded-full bg-[#0d7252] hover:bg-[#08553d] text-white text-xs font-bold flex items-center gap-1.5 shadow-md transition-all">
+              <span class="material-symbols-outlined text-sm">save</span>
+              <span>Enregistrer les Réseaux Sociaux</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 7. LEGAL DOCUMENTS CARD (CGV / POLITIQUE DE CONFIDENTIALITE) -->
+        <div class="bg-white rounded-3xl p-5 sm:p-6 border border-gray-100 shadow-sm space-y-5">
+          <div class="flex items-center justify-between pb-3 border-b border-gray-100">
+            <div class="flex items-center gap-2.5">
+              <span class="w-8 h-8 rounded-xl bg-emerald-50 text-[#0d7252] flex items-center justify-center font-bold text-sm">7</span>
+              <div>
+                <h4 class="font-extrabold text-sm sm:text-base text-gray-900">Conditions Générales & Politique de Confidentialité</h4>
+                <p class="text-[11px] text-gray-400">Rédigez les clauses contractuelles et la politique de protection des données consultables par vos clients.</p>
+              </div>
+            </div>
+            <span id="cms-legal-saved" class="hidden text-xs font-bold text-green-700 bg-green-50 px-3 py-1 rounded-full border border-green-200 flex items-center gap-1">
+              <span class="material-symbols-outlined text-sm">check_circle</span>
+              <span>Enregistré !</span>
+            </span>
+          </div>
+
+          <div>
+            <label class="block font-bold text-xs text-gray-700 mb-1 flex items-center justify-between">
+              <span>Conditions Générales de Vente &amp; d'Utilisation (CGV / CGU)</span>
+              <span class="text-[10px] text-gray-400 font-normal">Affichées lors du clic client dans le footer</span>
+            </label>
+            <textarea id="cms-legal-terms" rows="8" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3.5 text-xs text-gray-800 leading-relaxed focus:outline-none focus:border-[#0d7252] resize-y" placeholder="Rédigez ici vos conditions de commande, paiement Mobile Money, délais Chine-Gabon et retours..."></textarea>
+          </div>
+
+          <div>
+            <label class="block font-bold text-xs text-gray-700 mb-1 flex items-center justify-between">
+              <span>Politique de Confidentialité &amp; Données Personnelles</span>
+              <span class="text-[10px] text-gray-400 font-normal">Protection des coordonnées de livraison</span>
+            </label>
+            <textarea id="cms-legal-privacy" rows="8" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3.5 text-xs text-gray-800 leading-relaxed focus:outline-none focus:border-[#0d7252] resize-y" placeholder="Précisez ici les règles de confidentialité et de non-cession des numéros de téléphone et adresses..."></textarea>
+          </div>
+
+          <div class="pt-2 flex justify-end">
+            <button id="save-cms-legal-btn" type="button" class="py-2.5 px-6 rounded-full bg-[#0d7252] hover:bg-[#08553d] text-white text-xs font-bold flex items-center gap-1.5 shadow-md transition-all">
+              <span class="material-symbols-outlined text-sm">save</span>
+              <span>Enregistrer les Documents Légaux</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 8. FAQ MANAGEMENT CARD -->
+        <div class="bg-white rounded-3xl p-5 sm:p-6 border border-gray-100 shadow-sm space-y-5">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-gray-100 gap-3">
+            <div class="flex items-center gap-2.5">
+              <span class="w-8 h-8 rounded-xl bg-emerald-50 text-[#0d7252] flex items-center justify-center font-bold text-sm">8</span>
+              <div>
+                <h4 class="font-extrabold text-sm sm:text-base text-gray-900">Foire Aux Questions (FAQ)</h4>
+                <p class="text-[11px] text-gray-400">Gérez les questions et réponses affichées sur la vitrine client.</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <span id="cms-faq-saved" class="hidden text-xs font-bold text-green-700 bg-green-50 px-3 py-1 rounded-full border border-green-200 flex items-center gap-1">
+                <span class="material-symbols-outlined text-sm">check_circle</span>
+                <span>Enregistré !</span>
+              </span>
+              <button id="add-faq-item-btn" type="button" class="py-2 px-3.5 rounded-full bg-[#e6f7f0] hover:bg-emerald-100 text-[#0d7252] text-xs font-bold flex items-center gap-1.5 transition-colors shadow-sm">
+                <span class="material-symbols-outlined text-base">add_circle</span>
+                <span>+ Ajouter une question</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Dynamic FAQ Items Container -->
+          <div id="admin-faq-list" class="space-y-3.5">
+            <!-- Rendered by admin.js -->
+          </div>
+
+          <div class="pt-3 border-t border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <p class="text-[11px] text-gray-400">Ces questions-réponses sont immédiatement visibles sur la page d'accueil de la boutique.</p>
+            <button id="save-cms-faq-btn" type="button" class="py-2.5 px-6 rounded-full bg-[#0d7252] hover:bg-[#08553d] text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-md transition-all">
+              <span class="material-symbols-outlined text-sm">save</span>
+              <span>Enregistrer la FAQ</span>
+            </button>
+          </div>
+        </div>
+
       </div>
 
     </section>
 
   </main>
 
-  <!-- Mobile Bottom Sticky Navigation (Switch between Orders & Catalog) -->
-  <div id="admin-mobile-nav" class="hidden fixed bottom-0 inset-x-0 z-30 bg-surface/95 backdrop-blur-md border-t border-surface-border py-2 px-6 flex md:hidden items-center justify-around shadow-lg">
-    <button id="mobile-tab-orders-btn" class="flex flex-col items-center gap-0.5 text-primary text-[10px] font-bold">
-      <span class="material-symbols-outlined text-[20px]">receipt_long</span>
+  <!-- Mobile Bottom Sticky Navigation -->
+  <div id="admin-mobile-nav" class="hidden fixed bottom-0 inset-x-0 z-30 bg-white/95 backdrop-blur-md border-t border-gray-200 py-2 px-4 flex md:hidden items-center justify-around shadow-lg">
+    <button id="mobile-tab-orders-btn" class="flex flex-col items-center gap-0.5 text-[#0d7252] text-[10px] font-bold">
+      <span class="material-symbols-outlined text-xl">receipt_long</span>
       <span>Commandes</span>
     </button>
-    <button id="mobile-tab-products-btn" class="flex flex-col items-center gap-0.5 text-outline text-[10px] font-medium">
-      <span class="material-symbols-outlined text-[20px]">inventory_2</span>
+    <button id="mobile-tab-products-btn" class="flex flex-col items-center gap-0.5 text-gray-400 text-[10px] font-medium">
+      <span class="material-symbols-outlined text-xl">inventory_2</span>
       <span>Catalogue</span>
     </button>
-    <button id="mobile-add-product-btn" class="flex flex-col items-center gap-0.5 text-primary-container text-[10px] font-bold">
-      <span class="material-symbols-outlined text-[20px]">add_circle</span>
+    <button id="mobile-tab-cms-btn" class="flex flex-col items-center gap-0.5 text-gray-400 text-[10px] font-medium">
+      <span class="material-symbols-outlined text-xl">web</span>
+      <span>Vitrine</span>
+    </button>
+    <button id="mobile-add-product-btn" class="flex flex-col items-center gap-0.5 text-[#10b981] text-[10px] font-bold">
+      <span class="material-symbols-outlined text-xl">add_circle</span>
       <span>+ Produit</span>
     </button>
-    <a href="/" target="_blank" class="flex flex-col items-center gap-0.5 text-outline text-[10px] font-medium">
-      <span class="material-symbols-outlined text-[20px]">storefront</span>
+    <a href="/" target="_blank" class="flex flex-col items-center gap-0.5 text-gray-400 text-[10px] font-medium">
+      <span class="material-symbols-outlined text-xl">storefront</span>
       <span>Boutique</span>
     </a>
   </div>
 
-  <!-- ADD / EDIT PRODUCT MODAL (Touch-friendly sheet on smartphone) -->
+  <!-- ==================== ADD / EDIT PRODUCT MODAL ==================== -->
   <div id="product-modal-overlay" class="modal-overlay hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
-    <div class="bg-surface rounded-t-3xl sm:rounded-2xl w-full max-w-lg max-h-[90vh] flex flex-col shadow-2xl border border-surface-border overflow-hidden">
+    <div class="bg-white rounded-t-3xl sm:rounded-3xl w-full max-w-lg max-h-[90vh] flex flex-col shadow-2xl border border-gray-100 overflow-hidden">
       
       <!-- Modal Header -->
-      <div class="p-4 sm:p-5 border-b border-surface-border flex items-center justify-between shrink-0">
-        <div class="flex items-center gap-2">
-          <div class="w-8 h-8 rounded-lg bg-secondary-container/60 flex items-center justify-center text-primary">
-            <span class="material-symbols-outlined text-[20px]">edit_note</span>
+      <div class="p-5 border-b border-gray-100 flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-[#e6f7f0] flex items-center justify-center text-[#0d7252]">
+            <span class="material-symbols-outlined text-xl">edit_note</span>
           </div>
-          <h3 id="product-modal-title" class="font-bold text-base sm:text-lg text-on-surface">Ajouter un produit</h3>
+          <h3 id="product-modal-title" class="font-extrabold text-base sm:text-lg text-gray-900">Ajouter un produit</h3>
         </div>
-        <button id="close-product-modal-btn" class="w-8 h-8 rounded-full bg-surface-low text-outline flex items-center justify-center hover:bg-surface-border">
-          <span class="material-symbols-outlined text-[18px]">close</span>
+        <button id="close-product-modal-btn" class="w-8 h-8 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center hover:bg-gray-200 transition-colors">
+          <span class="material-symbols-outlined text-lg">close</span>
         </button>
       </div>
 
       <!-- Modal Scrollable Form Body -->
-      <form id="product-form" class="p-4 sm:p-6 overflow-y-auto space-y-4 text-xs sm:text-sm">
+      <form id="product-form" class="p-5 sm:p-6 overflow-y-auto space-y-4 text-xs sm:text-sm">
         <input type="hidden" id="product-edit-id" value=""/>
 
         <div>
-          <label class="block font-bold text-on-surface mb-1">Titre de l'article *</label>
-          <input id="prod-title" required class="w-full bg-surface-low border border-surface-border rounded-xl px-3.5 py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-container" placeholder="Ex: Xiaomi 14 Ultra 512GB Leica" type="text"/>
+          <label class="block font-bold text-gray-700 mb-1">Titre de l'article *</label>
+          <input id="prod-title" required class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:border-[#0d7252] focus:bg-white" placeholder="Ex: Xiaomi 14 Ultra 512GB Leica" type="text"/>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label class="block font-bold text-gray-700 mb-1">Description du produit (optionnel)</label>
+          <textarea id="prod-description" rows="3" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:border-[#0d7252] focus:bg-white resize-none" placeholder="Description détaillée de l'appareil, de l'état neuf ou des fonctionnalités..."></textarea>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
           <div>
-            <label class="block font-bold text-on-surface mb-1">Catégorie *</label>
-            <select id="prod-category" required class="w-full bg-surface-low border border-surface-border rounded-xl px-3.5 py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-container">
+            <label class="block font-bold text-gray-700 mb-1">Catégorie *</label>
+            <select id="prod-category" required class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:border-[#0d7252] focus:bg-white">
               <option value="smartphones">Smartphones &amp; Tablettes</option>
               <option value="ordinateurs">Ordinateurs &amp; Laptops</option>
               <option value="televiseurs">Téléviseurs &amp; Écrans 4K</option>
+              <option value="audio">Audio, Casques &amp; Écouteurs</option>
+              <option value="montres">Montres Connectées</option>
+              <option value="accessoires">Accessoires &amp; Câbles</option>
             </select>
           </div>
 
           <div>
-            <label class="block font-bold text-on-surface mb-1">Prix de Vente (FCFA) *</label>
-            <input id="prod-price" required min="1000" class="w-full bg-surface-low border border-surface-border rounded-xl px-3.5 py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-container" placeholder="Ex: 680000" type="number"/>
+            <label class="block font-bold text-gray-700 mb-1">Prix de Vente (FCFA) *</label>
+            <input id="prod-price" required min="1000" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:border-[#0d7252] focus:bg-white" placeholder="Ex: 680000" type="number"/>
           </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
           <div>
-            <label class="block font-bold text-on-surface mb-1">Prix Barré Promo (FCFA, optionnel)</label>
-            <input id="prod-original-price" min="1000" class="w-full bg-surface-low border border-surface-border rounded-xl px-3.5 py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-container" placeholder="Ex: 750000" type="number"/>
+            <label class="block font-bold text-gray-700 mb-1">Prix Barré Promo (FCFA, optionnel)</label>
+            <input id="prod-original-price" min="1000" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:border-[#0d7252] focus:bg-white" placeholder="Ex: 750000" type="number"/>
           </div>
 
           <div>
-            <label class="block font-bold text-on-surface mb-1">Disponibilité</label>
+            <label class="block font-bold text-gray-700 mb-1">Disponibilité</label>
             <label class="flex items-center gap-2 mt-2 cursor-pointer">
-              <input id="prod-instock" type="checkbox" checked class="w-4 h-4 text-primary rounded"/>
-              <span class="text-xs text-on-surface">Disponible en stock / import Chine</span>
+              <input id="prod-instock" type="checkbox" checked class="w-4 h-4 text-[#0d7252] rounded"/>
+              <span class="text-xs text-gray-700">Disponible en stock / import Chine</span>
             </label>
           </div>
         </div>
 
         <div>
-          <label class="block font-bold text-on-surface mb-1">URL de l'image *</label>
-          <input id="prod-image-url" required class="w-full bg-surface-low border border-surface-border rounded-xl px-3.5 py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-container" placeholder="https://images.unsplash.com/..." type="url"/>
-          <p class="text-[10px] text-outline mt-1">Image carrée ou haute résolution du produit.</p>
+          <label class="block font-bold text-gray-700 mb-1">Photo du produit *</label>
+          
+          <!-- File Upload Dropzone -->
+          <div id="image-upload-dropzone" class="border-2 border-dashed border-gray-200 hover:border-[#0d7252] bg-gray-50 hover:bg-[#e6f7f0]/30 rounded-2xl p-4 text-center cursor-pointer transition-all relative">
+            <input type="file" id="prod-image-file" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10"/>
+            
+            <!-- Default placeholder state -->
+            <div id="upload-placeholder" class="flex flex-col items-center justify-center gap-1.5 py-2">
+              <div class="w-10 h-10 rounded-full bg-[#e6f7f0] text-[#0d7252] flex items-center justify-center">
+                <span class="material-symbols-outlined text-2xl">add_photo_alternate</span>
+              </div>
+              <p class="text-xs font-bold text-gray-800">Cliquez pour téléverser une photo ou glissez-déposez ici</p>
+              <p class="text-[10px] text-gray-400">PNG, JPG, WEBP jusqu'à 25 Mo (depuis PC ou smartphone)</p>
+            </div>
+
+            <!-- Preview state (when an image is selected) -->
+            <div id="upload-preview-container" class="hidden flex items-center gap-3 bg-white p-2.5 rounded-xl border border-gray-200 text-left">
+              <img id="upload-preview-img" src="" alt="Aperçu" class="w-14 h-14 object-contain rounded-lg bg-gray-50 border border-gray-100 p-1 shrink-0"/>
+              <div class="flex-1 min-w-0">
+                <p id="upload-file-name" class="text-xs font-bold text-gray-800 truncate">photo.jpg</p>
+                <span id="upload-status" class="text-[10px] font-semibold text-[#0d7252] flex items-center gap-1">
+                  <span class="material-symbols-outlined text-[13px]">check_circle</span>
+                  <span>Photo prête</span>
+                </span>
+              </div>
+              <button type="button" id="remove-uploaded-image-btn" class="z-20 p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors">
+                <span class="material-symbols-outlined text-lg">close</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Hidden input storing final image URL (upload path or web URL) -->
+          <input type="hidden" id="prod-image-url" value=""/>
+
+          <!-- Alternative URL Toggle -->
+          <div class="mt-2 flex items-center justify-between">
+            <button type="button" id="toggle-url-input-btn" class="text-[11px] font-semibold text-[#0d7252] hover:underline flex items-center gap-1">
+              <span class="material-symbols-outlined text-xs">link</span>
+              <span>Ou coller une URL d'image web</span>
+            </button>
+          </div>
+
+          <div id="url-input-container" class="hidden mt-2">
+            <input id="prod-image-url-manual" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-[#0d7252] focus:bg-white" placeholder="https://images.unsplash.com/..." type="url"/>
+          </div>
         </div>
 
         <div>
-          <label class="block font-bold text-on-surface mb-1">Spécifications clés (séparées par des virgules)</label>
-          <input id="prod-specs" class="w-full bg-surface-low border border-surface-border rounded-xl px-3.5 py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-container" placeholder="Ex: 512 Go, 16 Go RAM, Écran AMOLED 120Hz" type="text"/>
+          <label class="block font-bold text-gray-700 mb-1">Spécifications clés (séparées par des virgules)</label>
+          <input id="prod-specs" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:border-[#0d7252] focus:bg-white" placeholder="Ex: 512 Go, 16 Go RAM, Écran AMOLED 120Hz" type="text"/>
         </div>
 
         <div>
-          <label class="block font-bold text-on-surface mb-1">Couleurs disponibles (codes hexa séparés par des virgules)</label>
-          <input id="prod-colors" class="w-full bg-surface-low border border-surface-border rounded-xl px-3.5 py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-container" placeholder="Ex: #1e293b, #f1f5f9, #10b981" type="text"/>
+          <label class="block font-bold text-gray-700 mb-1">Couleurs disponibles (codes hexa séparés par des virgules)</label>
+          <input id="prod-colors" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:border-[#0d7252] focus:bg-white" placeholder="Ex: #1e293b, #f1f5f9, #10b981" type="text"/>
         </div>
 
-        <div class="pt-2 flex gap-2">
-          <button type="submit" class="flex-1 py-3 rounded-xl bg-primary hover:bg-primary-container text-white font-bold text-xs sm:text-sm shadow-md transition-all">
+        <div class="pt-3 flex gap-2.5">
+          <button type="submit" class="flex-1 py-3 rounded-full bg-[#0d7252] hover:bg-[#08553d] text-white font-bold text-xs sm:text-sm shadow-md transition-all">
             Enregistrer le produit
           </button>
-          <button type="button" id="cancel-product-modal-btn" class="px-4 py-3 rounded-xl bg-surface-low text-outline font-semibold hover:bg-surface-border">
+          <button type="button" id="cancel-product-modal-btn" class="px-5 py-3 rounded-full bg-gray-100 text-gray-600 font-semibold hover:bg-gray-200 transition-colors">
             Annuler
           </button>
         </div>
@@ -337,31 +901,31 @@
     </div>
   </div>
 
-  <!-- STATUS UPDATE MODAL (Fulfillment & Payment) -->
+  <!-- ==================== STATUS UPDATE MODAL ==================== -->
   <div id="status-modal-overlay" class="modal-overlay hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
-    <div class="bg-surface rounded-t-3xl sm:rounded-2xl w-full max-w-md p-5 sm:p-6 shadow-2xl border border-surface-border space-y-4">
-      <div class="flex items-center justify-between pb-2 border-b border-surface-border">
-        <h3 class="font-bold text-base text-on-surface">Mettre à jour le statut</h3>
-        <button id="close-status-modal-btn" class="w-8 h-8 rounded-full bg-surface-low text-outline flex items-center justify-center hover:bg-surface-border">
-          <span class="material-symbols-outlined text-[18px]">close</span>
+    <div class="bg-white rounded-t-3xl sm:rounded-3xl w-full max-w-md p-6 shadow-2xl border border-gray-100 space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-gray-100">
+        <h3 class="font-extrabold text-base text-gray-900">Mettre à jour le statut</h3>
+        <button id="close-status-modal-btn" class="w-8 h-8 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center hover:bg-gray-200 transition-colors">
+          <span class="material-symbols-outlined text-lg">close</span>
         </button>
       </div>
 
-      <div class="bg-surface-low rounded-xl p-3 text-xs space-y-1">
+      <div class="bg-gray-50 rounded-2xl p-3.5 text-xs space-y-1 border border-gray-100">
         <div class="flex justify-between">
-          <span class="text-outline">Commande :</span>
-          <span id="status-order-num" class="font-bold text-on-surface">WZ-XXXXXX</span>
+          <span class="text-gray-500">Commande :</span>
+          <span id="status-order-num" class="font-bold text-gray-900">WZ-XXXXXX</span>
         </div>
         <div class="flex justify-between">
-          <span class="text-outline">Client :</span>
-          <span id="status-order-client" class="font-bold text-primary">Nom du client</span>
+          <span class="text-gray-500">Client :</span>
+          <span id="status-order-client" class="font-bold text-[#0d7252]">Nom du client</span>
         </div>
       </div>
 
-      <div class="space-y-3">
+      <div class="space-y-3.5">
         <div>
-          <label class="block text-xs font-bold text-on-surface mb-1">Statut d'Expédition (Chine &rarr; Gabon)</label>
-          <select id="update-fulfillment-status" class="w-full bg-surface-low border border-surface-border rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary-container">
+          <label class="block text-xs font-bold text-gray-700 mb-1">Statut d'Expédition (Chine &rarr; Gabon)</label>
+          <select id="update-fulfillment-status" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:border-[#0d7252] focus:bg-white">
             <option value="PENDING_CLEARANCE">En attente de confirmation</option>
             <option value="IN_PREPARATION_CHINA">En préparation en Chine (Achat usine)</option>
             <option value="SHIPPED_GABON">Expédié / En vol cargo vers Gabon</option>
@@ -371,8 +935,8 @@
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-on-surface mb-1">Statut Mobile Money</label>
-          <select id="update-payment-status" class="w-full bg-surface-low border border-surface-border rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary-container">
+          <label class="block text-xs font-bold text-gray-700 mb-1">Statut Mobile Money</label>
+          <select id="update-payment-status" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:border-[#0d7252] focus:bg-white">
             <option value="CONFIRMED_CLEARED">ENCAISSÉ 100% (Validé)</option>
             <option value="PENDING_PAYMENT">En attente de paiement</option>
             <option value="PAYMENT_FAILED">Paiement échoué / Annulé</option>
@@ -380,7 +944,7 @@
         </div>
       </div>
 
-      <button id="save-status-btn" class="w-full py-2.5 rounded-xl bg-primary hover:bg-primary-container text-white font-bold text-xs sm:text-sm shadow-md transition-all">
+      <button id="save-status-btn" class="w-full py-3 rounded-full bg-[#0d7252] hover:bg-[#08553d] text-white font-bold text-xs sm:text-sm shadow-md transition-all">
         Appliquer les modifications
       </button>
     </div>

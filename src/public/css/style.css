@@ -1,21 +1,24 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
 
 :root {
-  --primary: #006c49;
-  --primary-container: #10b981;
-  --secondary: #2d6a48;
-  --secondary-container: #b0f1c7;
-  --background: #faf8ff;
-  --surface: #ffffff;
-  --text-main: #131b2e;
-  --text-muted: #6c7a71;
+  --primary-emerald: #0d7252;
+  --primary-emerald-hover: #08553d;
+  --emerald-mint: #e6f7f0;
+  --emerald-accent: #10b981;
+  --footer-dark: #063828;
+  --footer-darker: #04281c;
+  --bg-page: #fbfcfd;
+  --surface-card: #ffffff;
+  --text-primary: #111827;
+  --text-muted: #64748b;
+  --border-subtle: #e2e8f0;
 }
 
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  background-color: var(--background);
-  color: var(--text-main);
+  background-color: var(--bg-page);
+  color: var(--text-primary);
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -23,19 +26,32 @@ h1, h2, h3, h4, h5, .font-heading {
   font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
-/* Category pills active state */
-.cat-pill.active {
-  background-color: var(--primary-container) !important;
-  color: #ffffff !important;
+/* Category card active/hover states */
+.category-card {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.category-card:hover {
+  transform: translateY(-3px);
+  border-color: #a7f3d0;
+  background-color: #f0fdf4;
+  box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.15);
+}
+.category-card.active {
+  background-color: #e6f7f0 !important;
+  border-color: #0d7252 !important;
+  box-shadow: 0 8px 20px -4px rgba(13, 114, 82, 0.2);
+}
+.category-card.active .cat-title {
+  color: #0d7252 !important;
   font-weight: 700;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
 }
 
-/* Admin segmented tab active state */
-.admin-tab-btn.active {
-  background-color: var(--surface) !important;
-  color: var(--primary) !important;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+/* Category pill filter state */
+.cat-pill.active {
+  background-color: var(--primary-emerald) !important;
+  color: #ffffff !important;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(13, 114, 82, 0.25);
 }
 
 /* Smooth modal transitions */
@@ -64,4 +80,13 @@ h1, h2, h3, h4, h5, .font-heading {
   .drawer-closed {
     transform: translateY(100%);
   }
+}
+
+/* Custom scrollbars */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

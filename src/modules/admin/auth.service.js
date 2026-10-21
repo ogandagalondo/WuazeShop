@@ -6,9 +6,9 @@ import { getDb } from '../../db/database.js';
 const activeSessions = new Map();
 
 export const authService = {
-  login(username, password) {
+  login(identifier, password) {
     const db = getDb();
-    const user = db.prepare(`SELECT * FROM admin_users WHERE username = ?`).get(username);
+    const user = db.prepare(`SELECT * FROM admin_users WHERE email = ? OR username = ?`).get(identifier, identifier);
     if (!user) {
       throw new Error('Identifiants incorrects');
     }
@@ -22,10 +22,11 @@ export const authService = {
     activeSessions.set(token, {
       userId: user.id,
       username: user.username,
+      email: user.email,
       createdAt: Date.now()
     });
 
-    return { token, username: user.username };
+    return { token, username: user.username, email: user.email };
   },
 
   verifyToken(token) {
