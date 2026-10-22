@@ -156,7 +156,9 @@ adminRouter.put('/admin/products/:id', (req, res) => {
     const description = req.body.description !== undefined ? req.body.description : existing.description;
     const category = req.body.category !== undefined ? req.body.category : existing.category;
     const price = req.body.price !== undefined ? Number(req.body.price) : existing.price;
-    const originalPrice = req.body.originalPrice !== undefined ? Number(req.body.originalPrice) : existing.original_price;
+    const originalPrice = req.body.originalPrice !== undefined 
+      ? (req.body.originalPrice !== null && req.body.originalPrice !== '' && Number(req.body.originalPrice) > 0 ? Number(req.body.originalPrice) : null)
+      : existing.original_price;
     const imageUrl = req.body.imageUrl !== undefined ? req.body.imageUrl : existing.image_url;
     const specs = req.body.specs !== undefined ? JSON.stringify(req.body.specs) : existing.specs;
     const colors = req.body.colors !== undefined ? JSON.stringify(req.body.colors) : existing.colors;
@@ -175,6 +177,138 @@ adminRouter.put('/admin/products/:id', (req, res) => {
   }
 });
 
+// PATCH /api/admin/products/:id/discount - Appliquer ou retirer une remise sur un produit
+adminRouter.patch('/admin/products/:id/discount', (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const db = getDb();
+    const product = db.prepare(`SELECT * FROM products WHERE id = ? AND is_active = 1`).get(id);
+    if (!product) {
+      return res.status(404).json({ error: 'Produit non trouvé' });
+    }
+
+    const { action, discountPercent, discountedPrice, originalPrice } = req.body;
+
+    if (action === 'remove') {
+      const restoredPrice = product.original_price && product.original_price > product.price 
+        ? product.original_price 
+        : product.price;
+
+      db.prepare(`
+        UPDATE products 
+        SET price = ?, original_price = NULL, updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+      `).run(restoredPrice, id);
+
+      const updated = db.prepare(`SELECT * FROM products WHERE id = ?`).get(id);
+      return res.json({ success: true, message: 'Remise retirée avec succès', product: updated });
+    }
+
+    let basePrice = (originalPrice && Number(originalPrice) > 0)
+      ? Number(originalPrice)
+      : product.price;
+
+    let finalPrice = product.price;
+    if (discountPercent !== undefined && discountPercent !== null && discountPercent !== '') {
+      const pct = Number(discountPercent);
+      if (isNaN(pct) || pct <= 0 || pct >= 100) {
+        return res.status(400).json({ error: 'Le pourcentage de remise doit être compris entre 1% et 99%.' });
+      }
+      finalPrice = Math.round(basePrice * (1 - (pct / 100)));
+    } else if (discountedPrice && Number(discountedPrice) > 0) {
+      finalPrice = Number(discountedPrice);
+    } else {
+      return res.status(400).json({ error: 'Veuillez spécifier un pourcentage ou un prix remisé valide.' });
+    }
+
+    if (finalPrice >= basePrice) {
+      return res.status(400).json({ error: 'Le prix remisé doit être inférieur au prix d’origine.' });
+    }
+
+    db.prepare(`
+      UPDATE products 
+      SET price = ?, original_price = ?, updated_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `).run(finalPrice, basePrice, id);
+
+    const updated = db.prepare(`SELECT * FROM products WHERE id = ?`).get(id);
+    res.json({ success: true, message: 'Remise appliquée avec succès', product: updated });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /api/admin/products/batch-discount - Appliquer ou retirer une remise groupée
+adminRouter.post('/admin/products/batch-discount', (req, res) => {
+  try {
+    const { category, discountPercent, action } = req.body;
+    const db = getDb();
+
+    let query = `SELECT * FROM products WHERE is_active = 1`;
+    const params = [];
+    if (category && category !== 'all') {
+      query += ` AND category = ?`;
+      params.push(category);
+    }
+    const products = db.prepare(query).all(...params);
+
+    if (products.length === 0) {
+      return res.status(404).json({ error: 'Aucun produit actif trouvé pour cette sélection.' });
+    }
+
+    let affectedCount = 0;
+
+    if (action === 'remove') {
+      const updateStmt = db.prepare(`
+        UPDATE products 
+        SET price = CASE WHEN original_price IS NOT NULL AND original_price > price THEN original_price ELSE price END,
+            original_price = NULL,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+      `);
+
+      for (const p of products) {
+        updateStmt.run(p.id);
+        affectedCount++;
+      }
+
+      return res.json({ 
+        success: true, 
+        message: `Toutes les remises ont été retirées (${affectedCount} articles réinitialisés).`,
+        affectedCount 
+      });
+    }
+
+    const pct = Number(discountPercent);
+    if (isNaN(pct) || pct <= 0 || pct >= 100) {
+      return res.status(400).json({ error: 'Pourcentage de remise invalide (doit être entre 1% et 99%).' });
+    }
+
+    const updateStmt = db.prepare(`
+      UPDATE products 
+      SET original_price = CASE WHEN original_price IS NOT NULL AND original_price > price THEN original_price ELSE price END,
+          price = CAST(ROUND((CASE WHEN original_price IS NOT NULL AND original_price > price THEN original_price ELSE price END) * (1 - (? / 100.0))) AS INTEGER),
+          updated_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `);
+
+    for (const p of products) {
+      updateStmt.run(pct, p.id);
+      affectedCount++;
+    }
+
+    res.json({ 
+      success: true, 
+      message: `Remise de -${pct}% appliquée avec succès sur ${affectedCount} article(s).`,
+      affectedCount,
+      discountPercent: pct
+    });
+  } catch (error) {
+    console.error('Batch discount error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // DELETE /api/admin/products/:id - Suppression douce (soft-delete) pour préserver l'historique
 adminRouter.delete('/admin/products/:id', (req, res) => {
   try {
@@ -187,6 +321,84 @@ adminRouter.delete('/admin/products/:id', (req, res) => {
 
     db.prepare(`UPDATE products SET is_active = 0, updated_at = CURRENT_TIMESTAMP WHERE id = ?`).run(id);
     res.json({ success: true, message: 'Produit archivé avec succès' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /api/admin/categories - Créer une catégorie
+adminRouter.post('/admin/categories', (req, res) => {
+  try {
+    const { name, slug, icon, description, bannerUrl } = req.body;
+    if (!name) {
+      return res.status(400).json({ error: 'Le nom de la catégorie est requis' });
+    }
+    const cleanSlug = (slug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-')).toLowerCase();
+    const db = getDb();
+    const existing = db.prepare(`SELECT * FROM categories WHERE slug = ?`).get(cleanSlug);
+    if (existing) {
+      return res.status(400).json({ error: 'Une catégorie avec cet identifiant existe déjà' });
+    }
+
+    db.prepare(`
+      INSERT INTO categories (name, slug, icon, description, banner_url)
+      VALUES (?, ?, ?, ?, ?)
+    `).run(name, cleanSlug, icon || 'category', description || null, bannerUrl || null);
+
+    const created = db.prepare(`SELECT * FROM categories WHERE slug = ?`).get(cleanSlug);
+    res.status(201).json(created);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// PUT /api/admin/categories/:id - Modifier une catégorie
+adminRouter.put('/admin/categories/:id', (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const db = getDb();
+    const existing = db.prepare(`SELECT * FROM categories WHERE id = ?`).get(id);
+    if (!existing) {
+      return res.status(404).json({ error: 'Catégorie non trouvée' });
+    }
+
+    const { name, slug, icon, description, bannerUrl } = req.body;
+    const newName = name !== undefined ? name : existing.name;
+    const newSlug = slug !== undefined ? slug.toLowerCase().replace(/[^a-z0-9]+/g, '-') : existing.slug;
+    const newIcon = icon !== undefined ? icon : existing.icon;
+    const newDesc = description !== undefined ? description : existing.description;
+    const newBanner = bannerUrl !== undefined ? bannerUrl : existing.banner_url;
+
+    db.prepare(`
+      UPDATE categories
+      SET name = ?, slug = ?, icon = ?, description = ?, banner_url = ?
+      WHERE id = ?
+    `).run(newName, newSlug, newIcon, newDesc, newBanner, id);
+
+    const updated = db.prepare(`SELECT * FROM categories WHERE id = ?`).get(id);
+    res.json(updated);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// DELETE /api/admin/categories/:id - Supprimer une catégorie
+adminRouter.delete('/admin/categories/:id', (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const db = getDb();
+    const existing = db.prepare(`SELECT * FROM categories WHERE id = ?`).get(id);
+    if (!existing) {
+      return res.status(404).json({ error: 'Catégorie non trouvée' });
+    }
+
+    const prods = db.prepare(`SELECT COUNT(*) as count FROM products WHERE category = ? AND is_active = 1`).get(existing.slug);
+    if (prods && prods.count > 0) {
+      return res.status(400).json({ error: `Impossible de supprimer : ${prods.count} article(s) sont encore associés à ce rayon.` });
+    }
+
+    db.prepare(`DELETE FROM categories WHERE id = ?`).run(id);
+    res.json({ success: true, message: 'Catégorie supprimée avec succès' });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

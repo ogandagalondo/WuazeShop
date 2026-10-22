@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="fr" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover"/>
+  <title>À Propos de WuazeShop | Le Pont High-Tech Direct Chine &amp; Gabon</title>
+  <meta name="description" content="Découvrez l'histoire de WuazeShop, notre mission et notre engagement d'importation directe d'appareils neufs certifiés depuis Shenzhen vers le Gabon au meilleur prix."/>
+
+  <!-- Tailwind CSS & Google Fonts -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "emerald-brand": "#0d7252",
+            "emerald-brand-hover": "#08553d",
+            "emerald-mint": "#e6f7f0",
+            "emerald-accent": "#10b981",
+            "footer-dark": "#063828",
+            "footer-darker": "#04281c",
+            "page-bg": "#fbfcfd"
+          }
+        }
+      }
+    };
+  </script>
+  <link rel="stylesheet" href="/css/style.css"/>
+
+  <style>
+    .drawer-closed {
+      transform: translateX(100%);
+    }
+    .drawer {
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .about-card {
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .about-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 16px 32px -10px rgba(13, 114, 82, 0.12);
+    }
+  </style>
+</head>
+<body class="bg-[#fbfcfd] text-gray-900 min-h-screen flex flex-col font-sans antialiased selection:bg-[#0d7252] selection:text-white pb-24 sm:pb-8">
+
+  <!-- ==================== TOP ANNOUNCEMENT BAR ==================== -->
+  <div class="bg-[#04281c] text-emerald-100 text-[10px] sm:text-xs py-1.5 sm:py-2 px-3 sm:px-4 text-center font-medium border-b border-emerald-900/50 flex items-center justify-center gap-2 leading-tight">
+    <span class="inline-block w-2 h-2 rounded-full bg-[#10b981] animate-pulse shrink-0"></span>
+    <span class="truncate sm:overflow-visible">🇨🇳 Import direct usine Shenzhen &rarr; 🇬🇦 Gabon | Fret cargo aérien inclus | Paiement sécurisé Mobile Money</span>
+  </div>
+
+  <!-- ==================== NAVBAR ==================== -->
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-gray-100 transition-all">
+    <div class="max-w-7xl mx-auto px-3.5 sm:px-6 h-16 sm:h-20 flex items-center justify-between gap-3 sm:gap-4">
+      
+      <!-- Left: Hamburger Button (Mobile/Tablet) & Brand Logo -->
+      <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+        <!-- Hamburger Menu Button -->
+        <button 
+          id="hamburger-menu-btn" 
+          type="button"
+          class="flex md:hidden items-center justify-center w-10 h-10 rounded-xl text-gray-700 hover:text-[#0d7252] hover:bg-emerald-50 active:scale-95 transition-all cursor-pointer" 
+          aria-label="Ouvrir le menu de navigation"
+          title="Menu de navigation"
+        >
+          <span class="material-symbols-outlined text-2xl">menu</span>
+        </button>
+
+        <!-- Logo -->
+        <a href="/" class="flex items-center gap-2 sm:gap-2.5 group shrink-0">
+          <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-[#0d7252] text-white flex items-center justify-center shadow-md shadow-[#0d7252]/20 group-hover:scale-105 transition-transform">
+            <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 14c1 1 3 1 4 0" stroke-width="2.2"/>
+            </svg>
+          </div>
+          <div class="flex flex-col">
+            <span class="text-xl sm:text-2xl font-extrabold tracking-tight text-gray-900 leading-tight">
+              Wuaze<span class="text-[#0d7252]">Shop</span>
+            </span>
+            <span class="text-[9px] uppercase tracking-widest font-bold text-gray-400">High-Tech Gabon</span>
+          </div>
+        </a>
+      </div>
+
+      <!-- Quick Search Bar (Desktop) -->
+      <div class="hidden md:flex flex-1 max-w-md mx-6 relative">
+        <input 
+          id="global-search-input"
+          type="text" 
+          placeholder="Rechercher iPhone, MacBook, TV 4K..." 
+          class="w-full bg-gray-50 border border-gray-200 rounded-full pl-10 pr-4 py-2.5 text-xs text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-[#0d7252] focus:bg-white focus:ring-2 focus:ring-[#0d7252]/10 transition-all"
+        />
+        <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-lg">search</span>
+      </div>
+
+      <!-- Header Actions (Store, Categories, Tracking, WhatsApp & Cart) -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <a href="/" class="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold text-gray-600 hover:text-[#0d7252] hover:bg-gray-100 transition-colors">
+          <span class="material-symbols-outlined text-base">home</span>
+          <span>Accueil</span>
+        </a>
+
+        <a href="/categories" class="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold text-gray-600 hover:text-[#0d7252] hover:bg-gray-100 transition-colors">
+          <span class="material-symbols-outlined text-base">grid_view</span>
+          <span>Catégories</span>
+        </a>
+
+        <a href="/tracking" class="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold text-gray-600 hover:text-[#0d7252] hover:bg-gray-100 transition-colors">
+          <span class="material-symbols-outlined text-base">radar</span>
+          <span>Suivi colis</span>
+        </a>
+
+        <!-- WhatsApp Support Direct -->
+        <a href="https://wa.me/241074001122" target="_blank" class="hidden lg:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-[#e6f7f0] text-[#0d7252] hover:bg-[#d5f2e6] text-xs font-bold transition-colors">
+          <span class="material-symbols-outlined text-base">chat</span>
+          <span>WhatsApp 7j/7</span>
+        </a>
+
+        <!-- Cart Button -->
+        <button id="cart-toggle-btn" class="relative flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-full bg-[#0d7252] hover:bg-[#08553d] text-white text-xs font-bold shadow-md shadow-[#0d7252]/20 active:scale-95 transition-all cursor-pointer">
+          <span class="material-symbols-outlined text-lg">shopping_bag</span>
+          <span id="cart-badge-total" class="hidden sm:inline font-semibold">0 FCFA</span>
+          <span id="cart-badge-count" class="w-5 h-5 rounded-full bg-white text-[#0d7252] text-[11px] font-black flex items-center justify-center">0</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ==================== BREADCRUMBS ==================== -->
+  <nav class="bg-gray-50/80 border-b border-gray-100 py-2.5 sm:py-3">
+    <div class="max-w-7xl mx-auto px-3.5 sm:px-6">
+      <ol class="flex items-center gap-2 text-xs text-gray-500 overflow-x-auto whitespace-nowrap">
+        <li>
+          <a href="/" class="hover:text-[#0d7252] transition-colors flex items-center gap-1">
+            <span class="material-symbols-outlined text-sm">home</span>
+            <span>Accueil</span>
+          </a>
+        </li>
+        <li class="text-gray-300">/</li>
+        <li class="text-gray-900 font-bold">À propos de WuazeShop</li>
+      </ol>
+    </div>
+  </nav>
+
+  <!-- ==================== MAIN CONTENT ==================== -->
+  <main class="flex-1">
+
+    <!-- 1. HERO SECTION -->
+    <section class="relative bg-gradient-to-b from-[#e6f7f0]/60 via-[#f4faf7]/40 to-[#fbfcfd] pt-10 sm:pt-16 pb-12 sm:pb-16 border-b border-gray-100 overflow-hidden">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 text-center space-y-4">
+        
+        <!-- Pill Badge -->
+        <div class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-emerald-50 border border-emerald-200/60 text-[#0d7252] text-xs font-extrabold uppercase tracking-wider shadow-xs">
+          <span class="material-symbols-outlined text-sm">corporate_fare</span>
+          <span id="about-hero-badge">✦ Notre Histoire &amp; Notre Mission</span>
+        </div>
+
+        <!-- Main Title -->
+        <h1 id="about-hero-title" class="text-2xl sm:text-4xl lg:text-5xl font-black text-gray-900 tracking-tight leading-[1.2]">
+          Le pont high-tech direct entre <span class="text-[#0d7252]">Shenzhen</span> et le <span class="text-[#10b981]">Gabon</span>
+        </h1>
+
+        <!-- Subtitle -->
+        <p id="about-hero-subtitle" class="text-xs sm:text-base text-gray-600 max-w-2xl mx-auto leading-relaxed">
+          WuazeShop révolutionne l'accès aux nouvelles technologies au Gabon en éliminant les intermédiaires coûteux et en garantissant des appareils certifiés 100% neufs avec un accompagnement local dédié.
+        </p>
+
+        <!-- Quick CTAs -->
+        <div class="flex flex-wrap items-center justify-center gap-3 pt-3">
+          <a href="/categories" class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#0d7252] hover:bg-[#08553d] text-white text-xs sm:text-sm font-bold shadow-md shadow-[#0d7252]/20 hover:shadow-lg transition-all">
+            <span class="material-symbols-outlined text-base">grid_view</span>
+            <span>Explorer le catalogue</span>
+          </a>
+          <a href="https://wa.me/241074001122" target="_blank" class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white text-gray-800 hover:text-[#0d7252] border border-gray-200 text-xs sm:text-sm font-bold shadow-xs hover:bg-gray-50 transition-all">
+            <span class="material-symbols-outlined text-base text-[#25D366]">chat</span>
+            <span>Échanger avec notre équipe</span>
+          </a>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 2. KEY METRICS STATS ROW -->
+    <section class="max-w-6xl mx-auto px-4 sm:px-6 -mt-6 sm:-mt-8 relative z-10">
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        
+        <div class="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 border border-gray-100 shadow-sm text-center space-y-1">
+          <div class="w-10 h-10 rounded-xl bg-[#e6f7f0] text-[#0d7252] mx-auto flex items-center justify-center font-bold">
+            <span class="material-symbols-outlined text-xl">verified</span>
+          </div>
+          <div id="about-stat1-num" class="text-xl sm:text-2xl font-black text-gray-900">100%</div>
+          <div id="about-stat1-label" class="text-[10px] sm:text-xs text-gray-500 font-medium">Appareils neufs &amp; contrôlés</div>
+        </div>
+
+        <div class="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 border border-gray-100 shadow-sm text-center space-y-1">
+          <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-700 mx-auto flex items-center justify-center font-bold">
+            <span class="material-symbols-outlined text-xl">flight_takeoff</span>
+          </div>
+          <div id="about-stat2-num" class="text-xl sm:text-2xl font-black text-gray-900">7-10 j</div>
+          <div id="about-stat2-label" class="text-[10px] sm:text-xs text-gray-500 font-medium">Délai moyen fret aérien express</div>
+        </div>
+
+        <div class="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 border border-gray-100 shadow-sm text-center space-y-1">
+          <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-700 mx-auto flex items-center justify-center font-bold">
+            <span class="material-symbols-outlined text-xl">shield</span>
+          </div>
+          <div id="about-stat3-num" class="text-xl sm:text-2xl font-black text-gray-900">1 An</div>
+          <div id="about-stat3-label" class="text-[10px] sm:text-xs text-gray-500 font-medium">Garantie constructeur complète</div>
+        </div>
+
+        <div class="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 border border-gray-100 shadow-sm text-center space-y-1">
+          <div class="w-10 h-10 rounded-xl bg-emerald-50 text-[#0d7252] mx-auto flex items-center justify-center font-bold">
+            <span class="material-symbols-outlined text-xl">group</span>
+          </div>
+          <div id="about-stat4-num" class="text-xl sm:text-2xl font-black text-gray-900">+1 500</div>
+          <div id="about-stat4-label" class="text-[10px] sm:text-xs text-gray-500 font-medium">Clients livrés partout au Gabon</div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 3. OUR STORY & THE SHENZHEN-LIBREVILLE BRIDGE -->
+    <section class="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        
+        <!-- Story Copy Column -->
+        <div class="lg:col-span-7 space-y-4 text-xs sm:text-sm text-gray-600 leading-relaxed">
+          <div class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#e6f7f0] text-[#0d7252] text-[11px] font-extrabold uppercase tracking-wider">
+            <span class="material-symbols-outlined text-sm">history_edu</span>
+            <span>Genèse du projet</span>
+          </div>
+          
+          <h2 id="about-story-title" class="text-xl sm:text-3xl font-extrabold text-gray-900 tracking-tight leading-snug">
+            Pourquoi avons-nous créé WuazeShop ?
+          </h2>
+
+          <p id="about-story-p1">
+            Pendant des années, acquérir un smartphone haut de gamme, un MacBook performant ou un téléviseur 4K au Gabon relevait du parcours du combattant : prix exorbitants chez les commerçants traditionnels, méfiance légitime envers les appareils reconditionnés vendus comme neufs, et absence totale de garantie constructeur.
+          </p>
+
+          <p id="about-story-p2">
+            WuazeShop est né d'une conviction inébranlable : <strong>chaque Gabonais mérite d'avoir accès aux meilleures technologies mondiales</strong> au juste prix, sans surcoût abusif d'intermédiaires, avec une transparence absolue et la simplicité du paiement Mobile Money (Airtel &amp; Moov).
+          </p>
+
+          <p id="about-story-p3">
+            En établissant une présence directe à <strong>Shenzhen</strong> — le cœur battant de la production high-tech mondiale — et une équipe logistique réactive à <strong>Libreville</strong>, nous avons créé un canal d'importation direct, fiable, rapide et sécurisé.
+          </p>
+
+          <div class="pt-3 border-t border-gray-100 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div class="flex items-center gap-2">
+              <span class="w-8 h-8 rounded-full bg-emerald-100 text-[#0d7252] flex items-center justify-center font-bold text-xs">✓</span>
+              <span class="text-xs font-bold text-gray-900">Zéro intermédiaire parasite</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="w-8 h-8 rounded-full bg-emerald-100 text-[#0d7252] flex items-center justify-center font-bold text-xs">✓</span>
+              <span class="text-xs font-bold text-gray-900">Contrôle visuel usine avant envoi</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Visual Shenzhen-Libreville Route Card -->
+        <div class="lg:col-span-5">
+          <div class="bg-gradient-to-br from-[#063828] to-[#04281c] rounded-3xl p-6 sm:p-7 text-white shadow-xl space-y-6 relative overflow-hidden">
+            <!-- Decorative Glow -->
+            <div class="absolute -right-10 -bottom-10 w-44 h-44 rounded-full bg-[#10b981]/20 blur-2xl pointer-events-none"></div>
+
+            <div class="flex items-center justify-between pb-4 border-b border-white/10">
+              <span class="text-xs font-extrabold uppercase tracking-wider text-emerald-300">Liaison Cargo Directe</span>
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#10b981] text-white">Express Air Cargo</span>
+            </div>
+
+            <!-- Route Stepper Graphic -->
+            <div class="space-y-4">
+              <!-- Shenzhen Origin -->
+              <div class="flex items-start gap-3">
+                <div class="w-9 h-9 rounded-xl bg-white/10 border border-white/20 text-emerald-300 flex items-center justify-center font-bold text-sm shrink-0">
+                  🇨🇳
+                </div>
+                <div>
+                  <h4 class="text-xs sm:text-sm font-extrabold text-white">Shenzhen, Chine</h4>
+                  <p class="text-[11px] text-gray-300">Achat direct usine &bull; Test fonctionnel rigoureux &bull; Emballage scellé</p>
+                </div>
+              </div>
+
+              <!-- Transit Flight Indicator -->
+              <div class="pl-4 border-l-2 border-dashed border-emerald-500/50 py-1 ml-4.5 space-y-1">
+                <div class="flex items-center gap-2 text-[11px] text-emerald-300 font-semibold">
+                  <span class="material-symbols-outlined text-sm animate-pulse">flight_takeoff</span>
+                  <span>Fret Aérien International (7-10 jours ouvrés)</span>
+                </div>
+              </div>
+
+              <!-- Libreville Destination -->
+              <div class="flex items-start gap-3">
+                <div class="w-9 h-9 rounded-xl bg-white/10 border border-white/20 text-emerald-300 flex items-center justify-center font-bold text-sm shrink-0">
+                  🇬🇦
+                </div>
+                <div>
+                  <h4 class="text-xs sm:text-sm font-extrabold text-white">Libreville, Gabon (LBV)</h4>
+                  <p class="text-[11px] text-gray-300">Dédouanement aéroport Léon Mba &bull; Livraison au quartier à domicile</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Trust Badge Box -->
+            <div class="p-3.5 rounded-2xl bg-white/10 border border-white/15 text-xs space-y-1">
+              <div class="flex items-center gap-1.5 font-bold text-emerald-200">
+                <span class="material-symbols-outlined text-base">verified_user</span>
+                <span>Dédouanement 100% Inclus</span>
+              </div>
+              <p class="text-[11px] text-gray-300">Le prix payé sur le site est définitif. Aucun frais supplémentaire ne vous sera demandé à l'aéroport ou lors de la livraison.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 4. HOW IT WORKS : OUR 4-STEP IMPORT MODEL -->
+    <section class="bg-gray-50/80 border-y border-gray-100 py-12 sm:py-16">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6">
+        
+        <div class="text-center max-w-xl mx-auto mb-10 space-y-2">
+          <span class="text-xs uppercase font-extrabold tracking-widest text-[#0d7252]">— TRANSPARENCE &amp; TRAÇABILITÉ</span>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-gray-900">Comment fonctionne WuazeShop ?</h2>
+          <p class="text-xs sm:text-sm text-gray-500">Un protocole rodé et sans faille, de l'usine jusqu'à votre domicile au Gabon.</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          
+          <!-- Step 1 -->
+          <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm space-y-3 about-card">
+            <div class="w-10 h-10 rounded-xl bg-[#e6f7f0] text-[#0d7252] flex items-center justify-center font-black text-sm">
+              1
+            </div>
+            <h4 class="font-extrabold text-sm text-gray-900">Sourcing &amp; Achat Chine</h4>
+            <p class="text-xs text-gray-500 leading-relaxed">
+              Dès validation de votre commande, notre acheteur à Shenzhen s'approvisionne directement auprès des usines et distributeurs agréés.
+            </p>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm space-y-3 about-card">
+            <div class="w-10 h-10 rounded-xl bg-[#e6f7f0] text-[#0d7252] flex items-center justify-center font-black text-sm">
+              2
+            </div>
+            <h4 class="font-extrabold text-sm text-gray-900">Inspection &amp; Emballage</h4>
+            <p class="text-xs text-gray-500 leading-relaxed">
+              Vérification physique, conformité du scellé d'origine et vidéo de contrôle envoyée sur demande au client avant le conditionnement cargo.
+            </p>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm space-y-3 about-card">
+            <div class="w-10 h-10 rounded-xl bg-[#e6f7f0] text-[#0d7252] flex items-center justify-center font-black text-sm">
+              3
+            </div>
+            <h4 class="font-extrabold text-sm text-gray-900">Fret Cargo &amp; Douane</h4>
+            <p class="text-xs text-gray-500 leading-relaxed">
+              Acheminement par vol cargo régulier. Notre équipe locale gère l'ensemble des formalités douanières à l'aéroport Léon Mba.
+            </p>
+          </div>
+
+          <!-- Step 4 -->
+          <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm space-y-3 about-card">
+            <div class="w-10 h-10 rounded-xl bg-[#0d7252] text-white flex items-center justify-center font-black text-sm shadow-md">
+              4
+            </div>
+            <h4 class="font-extrabold text-sm text-gray-900">Livraison &amp; Garantie</h4>
+            <p class="text-xs text-gray-500 leading-relaxed">
+              Remise en main propre dans votre quartier à Libreville ou expédition sécurisée vers l'intérieur du Gabon avec garantie 1 an.
+            </p>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 5. OUR 4 CORE VALUES -->
+    <section class="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
+      <div class="text-center max-w-xl mx-auto mb-10 space-y-2">
+        <span class="text-xs uppercase font-extrabold tracking-widest text-[#0d7252]">— NOS VALEURS</span>
+        <h2 id="about-mission-title" class="text-2xl sm:text-3xl font-extrabold text-gray-900">Pourquoi nous faire confiance ?</h2>
+        <p id="about-mission-text" class="text-xs sm:text-sm text-gray-500">
+          Nous bâtissons la relation client la plus transparente et la plus respectueuse du e-commerce au Gabon.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+        
+        <div class="bg-white rounded-3xl p-5 sm:p-6 border border-gray-100 shadow-sm flex items-start gap-4 about-card">
+          <div class="w-12 h-12 rounded-2xl bg-[#e6f7f0] text-[#0d7252] flex items-center justify-center shrink-0">
+            <span class="material-symbols-outlined text-2xl">verified</span>
+          </div>
+          <div class="space-y-1">
+            <h4 class="font-extrabold text-sm sm:text-base text-gray-900">100% Neuf &amp; Authenticité Garantie</h4>
+            <p class="text-xs text-gray-500 leading-relaxed">
+              Zéro appareil reconditionné caché, zéro contrefaçon. Tous nos articles sont livrés dans leur boîte scellée par le fabricant d'origine (Apple, Samsung, Xiaomi, etc.).
+            </p>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-3xl p-5 sm:p-6 border border-gray-100 shadow-sm flex items-start gap-4 about-card">
+          <div class="w-12 h-12 rounded-2xl bg-[#e6f7f0] text-[#0d7252] flex items-center justify-center shrink-0">
+            <span class="material-symbols-outlined text-2xl">payments</span>
+          </div>
+          <div class="space-y-1">
+            <h4 class="font-extrabold text-sm sm:text-base text-gray-900">Paiement Mobile Money Sécurisé</h4>
+            <p class="text-xs text-gray-500 leading-relaxed">
+              Réglez en toute confiance avec Airtel Money et Moov Money. Chaque transaction est instantanément enregistrée et donne lieu à un numéro de suivi officiel.
+            </p>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-3xl p-5 sm:p-6 border border-gray-100 shadow-sm flex items-start gap-4 about-card">
+          <div class="w-12 h-12 rounded-2xl bg-[#e6f7f0] text-[#0d7252] flex items-center justify-center shrink-0">
+            <span class="material-symbols-outlined text-2xl">support_agent</span>
+          </div>
+          <div class="space-y-1">
+            <h4 class="font-extrabold text-sm sm:text-base text-gray-900">Service Client Gabonais Dédié 7j/7</h4>
+            <p class="text-xs text-gray-500 leading-relaxed">
+              Notre équipe répond directement sur WhatsApp à toutes vos questions sur les spécifications techniques, la compatibilité réseau au Gabon et l'état du colis.
+            </p>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-3xl p-5 sm:p-6 border border-gray-100 shadow-sm flex items-start gap-4 about-card">
+          <div class="w-12 h-12 rounded-2xl bg-[#e6f7f0] text-[#0d7252] flex items-center justify-center shrink-0">
+            <span class="material-symbols-outlined text-2xl">local_shipping</span>
+          </div>
+          <div class="space-y-1">
+            <h4 class="font-extrabold text-sm sm:text-base text-gray-900">Livraison Partout au Gabon</h4>
+            <p class="text-xs text-gray-500 leading-relaxed">
+              Nous livrons à domicile ou au bureau dans tout le Grand Libreville (Louis, Glass, Akébé, Nzeng-Ayong, Angondjé, etc.) et expédions vers Port-Gentil et les provinces.
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 6. WHATSAPP & CONTACT CTA BANNER -->
+    <section class="max-w-6xl mx-auto px-4 sm:px-6 pb-12 sm:pb-16">
+      <div class="bg-gradient-to-r from-[#0d7252] to-[#10b981] rounded-3xl p-6 sm:p-8 text-white shadow-lg flex flex-col md:flex-row items-center justify-between gap-6">
+        <div class="space-y-2 text-center md:text-left">
+          <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 text-xs font-semibold backdrop-blur-sm">
+            <span class="material-symbols-outlined text-sm">chat</span>
+            <span>Une question particulière ?</span>
+          </div>
+          <h3 class="text-xl sm:text-2xl font-extrabold tracking-tight">Envie d'échanger avec nous ou de commander un modèle précis ?</h3>
+          <p class="text-xs sm:text-sm text-emerald-100 max-w-xl">
+            Notre acheteur à Shenzhen et notre service client à Libreville sont à votre écoute pour vous conseiller, chercher un produit sur-mesure ou vous envoyer des photos réelles.
+          </p>
+        </div>
+        <a href="https://wa.me/241074001122" target="_blank" class="w-full sm:w-auto shrink-0 inline-flex items-center justify-center gap-2 bg-white text-[#0d7252] hover:bg-emerald-50 px-6 py-3.5 rounded-full font-bold text-xs sm:text-sm shadow-md transition-all">
+          <span class="material-symbols-outlined text-lg">chat</span>
+          <span>Écrire sur WhatsApp (+241) 074 00 11 22</span>
+        </a>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="bg-[#04281c] text-gray-300 pt-16 pb-8 border-t border-emerald-950">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 pb-12 border-b border-emerald-900/60">
+        
+        <!-- Brand Info -->
+        <div class="space-y-4">
+          <div class="flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-md">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 14c1 1 3 1 4 0" stroke-width="2.2"/>
+              </svg>
+            </div>
+            <span class="text-xl font-extrabold text-white tracking-tight">
+              Wuaze<span class="text-[#10b981]">Shop</span>
+            </span>
+          </div>
+          <p id="footer-desc" class="text-xs text-emerald-200/80 leading-relaxed">
+            Votre passerelle d'importation technologique directe Chine &amp; Gabon. Produits originaux neufs certifiés, expédition sécurisée et service client réactif.
+          </p>
+        </div>
+
+        <!-- Navigation Links -->
+        <div class="space-y-3">
+          <h5 class="text-xs font-bold uppercase tracking-wider text-emerald-300">Navigation</h5>
+          <ul class="space-y-2 text-xs">
+            <li><a href="/" class="hover:text-white transition-colors">Accueil</a></li>
+            <li><a href="/categories" class="hover:text-white transition-colors">Toutes les catégories</a></li>
+            <li><a href="/tracking" class="hover:text-white transition-colors">Suivi de colis</a></li>
+            <li><a href="/about" class="text-white font-bold transition-colors">À propos de nous</a></li>
+          </ul>
+        </div>
+
+        <!-- Catégories Populaires -->
+        <div class="space-y-3">
+          <h5 class="text-xs font-bold uppercase tracking-wider text-emerald-300">Rayons Populaires</h5>
+          <ul class="space-y-2 text-xs">
+            <li><a href="/category/smartphones" class="hover:text-white transition-colors">Smartphones &amp; Tablettes</a></li>
+            <li><a href="/category/ordinateurs" class="hover:text-white transition-colors">Ordinateurs &amp; MacBooks</a></li>
+            <li><a href="/category/televiseurs" class="hover:text-white transition-colors">Téléviseurs 4K UHD</a></li>
+            <li><a href="/category/audio" class="hover:text-white transition-colors">Casques &amp; Écouteurs</a></li>
+            <li><a href="/category/montres" class="hover:text-white transition-colors">Montres Connectées</a></li>
+          </ul>
+        </div>
+
+        <!-- Paiement & Sécurité -->
+        <div class="space-y-3">
+          <h5 class="text-xs font-bold uppercase tracking-wider text-emerald-300">Paiement Mobile Money</h5>
+          <p class="text-xs text-emerald-200/80">Commandes 100% sécurisées via Airtel Money et Moov Money au Gabon.</p>
+          <div class="flex items-center gap-2 pt-1">
+            <span class="px-2.5 py-1 rounded-lg bg-red-600/30 text-red-200 text-[10px] font-bold border border-red-500/40">Airtel Money</span>
+            <span class="px-2.5 py-1 rounded-lg bg-blue-600/30 text-blue-200 text-[10px] font-bold border border-blue-500/40">Moov Money</span>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-emerald-300/70">
+        <p id="footer-copyright">© 2026 WuazeShop. Tous droits réservés.</p>
+        <div class="flex items-center gap-4">
+          <a href="/about" class="hover:text-white transition-colors">À propos</a>
+          <a href="/#faq-section" class="hover:text-white transition-colors">FAQ</a>
+          <a href="/admin" class="hover:text-white transition-colors text-[11px] opacity-60">Portail Admin</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ==================== MOBILE DRAWER MENU ==================== -->
+  <div id="mobile-nav-overlay" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs transition-opacity"></div>
+  <aside id="mobile-nav-drawer" class="nav-drawer-closed fixed top-0 left-0 bottom-0 z-50 w-80 max-w-[85vw] bg-white shadow-2xl flex flex-col transition-transform duration-300 ease-in-out">
+    <div class="p-4 border-b border-gray-100 flex items-center justify-between bg-emerald-50/50">
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-xl bg-[#0d7252] text-white flex items-center justify-center shadow-xs">
+          <span class="material-symbols-outlined text-lg">shopping_bag</span>
+        </div>
+        <div class="flex flex-col">
+          <span class="font-extrabold text-sm text-gray-900 leading-tight">Wuaze<span class="text-[#0d7252]">Shop</span></span>
+          <span class="text-[9px] uppercase tracking-wider text-gray-400 font-bold">Navigation Principale</span>
+        </div>
+      </div>
+      <button id="close-mobile-nav-btn" type="button" class="w-8 h-8 rounded-full bg-white text-gray-500 hover:text-gray-800 flex items-center justify-center shadow-xs transition-colors cursor-pointer">
+        <span class="material-symbols-outlined text-lg">close</span>
+      </button>
+    </div>
+
+    <div class="flex-1 overflow-y-auto p-4 space-y-4">
+      <div class="space-y-1">
+        <span class="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider px-3 mb-1 block">Menu</span>
+        <a href="/" class="mobile-nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-800 hover:text-[#0d7252] hover:bg-emerald-50 text-sm font-bold transition-colors">
+          <span class="material-symbols-outlined text-[#0d7252] text-xl">home</span>
+          <span>Accueil</span>
+        </a>
+        <a href="/categories" class="mobile-nav-link flex items-center justify-between px-3 py-2.5 rounded-xl text-gray-800 hover:text-[#0d7252] hover:bg-emerald-50 text-sm font-bold transition-colors">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-[#0d7252] text-xl">grid_view</span>
+            <span>Toutes les catégories</span>
+          </div>
+          <span class="material-symbols-outlined text-gray-400 text-base">arrow_forward</span>
+        </a>
+
+        <!-- Catégories disponibles sub-grid -->
+        <div class="grid grid-cols-2 gap-1.5 pl-3 pr-1 py-1.5">
+          <a href="/category/smartphones" class="mobile-nav-link flex items-center gap-2 p-2 rounded-xl bg-gray-50 hover:bg-emerald-50 text-gray-800 hover:text-[#0d7252] border border-gray-100 hover:border-emerald-200 transition-all text-xs font-bold">
+            <span class="material-symbols-outlined text-[#0d7252] text-base shrink-0">smartphone</span>
+            <span class="truncate">Smartphones</span>
+          </a>
+          <a href="/category/ordinateurs" class="mobile-nav-link flex items-center gap-2 p-2 rounded-xl bg-gray-50 hover:bg-emerald-50 text-gray-800 hover:text-[#0d7252] border border-gray-100 hover:border-emerald-200 transition-all text-xs font-bold">
+            <span class="material-symbols-outlined text-[#0d7252] text-base shrink-0">laptop_mac</span>
+            <span class="truncate">Ordinateurs</span>
+          </a>
+          <a href="/category/televiseurs" class="mobile-nav-link flex items-center gap-2 p-2 rounded-xl bg-gray-50 hover:bg-emerald-50 text-gray-800 hover:text-[#0d7252] border border-gray-100 hover:border-emerald-200 transition-all text-xs font-bold">
+            <span class="material-symbols-outlined text-[#0d7252] text-base shrink-0">tv</span>
+            <span class="truncate">Téléviseurs</span>
+          </a>
+          <a href="/category/audio" class="mobile-nav-link flex items-center gap-2 p-2 rounded-xl bg-gray-50 hover:bg-emerald-50 text-gray-800 hover:text-[#0d7252] border border-gray-100 hover:border-emerald-200 transition-all text-xs font-bold">
+            <span class="material-symbols-outlined text-[#0d7252] text-base shrink-0">headphones</span>
+            <span class="truncate">Audio</span>
+          </a>
+          <a href="/category/montres" class="mobile-nav-link flex items-center gap-2 p-2 rounded-xl bg-gray-50 hover:bg-emerald-50 text-gray-800 hover:text-[#0d7252] border border-gray-100 hover:border-emerald-200 transition-all text-xs font-bold">
+            <span class="material-symbols-outlined text-[#0d7252] text-base shrink-0">watch</span>
+            <span class="truncate">Montres</span>
+          </a>
+          <a href="/category/accessoires" class="mobile-nav-link flex items-center gap-2 p-2 rounded-xl bg-gray-50 hover:bg-emerald-50 text-gray-800 hover:text-[#0d7252] border border-gray-100 hover:border-emerald-200 transition-all text-xs font-bold">
+            <span class="material-symbols-outlined text-[#0d7252] text-base shrink-0">cable</span>
+            <span class="truncate">Accessoires</span>
+          </a>
+        </div>
+
+        <!-- Suivi de commande -->
+        <a href="/tracking" class="mobile-nav-link flex items-center justify-between px-3 py-2.5 rounded-xl text-gray-800 hover:text-[#0d7252] hover:bg-emerald-50 text-sm font-bold transition-colors">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-[#0d7252] text-xl">radar</span>
+            <span>Suivi de commande</span>
+          </div>
+          <span class="px-2 py-0.5 rounded-full text-[9px] font-black bg-[#e6f7f0] text-[#0d7252] border border-emerald-200">En direct</span>
+        </a>
+      </div>
+
+      <!-- Section À propos avec Menu Déroulant -->
+      <div class="pt-3 border-t border-gray-100">
+        <button 
+          id="drawer-about-toggle-btn"
+          type="button" 
+          class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-[#0d7252] bg-emerald-50/70 text-sm font-bold transition-all cursor-pointer"
+          aria-expanded="true"
+        >
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-[#0d7252] text-xl">info</span>
+            <span>À propos</span>
+          </div>
+          <span id="drawer-about-chevron" class="material-symbols-outlined text-[#0d7252] text-xl transition-transform duration-200 rotate-180">keyboard_arrow_down</span>
+        </button>
+
+        <!-- Dropdown Sub-menu -->
+        <div id="drawer-about-dropdown" class="pl-9 pr-2 py-1 space-y-1 transition-all">
+          <a href="/about" class="mobile-nav-link flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-[#0d7252] bg-emerald-50 transition-colors">
+            <span class="material-symbols-outlined text-base text-[#0d7252]">corporate_fare</span>
+            <span>À propos de nous</span>
+          </a>
+          <a href="https://wa.me/241074001122" target="_blank" class="mobile-nav-link flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-gray-600 hover:text-[#0d7252] hover:bg-emerald-50 transition-colors">
+            <span class="material-symbols-outlined text-base text-gray-400">support_agent</span>
+            <span>Contact</span>
+          </a>
+          <a href="/#faq-section" class="mobile-nav-link flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-gray-600 hover:text-[#0d7252] hover:bg-emerald-50 transition-colors">
+            <span class="material-symbols-outlined text-base text-gray-400">help_outline</span>
+            <span>FAQ</span>
+          </a>
+          <a href="/about#legal" class="mobile-nav-link flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-gray-600 hover:text-[#0d7252] hover:bg-emerald-50 transition-colors">
+            <span class="material-symbols-outlined text-base text-gray-400">policy</span>
+            <span>Conditions générales</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Reassurance Card in Menu -->
+      <div class="bg-gray-50 rounded-2xl p-3.5 border border-gray-100 text-xs space-y-1.5">
+        <div class="flex items-center gap-1.5 font-bold text-[#0d7252]">
+          <span class="material-symbols-outlined text-base">verified</span>
+          <span>Direct Chine &rarr; Libreville</span>
+        </div>
+        <p class="text-[11px] text-gray-500 leading-relaxed">Fret aérien 7-10 jours &bull; Dédouanement 100% inclus &bull; Paiement sécurisé Mobile Money.</p>
+      </div>
+    </div>
+
+    <!-- Drawer Footer -->
+    <div class="p-4 border-t border-gray-100 bg-gray-50 space-y-2 shrink-0">
+      <a href="https://wa.me/241074001122" target="_blank" class="w-full py-3 rounded-full bg-[#25D366] hover:bg-[#20ba5a] text-white text-xs font-bold shadow-md flex items-center justify-center gap-2 transition-all">
+        <span class="material-symbols-outlined text-base">chat</span>
+        <span>Conseiller WhatsApp direct 7j/7</span>
+      </a>
+      <p class="text-[10px] text-gray-400 text-center font-medium">
+        WuazeShop Gabon &bull; Libreville &amp; Shenzhen
+      </p>
+    </div>
+  </aside>
+
+  <!-- ==================== CART SLIDE-OVER DRAWER ==================== -->
+  <div id="cart-drawer-overlay" class="modal-overlay hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-end sm:items-stretch justify-end">
+    <div class="drawer drawer-closed bg-white w-full max-w-md h-[88vh] sm:h-full rounded-t-3xl sm:rounded-none flex flex-col shadow-2xl p-4 sm:p-6 overflow-hidden">
+      <div class="flex items-center justify-between pb-4 border-b border-gray-100">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-[#0d7252] text-2xl">shopping_cart</span>
+          <h3 class="font-extrabold text-base text-gray-900">Mon Panier</h3>
+        </div>
+        <button id="close-cart-btn" class="w-8 h-8 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center hover:bg-gray-200 transition-colors cursor-pointer">
+          <span class="material-symbols-outlined text-lg">close</span>
+        </button>
+      </div>
+
+      <!-- Cart Items List -->
+      <div id="cart-items-container" class="flex-1 overflow-y-auto py-4 space-y-3">
+        <!-- Rendered by about.js -->
+      </div>
+
+      <!-- Cart Footer / Total & Checkout Button -->
+      <div id="cart-footer-container" class="pt-4 border-t border-gray-100 space-y-3">
+        <div id="cart-subtotal-row" class="flex justify-between items-baseline">
+          <span class="text-xs text-gray-500 font-medium">Sous-total :</span>
+          <span id="cart-subtotal-display" class="text-base font-extrabold text-[#0d7252]">0 FCFA</span>
+        </div>
+        <button id="open-checkout-modal-btn" class="w-full py-3.5 rounded-full bg-[#0d7252] hover:bg-[#08553d] text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer">
+          <span>Passer à la caisse</span>
+          <span class="material-symbols-outlined text-sm">arrow_forward</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MOBILE BOTTOM NAVIGATION ==================== -->
+  <nav class="fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-gray-100 py-2 px-4 flex md:hidden items-center justify-around shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
+    <a href="/" class="flex flex-col items-center gap-0.5 text-gray-500 hover:text-[#0d7252] text-[10px] font-medium">
+      <span class="material-symbols-outlined text-xl">home</span>
+      <span>Accueil</span>
+    </a>
+    <a href="/categories" class="flex flex-col items-center gap-0.5 text-gray-500 hover:text-[#0d7252] text-[10px] font-medium">
+      <span class="material-symbols-outlined text-xl">grid_view</span>
+      <span>Catégories</span>
+    </a>
+    <button id="mobile-cart-btn" class="relative flex flex-col items-center gap-0.5 text-gray-700 hover:text-[#0d7252] text-[10px] font-bold">
+      <div class="relative">
+        <span class="material-symbols-outlined text-xl">shopping_cart</span>
+        <span id="mobile-cart-badge" class="absolute -top-1.5 -right-2 bg-[#10b981] text-white text-[9px] font-extrabold w-4 h-4 rounded-full flex items-center justify-center">0</span>
+      </div>
+      <span>Panier</span>
+    </button>
+    <a href="https://wa.me/241074001122" target="_blank" class="flex flex-col items-center gap-0.5 text-[#25D366] text-[10px] font-bold">
+      <span class="material-symbols-outlined text-xl">chat</span>
+      <span>WhatsApp</span>
+    </a>
+    <a href="/tracking" class="flex flex-col items-center gap-0.5 text-gray-500 hover:text-[#0d7252] text-[10px] font-medium">
+      <span class="material-symbols-outlined text-xl">local_shipping</span>
+      <span>Suivi</span>
+    </a>
+  </nav>
+
+  <script src="/js/about.js"></script>
+</body>
+</html>

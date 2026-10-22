@@ -285,4 +285,141 @@ describe('Admin CMS API', () => {
     expect(publicRes.body.faq_section[0].question).toBe('Comment contacter le service client à Libreville ?');
     expect(publicRes.body.faq_section[1].answer).toContain('fret aérien cargo express');
   });
+
+  it('allows authenticated admin to create, update and delete a category in CMS', async () => {
+    // 1. Create a new category
+    const createRes = await request(app)
+      .post('/api/admin/categories')
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({
+        name: 'Drones & Caméras',
+        slug: 'drones-cameras',
+        icon: 'videocam',
+        description: 'Drones professionnels 4K et stabilisateurs importés de Shenzhen.',
+        banner_url: '/images/hero-devices.jpg'
+      });
+
+    expect(createRes.status).toBe(201);
+    expect(createRes.body.slug).toBe('drones-cameras');
+    expect(createRes.body.name).toBe('Drones & Caméras');
+    const newCatId = createRes.body.id;
+
+    // 2. Update the category
+    const updateRes = await request(app)
+      .put(`/api/admin/categories/${newCatId}`)
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({
+        name: 'Drones & Stabilisateurs 4K',
+        description: 'Drones et gimbals professionnels'
+      });
+
+    expect(updateRes.status).toBe(200);
+    expect(updateRes.body.name).toBe('Drones & Stabilisateurs 4K');
+    expect(updateRes.body.description).toBe('Drones et gimbals professionnels');
+
+    // 3. Delete the category (0 products attached)
+    const deleteRes = await request(app)
+      .delete(`/api/admin/categories/${newCatId}`)
+      .set('Authorization', `Bearer ${authToken}`);
+
+    expect(deleteRes.status).toBe(200);
+    expect(deleteRes.body.success).toBe(true);
+
+    // Verify it is gone
+    const getRes = await request(app).get('/api/categories/drones-cameras');
+    expect(getRes.status).toBe(404);
+  });
+
+  it('prevents deleting a category that has attached products', async () => {
+    const listRes = await request(app).get('/api/categories');
+    const smartphoneCat = listRes.body.find(c => c.slug === 'smartphones');
+    expect(smartphoneCat).toBeDefined();
+
+    const deleteRes = await request(app)
+      .delete(`/api/admin/categories/${smartphoneCat.id}`)
+      .set('Authorization', `Bearer ${authToken}`);
+
+    expect(deleteRes.status).toBe(400);
+    expect(deleteRes.body.error).toContain('Impossible de supprimer');
+  });
+
+  it('rejects unauthenticated requests to modify categories', async () => {
+    const res = await request(app)
+      .post('/api/admin/categories')
+      .send({ name: 'Hacking', slug: 'hack' });
+
+    expect(res.status).toBe(401);
+  });
+
+  it('allows authenticated admin to apply a percentage discount to a product', async () => {
+    const listRes = await request(app).get('/api/products');
+    const targetProduct = listRes.body[0];
+    const initialPrice = targetProduct.price;
+
+    const discountRes = await request(app)
+      .patch(`/api/admin/products/${targetProduct.id}/discount`)
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({
+        discountPercent: 20
+      });
+
+    expect(discountRes.status).toBe(200);
+    expect(discountRes.body.success).toBe(true);
+    expect(discountRes.body.product.price).toBe(Math.round(initialPrice * 0.8));
+    expect(discountRes.body.product.original_price).toBe(initialPrice);
+  });
+
+  it('allows authenticated admin to remove a discount from a product', async () => {
+    const listRes = await request(app).get('/api/products');
+    const targetProduct = listRes.body[0];
+
+    const removeRes = await request(app)
+      .patch(`/api/admin/products/${targetProduct.id}/discount`)
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({
+        action: 'remove'
+      });
+
+    expect(removeRes.status).toBe(200);
+    expect(removeRes.body.success).toBe(true);
+    expect(removeRes.body.product.original_price).toBeNull();
+  });
+
+  it('allows authenticated admin to apply a batch discount to an entire category', async () => {
+    const batchRes = await request(app)
+      .post('/api/admin/products/batch-discount')
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({
+        category: 'smartphones',
+        discountPercent: 15
+      });
+
+    expect(batchRes.status).toBe(200);
+    expect(batchRes.body.success).toBe(true);
+    expect(batchRes.body.affectedCount).toBeGreaterThan(0);
+
+    const checkList = await request(app).get('/api/products?category=smartphones');
+    for (const p of checkList.body) {
+      expect(p.original_price).toBeGreaterThan(p.price);
+    }
+  });
+
+  it('allows authenticated admin to batch-remove discounts from a category', async () => {
+    const removeBatchRes = await request(app)
+      .post('/api/admin/products/batch-discount')
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({
+        category: 'smartphones',
+        action: 'remove'
+      });
+
+    expect(removeBatchRes.status).toBe(200);
+    expect(removeBatchRes.body.success).toBe(true);
+
+    const checkList = await request(app).get('/api/products?category=smartphones');
+    for (const p of checkList.body) {
+      expect(p.original_price).toBeNull();
+    }
+  });
 });
+

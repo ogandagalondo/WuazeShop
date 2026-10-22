@@ -47,8 +47,20 @@
       </a>
 
       <!-- Quick Action Controls (Authenticated State) -->
-      <div id="admin-header-actions" class="hidden flex items-center gap-2 sm:gap-3">
-        <a href="/" target="_blank" class="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold text-gray-600 hover:text-[#0d7252] hover:bg-emerald-50 border border-gray-200 transition-colors">
+      <div id="admin-header-actions" class="hidden flex items-center gap-1.5 sm:gap-2.5">
+        <a href="/categories" target="_blank" class="hidden lg:inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold text-gray-600 hover:text-[#0d7252] hover:bg-emerald-50 border border-gray-200 transition-colors" title="Voir la grille de toutes les catégories">
+          <span class="material-symbols-outlined text-base">grid_view</span>
+          <span>Catégories</span>
+        </a>
+        <a href="/tracking" target="_blank" class="hidden md:inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold text-gray-600 hover:text-[#0d7252] hover:bg-emerald-50 border border-gray-200 transition-colors" title="Voir la page de suivi de colis">
+          <span class="material-symbols-outlined text-base">route</span>
+          <span>Suivi colis</span>
+        </a>
+        <a href="/about" target="_blank" class="hidden xl:inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold text-gray-600 hover:text-[#0d7252] hover:bg-emerald-50 border border-gray-200 transition-colors" title="Voir la page À propos">
+          <span class="material-symbols-outlined text-base">corporate_fare</span>
+          <span>À propos</span>
+        </a>
+        <a href="/" target="_blank" class="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold text-gray-600 hover:text-[#0d7252] hover:bg-emerald-50 border border-gray-200 transition-colors" title="Ouvrir la vitrine d'accueil">
           <span class="material-symbols-outlined text-base">storefront</span>
           <span>Voir la boutique</span>
         </a>
@@ -176,6 +188,12 @@
             <span id="tab-products-badge" class="bg-gray-200 text-gray-700 text-[10px] px-2 py-0.5 rounded-full font-bold ml-1">0</span>
           </button>
 
+          <button id="tab-categories-btn" class="admin-tab-btn px-3 sm:px-5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 text-gray-500 hover:text-gray-900 transition-all">
+            <span class="material-symbols-outlined text-lg">category</span>
+            <span>Rayons &amp; Catégories</span>
+            <span id="tab-categories-badge" class="bg-gray-200 text-gray-700 text-[10px] px-2 py-0.5 rounded-full font-bold ml-1">0</span>
+          </button>
+
           <button id="tab-cms-btn" class="admin-tab-btn px-3 sm:px-5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 text-gray-500 hover:text-gray-900 transition-all">
             <span class="material-symbols-outlined text-lg">web</span>
             <span>Vitrine / CMS</span>
@@ -230,10 +248,16 @@
             <button data-cat-filter="accessoires" class="admin-cat-pill px-3.5 py-1.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-600 shrink-0">Accessoires</button>
           </div>
 
-          <div class="relative w-full sm:w-72">
-            <div class="flex items-center bg-white rounded-full px-3.5 py-2 border border-gray-200 text-xs focus-within:ring-2 focus-within:ring-[#0d7252]">
-              <span class="material-symbols-outlined text-gray-400 text-base mr-1.5">search</span>
-              <input id="admin-product-search-input" class="w-full bg-transparent focus:outline-none text-gray-900 placeholder:text-gray-400" placeholder="Rechercher produit..." type="text"/>
+          <div class="flex flex-wrap items-center gap-2">
+            <button id="open-batch-discount-btn" type="button" class="py-2 px-3.5 rounded-full bg-emerald-50 hover:bg-emerald-100 text-[#0d7252] border border-emerald-200 text-xs font-bold flex items-center gap-1.5 transition-all shadow-2xs shrink-0 cursor-pointer" title="Appliquer une remise groupée sur une catégorie ou tout le magasin">
+              <span class="material-symbols-outlined text-sm">percent</span>
+              <span>Opération Réduction / Soldes</span>
+            </button>
+            <div class="relative w-full sm:w-64">
+              <div class="flex items-center bg-white rounded-full px-3.5 py-2 border border-gray-200 text-xs focus-within:ring-2 focus-within:ring-[#0d7252]">
+                <span class="material-symbols-outlined text-gray-400 text-base mr-1.5">search</span>
+                <input id="admin-product-search-input" class="w-full bg-transparent focus:outline-none text-gray-900 placeholder:text-gray-400" placeholder="Rechercher produit..." type="text"/>
+              </div>
             </div>
           </div>
         </div>
@@ -241,6 +265,37 @@
         <!-- Products Cards Grid -->
         <div id="admin-products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <!-- Rendered by admin.js -->
+        </div>
+      </div>
+
+      <!-- TAB: GESTION DES RAYONS & CATÉGORIES (PAGES DÉDIÉES) -->
+      <div id="tab-categories-content" class="hidden space-y-5">
+        <!-- Overview Banner -->
+        <div class="bg-gradient-to-r from-[#e6f7f0] to-[#f4faf7] rounded-3xl p-5 sm:p-6 border border-emerald-200/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-2xl bg-[#0d7252] text-white flex items-center justify-center shadow-md shrink-0">
+              <span class="material-symbols-outlined text-2xl">category</span>
+            </div>
+            <div>
+              <h3 class="font-extrabold text-base sm:text-lg text-gray-900">Gestion des Rayons &amp; Pages Dédiées</h3>
+              <p class="text-xs text-gray-500">Chaque catégorie dispose de sa propre page catalogue publique (ex: /category/smartphones) et figure dans la grille globale (/categories). Modifiez ici les intitulés, descriptions, icônes et bannières.</p>
+            </div>
+          </div>
+          <div class="flex flex-wrap items-center gap-2 shrink-0">
+            <a href="/categories" target="_blank" class="px-4 py-2.5 rounded-full bg-white text-[#0d7252] border border-emerald-200 text-xs font-bold hover:bg-emerald-50 transition-colors shadow-sm flex items-center gap-1.5 cursor-pointer">
+              <span class="material-symbols-outlined text-sm">grid_view</span>
+              <span>Voir la grille publique</span>
+            </a>
+            <button id="open-add-category-btn" type="button" class="px-5 py-2.5 rounded-full bg-[#0d7252] hover:bg-[#08553d] text-white text-xs font-bold shadow-md flex items-center gap-1.5 transition-all cursor-pointer">
+              <span class="material-symbols-outlined text-sm">add_circle</span>
+              <span>Nouveau Rayon</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Categories Cards Grid -->
+        <div id="admin-categories-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- Rendered dynamically by admin.js -->
         </div>
       </div>
 
@@ -254,14 +309,28 @@
               <span class="material-symbols-outlined text-2xl">auto_fix_high</span>
             </div>
             <div>
-              <h3 class="font-extrabold text-base sm:text-lg text-gray-900">Personnalisation de la Vitrine</h3>
-              <p class="text-xs text-gray-500">Modifiez en temps réel chaque texte, image et bannière affichés sur la page d'accueil de WuazeShop.</p>
+              <h3 class="font-extrabold text-base sm:text-lg text-gray-900">Personnalisation de la Vitrine &amp; CMS</h3>
+              <p class="text-xs text-gray-500">Modifiez en temps réel chaque texte, image, bannière, FAQ et documents légaux affichés sur l'ensemble du site WuazeShop.</p>
             </div>
           </div>
-          <a href="/" target="_blank" class="px-4 py-2 rounded-full bg-white text-[#0d7252] border border-emerald-200 text-xs font-bold hover:bg-emerald-50 transition-colors shadow-sm flex items-center gap-1.5 shrink-0">
-            <span class="material-symbols-outlined text-sm">open_in_new</span>
-            <span>Voir la boutique</span>
-          </a>
+          <div class="flex flex-wrap items-center gap-2 shrink-0">
+            <a href="/" target="_blank" class="px-3.5 py-2 rounded-full bg-white text-[#0d7252] border border-emerald-200 text-xs font-bold hover:bg-emerald-50 transition-colors shadow-sm flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-sm">storefront</span>
+              <span>Accueil</span>
+            </a>
+            <a href="/categories" target="_blank" class="px-3.5 py-2 rounded-full bg-white text-[#0d7252] border border-emerald-200 text-xs font-bold hover:bg-emerald-50 transition-colors shadow-sm flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-sm">grid_view</span>
+              <span>Catégories</span>
+            </a>
+            <a href="/tracking" target="_blank" class="px-3.5 py-2 rounded-full bg-white text-[#0d7252] border border-emerald-200 text-xs font-bold hover:bg-emerald-50 transition-colors shadow-sm flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-sm">route</span>
+              <span>Suivi Colis</span>
+            </a>
+            <a href="/about" target="_blank" class="px-3.5 py-2 rounded-full bg-white text-[#0d7252] border border-emerald-200 text-xs font-bold hover:bg-emerald-50 transition-colors shadow-sm flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-sm">corporate_fare</span>
+              <span>À propos</span>
+            </a>
+          </div>
         </div>
 
         <!-- 1. HERO SECTION CARD -->
@@ -289,8 +358,8 @@
             <div>
               <label class="block font-bold text-xs text-gray-700 mb-1">Bouton d'appel à l'action (CTA)</label>
               <div class="grid grid-cols-2 gap-2">
-                <input id="cms-hero-cta-text" type="text" class="bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#0d7252]" placeholder="Texte du bouton"/>
-                <input id="cms-hero-cta-link" type="text" class="bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#0d7252]" placeholder="#products-section"/>
+                <input id="cms-hero-cta-text" type="text" class="bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#0d7252]" placeholder="Découvrir"/>
+                <input id="cms-hero-cta-link" type="text" class="bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#0d7252]" placeholder="/categories"/>
               </div>
             </div>
           </div>
@@ -736,6 +805,111 @@
           </div>
         </div>
 
+        <!-- 9. ABOUT US PAGE SECTION CARD -->
+        <div class="bg-white rounded-3xl p-5 sm:p-6 border border-gray-100 shadow-sm space-y-5">
+          <div class="flex items-center justify-between pb-3 border-b border-gray-100">
+            <div class="flex items-center gap-2.5">
+              <span class="w-8 h-8 rounded-xl bg-emerald-50 text-[#0d7252] flex items-center justify-center font-bold text-sm">9</span>
+              <div>
+                <h4 class="font-extrabold text-sm sm:text-base text-gray-900">Page « À Propos de Nous » (/about)</h4>
+                <p class="text-[11px] text-gray-400">Personnalisez l'histoire, la mission, les engagements et les chiffres clés présentés à vos clients.</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <a href="/about" target="_blank" class="hidden sm:inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold text-[#0d7252] bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition-colors">
+                <span class="material-symbols-outlined text-sm">open_in_new</span>
+                <span>Aperçu en direct</span>
+              </a>
+              <span id="cms-about-saved" class="hidden text-xs font-bold text-green-700 bg-green-50 px-3 py-1 rounded-full border border-green-200 flex items-center gap-1">
+                <span class="material-symbols-outlined text-sm">check_circle</span>
+                <span>Enregistré !</span>
+              </span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block font-bold text-xs text-gray-700 mb-1">Badge d'en-tête</label>
+              <input id="cms-about-badge" type="text" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-[#0d7252]" placeholder="✦ Notre Histoire &amp; Notre Mission"/>
+            </div>
+            <div>
+              <label class="block font-bold text-xs text-gray-700 mb-1">Titre de l'histoire</label>
+              <input id="cms-about-story-title" type="text" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-[#0d7252]" placeholder="Pourquoi avons-nous créé WuazeShop ?"/>
+            </div>
+          </div>
+
+          <div>
+            <label class="block font-bold text-xs text-gray-700 mb-1">Grand Titre de la page</label>
+            <input id="cms-about-title" type="text" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-[#0d7252]" placeholder="Le pont high-tech direct entre Shenzhen et le Gabon"/>
+          </div>
+
+          <div>
+            <label class="block font-bold text-xs text-gray-700 mb-1">Sous-titre / Introduction</label>
+            <textarea id="cms-about-subtitle" rows="2" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-[#0d7252] resize-none" placeholder="WuazeShop révolutionne l'accès aux nouvelles technologies au Gabon..."></textarea>
+          </div>
+
+          <div class="space-y-3">
+            <label class="block font-bold text-xs text-gray-700">Histoire &amp; Genèse (3 paragraphes explicatifs)</label>
+            <div>
+              <span class="text-[10px] font-bold text-gray-400 block mb-1 uppercase">Paragraphe 1 : Constat et problématique locale</span>
+              <textarea id="cms-about-story-p1" rows="2" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-[#0d7252] resize-none" placeholder="Pendant des années, acquérir un smartphone haut de gamme au Gabon..."></textarea>
+            </div>
+            <div>
+              <span class="text-[10px] font-bold text-gray-400 block mb-1 uppercase">Paragraphe 2 : Notre solution et mission</span>
+              <textarea id="cms-about-story-p2" rows="2" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-[#0d7252] resize-none" placeholder="WuazeShop est né d'une conviction inébranlable..."></textarea>
+            </div>
+            <div>
+              <span class="text-[10px] font-bold text-gray-400 block mb-1 uppercase">Paragraphe 3 : Liaison directe Shenzhen - Libreville</span>
+              <textarea id="cms-about-story-p3" rows="2" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-[#0d7252] resize-none" placeholder="En établissant une présence directe à Shenzhen et Libreville..."></textarea>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block font-bold text-xs text-gray-700 mb-1">Titre de la section Valeurs &amp; Mission</label>
+              <input id="cms-about-mission-title" type="text" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-[#0d7252]" placeholder="Pourquoi nous faire confiance ?"/>
+            </div>
+            <div>
+              <label class="block font-bold text-xs text-gray-700 mb-1">Sous-texte de mission</label>
+              <input id="cms-about-mission-text" type="text" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-[#0d7252]" placeholder="Nous bâtissons la relation client la plus transparente..."/>
+            </div>
+          </div>
+
+          <!-- 4 Stats -->
+          <div>
+            <label class="block font-bold text-xs text-gray-700 mb-2">Les 4 Chiffres Clés (Statistiques)</label>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              <div class="p-3 bg-gray-50 rounded-xl border border-gray-200 space-y-1">
+                <span class="text-[10px] font-bold text-gray-400 uppercase">Chiffre 1</span>
+                <input id="cms-about-stat1-num" type="text" class="w-full bg-white border border-gray-200 rounded-lg px-2.5 py-1 text-xs font-bold" placeholder="100%"/>
+                <input id="cms-about-stat1-label" type="text" class="w-full bg-white border border-gray-200 rounded-lg px-2.5 py-1 text-[11px] text-gray-500" placeholder="Appareils neufs &amp; contrôlés"/>
+              </div>
+              <div class="p-3 bg-gray-50 rounded-xl border border-gray-200 space-y-1">
+                <span class="text-[10px] font-bold text-gray-400 uppercase">Chiffre 2</span>
+                <input id="cms-about-stat2-num" type="text" class="w-full bg-white border border-gray-200 rounded-lg px-2.5 py-1 text-xs font-bold" placeholder="7-10 j"/>
+                <input id="cms-about-stat2-label" type="text" class="w-full bg-white border border-gray-200 rounded-lg px-2.5 py-1 text-[11px] text-gray-500" placeholder="Délai moyen fret aérien"/>
+              </div>
+              <div class="p-3 bg-gray-50 rounded-xl border border-gray-200 space-y-1">
+                <span class="text-[10px] font-bold text-gray-400 uppercase">Chiffre 3</span>
+                <input id="cms-about-stat3-num" type="text" class="w-full bg-white border border-gray-200 rounded-lg px-2.5 py-1 text-xs font-bold" placeholder="1 An"/>
+                <input id="cms-about-stat3-label" type="text" class="w-full bg-white border border-gray-200 rounded-lg px-2.5 py-1 text-[11px] text-gray-500" placeholder="Garantie constructeur complète"/>
+              </div>
+              <div class="p-3 bg-gray-50 rounded-xl border border-gray-200 space-y-1">
+                <span class="text-[10px] font-bold text-gray-400 uppercase">Chiffre 4</span>
+                <input id="cms-about-stat4-num" type="text" class="w-full bg-white border border-gray-200 rounded-lg px-2.5 py-1 text-xs font-bold" placeholder="+1 500"/>
+                <input id="cms-about-stat4-label" type="text" class="w-full bg-white border border-gray-200 rounded-lg px-2.5 py-1 text-[11px] text-gray-500" placeholder="Clients livrés partout au Gabon"/>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-2 flex justify-end">
+            <button id="save-cms-about-btn" type="button" class="py-2.5 px-6 rounded-full bg-[#0d7252] hover:bg-[#08553d] text-white text-xs font-bold flex items-center gap-1.5 shadow-md transition-all cursor-pointer">
+              <span class="material-symbols-outlined text-sm">save</span>
+              <span>Enregistrer la Page À Propos</span>
+            </button>
+          </div>
+        </div>
+
       </div>
 
     </section>
@@ -743,7 +917,7 @@
   </main>
 
   <!-- Mobile Bottom Sticky Navigation -->
-  <div id="admin-mobile-nav" class="hidden fixed bottom-0 inset-x-0 z-30 bg-white/95 backdrop-blur-md border-t border-gray-200 py-2 px-4 flex md:hidden items-center justify-around shadow-lg">
+  <div id="admin-mobile-nav" class="hidden fixed bottom-0 inset-x-0 z-30 bg-white/95 backdrop-blur-md border-t border-gray-200 py-2 px-2 sm:px-4 flex md:hidden items-center justify-around shadow-lg">
     <button id="mobile-tab-orders-btn" class="flex flex-col items-center gap-0.5 text-[#0d7252] text-[10px] font-bold">
       <span class="material-symbols-outlined text-xl">receipt_long</span>
       <span>Commandes</span>
@@ -751,6 +925,10 @@
     <button id="mobile-tab-products-btn" class="flex flex-col items-center gap-0.5 text-gray-400 text-[10px] font-medium">
       <span class="material-symbols-outlined text-xl">inventory_2</span>
       <span>Catalogue</span>
+    </button>
+    <button id="mobile-tab-categories-btn" class="flex flex-col items-center gap-0.5 text-gray-400 text-[10px] font-medium">
+      <span class="material-symbols-outlined text-xl">category</span>
+      <span>Catégories</span>
     </button>
     <button id="mobile-tab-cms-btn" class="flex flex-col items-center gap-0.5 text-gray-400 text-[10px] font-medium">
       <span class="material-symbols-outlined text-xl">web</span>
@@ -811,24 +989,106 @@
           </div>
 
           <div>
-            <label class="block font-bold text-gray-700 mb-1">Prix de Vente (FCFA) *</label>
-            <input id="prod-price" required min="1000" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:border-[#0d7252] focus:bg-white" placeholder="Ex: 680000" type="number"/>
+            <label class="block font-bold text-gray-700 mb-1">
+              <span>Prix de Vente Normal (FCFA) *</span>
+              <span id="prod-base-price-help" class="text-[10px] text-gray-400 font-normal ml-1">(prix de référence)</span>
+            </label>
+            <input id="prod-price" required min="500" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-bold text-gray-900 focus:outline-none focus:border-[#0d7252] focus:bg-white" placeholder="Ex: 850000" type="number"/>
           </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-          <div>
-            <label class="block font-bold text-gray-700 mb-1">Prix Barré Promo (FCFA, optionnel)</label>
-            <input id="prod-original-price" min="1000" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:border-[#0d7252] focus:bg-white" placeholder="Ex: 750000" type="number"/>
-          </div>
+        <!-- Interactive Remise / Réduction Section -->
+        <div class="rounded-2xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50/50 via-white to-emerald-50/30 p-4 space-y-3 shadow-2xs">
+          
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <div class="w-7 h-7 rounded-lg bg-[#0d7252] text-white flex items-center justify-center shadow-xs">
+                <span class="material-symbols-outlined text-sm">local_offer</span>
+              </div>
+              <div>
+                <h4 class="text-xs font-extrabold text-gray-900">Remise &amp; Réduction Commerciale</h4>
+                <p class="text-[10px] text-gray-500">Appliquez un prix barré et un badge de réduction (-15%, -20%...) sur la vitrine.</p>
+              </div>
+            </div>
 
-          <div>
-            <label class="block font-bold text-gray-700 mb-1">Disponibilité</label>
-            <label class="flex items-center gap-2 mt-2 cursor-pointer">
-              <input id="prod-instock" type="checkbox" checked class="w-4 h-4 text-[#0d7252] rounded"/>
-              <span class="text-xs text-gray-700">Disponible en stock / import Chine</span>
+            <!-- Discount Active Toggle -->
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input id="prod-discount-enable" type="checkbox" class="sr-only peer"/>
+              <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#0d7252]"></div>
+              <span id="prod-discount-toggle-label" class="ml-2 text-xs font-bold text-gray-500 peer-checked:text-[#0d7252]">Sans remise</span>
             </label>
           </div>
+
+          <!-- Hidden storage for original price -->
+          <input type="hidden" id="prod-original-price" value=""/>
+
+          <!-- Interactive Discount Fields Container (Shown when toggle checked) -->
+          <div id="prod-discount-fields" class="hidden space-y-3 pt-2.5 border-t border-emerald-100/80">
+            
+            <!-- Quick Percentage Pills -->
+            <div>
+              <span class="block text-[10px] font-extrabold text-gray-600 uppercase tracking-wider mb-1.5">Taux de remise rapide :</span>
+              <div class="flex flex-wrap gap-1.5">
+                <button type="button" onclick="applyDiscountPreset(5)" class="discount-preset-btn px-2.5 py-1 rounded-lg text-xs font-bold bg-white hover:bg-emerald-100 hover:text-[#0d7252] border border-emerald-200 text-gray-700 transition-all">-5%</button>
+                <button type="button" onclick="applyDiscountPreset(10)" class="discount-preset-btn px-2.5 py-1 rounded-lg text-xs font-bold bg-white hover:bg-emerald-100 hover:text-[#0d7252] border border-emerald-200 text-gray-700 transition-all">-10%</button>
+                <button type="button" onclick="applyDiscountPreset(15)" class="discount-preset-btn px-2.5 py-1 rounded-lg text-xs font-bold bg-white hover:bg-emerald-100 hover:text-[#0d7252] border border-emerald-200 text-gray-700 transition-all">-15%</button>
+                <button type="button" onclick="applyDiscountPreset(20)" class="discount-preset-btn px-2.5 py-1 rounded-lg text-xs font-bold bg-white hover:bg-emerald-100 hover:text-[#0d7252] border border-emerald-200 text-gray-700 transition-all">-20%</button>
+                <button type="button" onclick="applyDiscountPreset(25)" class="discount-preset-btn px-2.5 py-1 rounded-lg text-xs font-bold bg-white hover:bg-emerald-100 hover:text-[#0d7252] border border-emerald-200 text-gray-700 transition-all">-25%</button>
+                <button type="button" onclick="applyDiscountPreset(30)" class="discount-preset-btn px-2.5 py-1 rounded-lg text-xs font-bold bg-white hover:bg-emerald-100 hover:text-[#0d7252] border border-emerald-200 text-gray-700 transition-all">-30%</button>
+                <button type="button" onclick="applyDiscountPreset(50)" class="discount-preset-btn px-2.5 py-1 rounded-lg text-xs font-bold bg-white hover:bg-emerald-100 hover:text-[#0d7252] border border-emerald-200 text-gray-700 transition-all">-50%</button>
+              </div>
+            </div>
+
+            <!-- 3 Inputs: Regular Price (original), Discount %, Discounted Price -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label class="block text-[11px] font-bold text-gray-700 mb-1">Prix Barré / Normal (FCFA)</label>
+                <input id="prod-discount-regular" min="500" class="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none focus:border-[#0d7252]" placeholder="Ex: 850000" type="number"/>
+              </div>
+
+              <div>
+                <label class="block text-[11px] font-bold text-gray-700 mb-1">Pourcentage de remise (%)</label>
+                <div class="relative">
+                  <input id="prod-discount-percent" min="1" max="99" class="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-xs font-bold text-[#0d7252] focus:outline-none focus:border-[#0d7252]" placeholder="Ex: 15" type="number"/>
+                  <span class="absolute right-3 top-2 text-xs font-bold text-gray-400">%</span>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-[11px] font-bold text-gray-700 mb-1">Nouveau Prix Réduit (FCFA)</label>
+                <input id="prod-discount-final" min="500" class="w-full bg-white border border-emerald-300 rounded-xl px-3 py-2 text-xs font-extrabold text-[#0d7252] focus:outline-none focus:border-[#0d7252] bg-emerald-50/30" placeholder="Ex: 722500" type="number"/>
+              </div>
+            </div>
+
+            <!-- Live Preview Box -->
+            <div id="prod-discount-preview-box" class="bg-white rounded-xl p-3 border border-emerald-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+              <div class="flex items-center gap-2">
+                <span id="prod-discount-badge-preview" class="bg-[#10b981] text-white text-[11px] font-extrabold px-2.5 py-0.5 rounded-full shadow-2xs">-15% PROMO</span>
+                <div class="text-xs">
+                  <span class="text-gray-400 line-through mr-1.5" id="prod-discount-strike-preview">850 000 FCFA</span>
+                  <span class="font-black text-[#0d7252]" id="prod-discount-price-preview">722 500 FCFA</span>
+                </div>
+              </div>
+
+              <div class="text-right flex items-center gap-3">
+                <span class="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full" id="prod-discount-savings-preview">Économie : 127 500 FCFA</span>
+                <button type="button" onclick="cancelProductDiscount()" class="text-[11px] text-red-600 hover:text-red-700 font-bold hover:underline cursor-pointer flex items-center gap-0.5">
+                  <span class="material-symbols-outlined text-xs">close</span>
+                  <span>Retirer remise</span>
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+        <div>
+          <label class="block font-bold text-gray-700 mb-1">Disponibilité</label>
+          <label class="flex items-center gap-2 cursor-pointer bg-gray-50 p-2.5 rounded-xl border border-gray-200">
+            <input id="prod-instock" type="checkbox" checked class="w-4 h-4 text-[#0d7252] rounded"/>
+            <span class="text-xs text-gray-700 font-semibold">Disponible en stock / import Chine</span>
+          </label>
         </div>
 
         <div>
@@ -879,14 +1139,84 @@
           </div>
         </div>
 
-        <div>
-          <label class="block font-bold text-gray-700 mb-1">Spécifications clés (séparées par des virgules)</label>
-          <input id="prod-specs" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:border-[#0d7252] focus:bg-white" placeholder="Ex: 512 Go, 16 Go RAM, Écran AMOLED 120Hz" type="text"/>
+        <!-- Interactive Technical Specs (Characteristics) Builder -->
+        <div class="space-y-2">
+          <label class="block font-bold text-gray-700">Caractéristiques Techniques &amp; Spécifications</label>
+          <div class="flex gap-2">
+            <input id="spec-input-custom" class="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-[#0d7252] focus:bg-white" placeholder="Ex: Puce A17 Pro, Écran 120Hz, 512 Go SSD..." type="text"/>
+            <button type="button" id="add-spec-btn" class="px-3.5 py-2 rounded-xl bg-emerald-50 text-[#0d7252] border border-emerald-200 hover:bg-emerald-100 text-xs font-bold transition-colors shrink-0">
+              + Ajouter
+            </button>
+          </div>
+          
+          <!-- Suggested Quick Tags -->
+          <div class="flex flex-wrap items-center gap-1.5 pt-1">
+            <span class="text-[10px] text-gray-400 font-semibold mr-1">Suggestions rapides :</span>
+            <button type="button" onclick="addSuggestedSpec('Puce A17 Pro')" class="px-2 py-0.5 rounded-full bg-gray-100 hover:bg-emerald-50 text-[10px] font-semibold text-gray-600 hover:text-[#0d7252] transition-colors">+ Puce A17 Pro</button>
+            <button type="button" onclick="addSuggestedSpec('Écran AMOLED 120Hz')" class="px-2 py-0.5 rounded-full bg-gray-100 hover:bg-emerald-50 text-[10px] font-semibold text-gray-600 hover:text-[#0d7252] transition-colors">+ 120Hz AMOLED</button>
+            <button type="button" onclick="addSuggestedSpec('Autonomie 24h')" class="px-2 py-0.5 rounded-full bg-gray-100 hover:bg-emerald-50 text-[10px] font-semibold text-gray-600 hover:text-[#0d7252] transition-colors">+ Autonomie 24h</button>
+            <button type="button" onclick="addSuggestedSpec('Charge Rapide 65W')" class="px-2 py-0.5 rounded-full bg-gray-100 hover:bg-emerald-50 text-[10px] font-semibold text-gray-600 hover:text-[#0d7252] transition-colors">+ Charge 65W</button>
+            <button type="button" onclick="addSuggestedSpec('Garantie 1 An')" class="px-2 py-0.5 rounded-full bg-gray-100 hover:bg-emerald-50 text-[10px] font-semibold text-gray-600 hover:text-[#0d7252] transition-colors">+ Garantie 1 An</button>
+          </div>
+
+          <!-- Active Specs Badges Container -->
+          <div id="active-specs-container" class="flex flex-wrap gap-1.5 min-h-[32px] p-2 bg-gray-50/80 rounded-xl border border-gray-100">
+            <!-- Dynamically populated chips with remove buttons -->
+          </div>
+          <input type="hidden" id="prod-specs" value=""/>
         </div>
 
-        <div>
-          <label class="block font-bold text-gray-700 mb-1">Couleurs disponibles (codes hexa séparés par des virgules)</label>
-          <input id="prod-colors" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:border-[#0d7252] focus:bg-white" placeholder="Ex: #1e293b, #f1f5f9, #10b981" type="text"/>
+        <!-- Interactive Color Variants Builder -->
+        <div class="space-y-2">
+          <label class="block font-bold text-gray-700">Couleurs &amp; Finitions Disponibles</label>
+          
+          <!-- Quick Palette Presets -->
+          <div class="flex flex-wrap items-center gap-1.5 pt-0.5">
+            <span class="text-[10px] text-gray-400 font-semibold mr-1">Palette rapide :</span>
+            <button type="button" onclick="addColorPreset('#9c9589', 'Titane Naturel')" class="flex items-center gap-1 px-2 py-1 rounded-full bg-gray-100 hover:bg-emerald-50 text-[11px] font-medium text-gray-700 border border-gray-200 transition-colors">
+              <span class="w-3 h-3 rounded-full bg-[#9c9589] border border-black/10"></span>
+              <span>Titane</span>
+            </button>
+            <button type="button" onclick="addColorPreset('#1e1e1e', 'Noir Sidéral')" class="flex items-center gap-1 px-2 py-1 rounded-full bg-gray-100 hover:bg-emerald-50 text-[11px] font-medium text-gray-700 border border-gray-200 transition-colors">
+              <span class="w-3 h-3 rounded-full bg-[#1e1e1e]"></span>
+              <span>Noir</span>
+            </button>
+            <button type="button" onclick="addColorPreset('#293644', 'Bleu Titane')" class="flex items-center gap-1 px-2 py-1 rounded-full bg-gray-100 hover:bg-emerald-50 text-[11px] font-medium text-gray-700 border border-gray-200 transition-colors">
+              <span class="w-3 h-3 rounded-full bg-[#293644]"></span>
+              <span>Bleu</span>
+            </button>
+            <button type="button" onclick="addColorPreset('#d2d4d7', 'Argent')" class="flex items-center gap-1 px-2 py-1 rounded-full bg-gray-100 hover:bg-emerald-50 text-[11px] font-medium text-gray-700 border border-gray-200 transition-colors">
+              <span class="w-3 h-3 rounded-full bg-[#d2d4d7] border border-black/10"></span>
+              <span>Argent</span>
+            </button>
+            <button type="button" onclick="addColorPreset('#f0e4d3', 'Or / Starlight')" class="flex items-center gap-1 px-2 py-1 rounded-full bg-gray-100 hover:bg-emerald-50 text-[11px] font-medium text-gray-700 border border-gray-200 transition-colors">
+              <span class="w-3 h-3 rounded-full bg-[#f0e4d3] border border-black/10"></span>
+              <span>Or</span>
+            </button>
+            <button type="button" onclick="addColorPreset('#f97316', 'Orange Alpine')" class="flex items-center gap-1 px-2 py-1 rounded-full bg-gray-100 hover:bg-emerald-50 text-[11px] font-medium text-gray-700 border border-gray-200 transition-colors">
+              <span class="w-3 h-3 rounded-full bg-[#f97316]"></span>
+              <span>Orange</span>
+            </button>
+            <button type="button" onclick="addColorPreset('#ffffff', 'Blanc Pur')" class="flex items-center gap-1 px-2 py-1 rounded-full bg-gray-100 hover:bg-emerald-50 text-[11px] font-medium text-gray-700 border border-gray-200 transition-colors">
+              <span class="w-3 h-3 rounded-full bg-white border border-gray-300"></span>
+              <span>Blanc</span>
+            </button>
+          </div>
+
+          <!-- Custom Color Picker Bar -->
+          <div class="flex items-center gap-2 pt-1">
+            <input type="color" id="custom-color-picker" value="#0d7252" class="w-8 h-8 rounded-xl border border-gray-200 cursor-pointer p-0.5 bg-white shrink-0"/>
+            <input type="text" id="custom-color-name" placeholder="Nom ou code hexa (ex: Vert Émeraude ou #0d7252)" class="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#0d7252] focus:bg-white"/>
+            <button type="button" id="add-custom-color-btn" class="px-3.5 py-2 rounded-xl bg-[#0d7252] hover:bg-[#08553d] text-white text-xs font-bold transition-colors shrink-0">
+              + Ajouter
+            </button>
+          </div>
+
+          <!-- Active Colors Badges Container -->
+          <div id="active-colors-container" class="flex flex-wrap gap-2 min-h-[36px] p-2.5 bg-gray-50/80 rounded-xl border border-gray-100">
+            <!-- Dynamically populated color pills with preview circle & remove button -->
+          </div>
+          <input type="hidden" id="prod-colors" value=""/>
         </div>
 
         <div class="pt-3 flex gap-2.5">
@@ -894,6 +1224,79 @@
             Enregistrer le produit
           </button>
           <button type="button" id="cancel-product-modal-btn" class="px-5 py-3 rounded-full bg-gray-100 text-gray-600 font-semibold hover:bg-gray-200 transition-colors">
+            Annuler
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== CATEGORY EDIT/CREATE MODAL ==================== -->
+  <div id="category-modal-overlay" class="modal-overlay hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl w-full max-w-lg p-6 sm:p-7 shadow-2xl border border-gray-100 max-h-[90vh] overflow-y-auto space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-gray-100">
+        <div>
+          <h3 id="category-modal-title" class="font-extrabold text-base sm:text-lg text-gray-900">Modifier le Rayon</h3>
+          <p class="text-xs text-gray-500">Personnalisez la page dédiée de cette catégorie</p>
+        </div>
+        <button id="close-category-modal-btn" type="button" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 transition-colors cursor-pointer">
+          <span class="material-symbols-outlined text-base">close</span>
+        </button>
+      </div>
+
+      <form id="category-form" class="space-y-4 text-xs">
+        <input type="hidden" id="category-edit-id" value=""/>
+
+        <div>
+          <label class="block font-bold text-gray-700 mb-1">Nom du Rayon *</label>
+          <input id="cat-form-name" required type="text" placeholder="Ex: Smartphones & Tablettes" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2.5 text-xs text-gray-900 focus:outline-none focus:border-[#0d7252] focus:bg-white"/>
+        </div>
+
+        <div>
+          <label class="block font-bold text-gray-700 mb-1">Identifiant URL (Slug) *</label>
+          <div class="flex items-center bg-gray-50 border border-gray-200 rounded-xl px-3 py-2">
+            <span class="text-gray-400 font-mono text-[11px] mr-1">/category/</span>
+            <input id="cat-form-slug" required type="text" placeholder="smartphones" class="w-full bg-transparent font-mono text-xs text-gray-900 focus:outline-none"/>
+          </div>
+          <p class="text-[10px] text-gray-400 mt-1">Caractères minuscules, chiffres et tirets uniquement.</p>
+        </div>
+
+        <div>
+          <label class="block font-bold text-gray-700 mb-1">Icône Material Symbols</label>
+          <div class="flex items-center gap-2 mb-2">
+            <input id="cat-form-icon" type="text" placeholder="smartphone" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-[#0d7252]"/>
+            <span id="cat-icon-preview" class="w-9 h-9 rounded-xl bg-emerald-50 text-[#0d7252] flex items-center justify-center border border-emerald-200/60 shrink-0">
+              <span class="material-symbols-outlined text-xl">category</span>
+            </span>
+          </div>
+          <!-- Quick Icon Selector Pills -->
+          <div class="flex flex-wrap gap-1.5 pt-1">
+            <span class="text-[10px] text-gray-400 font-medium">Suggestions :</span>
+            <button type="button" onclick="window.setCategoryIcon && window.setCategoryIcon('smartphone')" class="px-2 py-0.5 rounded-full bg-gray-100 hover:bg-emerald-50 text-[10px] font-bold text-gray-600 transition-colors">smartphone</button>
+            <button type="button" onclick="window.setCategoryIcon && window.setCategoryIcon('laptop_mac')" class="px-2 py-0.5 rounded-full bg-gray-100 hover:bg-emerald-50 text-[10px] font-bold text-gray-600 transition-colors">laptop_mac</button>
+            <button type="button" onclick="window.setCategoryIcon && window.setCategoryIcon('tv')" class="px-2 py-0.5 rounded-full bg-gray-100 hover:bg-emerald-50 text-[10px] font-bold text-gray-600 transition-colors">tv</button>
+            <button type="button" onclick="window.setCategoryIcon && window.setCategoryIcon('headphones')" class="px-2 py-0.5 rounded-full bg-gray-100 hover:bg-emerald-50 text-[10px] font-bold text-gray-600 transition-colors">headphones</button>
+            <button type="button" onclick="window.setCategoryIcon && window.setCategoryIcon('watch')" class="px-2 py-0.5 rounded-full bg-gray-100 hover:bg-emerald-50 text-[10px] font-bold text-gray-600 transition-colors">watch</button>
+            <button type="button" onclick="window.setCategoryIcon && window.setCategoryIcon('cable')" class="px-2 py-0.5 rounded-full bg-gray-100 hover:bg-emerald-50 text-[10px] font-bold text-gray-600 transition-colors">cable</button>
+            <button type="button" onclick="window.setCategoryIcon && window.setCategoryIcon('tablet')" class="px-2 py-0.5 rounded-full bg-gray-100 hover:bg-emerald-50 text-[10px] font-bold text-gray-600 transition-colors">tablet</button>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-gray-700 mb-1">Description (Affichée en haut de la page du rayon)</label>
+          <textarea id="cat-form-description" rows="3" placeholder="Présentation affichée sur la page dédiée du rayon..." class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-[#0d7252] focus:bg-white resize-none"></textarea>
+        </div>
+
+        <div>
+          <label class="block font-bold text-gray-700 mb-1">Bannière / Illustration (Optionnel)</label>
+          <input id="cat-form-banner" type="text" placeholder="URL d'image (/images/... ou https://...)" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-[#0d7252] focus:bg-white"/>
+        </div>
+
+        <div class="pt-3 flex gap-2.5">
+          <button type="submit" class="flex-1 py-3 rounded-full bg-[#0d7252] hover:bg-[#08553d] text-white font-bold text-xs shadow-md transition-all cursor-pointer">
+            Enregistrer le rayon
+          </button>
+          <button type="button" id="cancel-category-modal-btn" class="px-5 py-3 rounded-full bg-gray-100 text-gray-600 font-semibold hover:bg-gray-200 transition-colors cursor-pointer">
             Annuler
           </button>
         </div>
@@ -924,13 +1327,13 @@
 
       <div class="space-y-3.5">
         <div>
-          <label class="block text-xs font-bold text-gray-700 mb-1">Statut d'Expédition (Chine &rarr; Gabon)</label>
+          <label class="block text-xs font-bold text-gray-700 mb-1">Statut d'Expédition Logistique (Chine &rarr; Gabon)</label>
           <select id="update-fulfillment-status" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:border-[#0d7252] focus:bg-white">
-            <option value="PENDING_CLEARANCE">En attente de confirmation</option>
-            <option value="IN_PREPARATION_CHINA">En préparation en Chine (Achat usine)</option>
-            <option value="SHIPPED_GABON">Expédié / En vol cargo vers Gabon</option>
-            <option value="ARRIVED_LIBREVILLE">Arrivé à Libreville (Prêt pour livraison)</option>
-            <option value="DELIVERED">Livré au client</option>
+            <option value="PENDING_CLEARANCE">Étape 1 : Commande confirmée (En attente d'achat Chine)</option>
+            <option value="IN_PREPARATION_CHINA">Étape 2 : En préparation en Chine (Achat usine &amp; contrôle qualité)</option>
+            <option value="SHIPPED_GABON">Étape 3 : Fret cargo aérien (En vol Chine &rarr; Gabon)</option>
+            <option value="ARRIVED_LIBREVILLE">Étape 4 : Arrivé à Libreville (Dédouanement aéroport Léon Mba)</option>
+            <option value="DELIVERED">Étape 5 : Livré au client (Remise en main propre)</option>
           </select>
         </div>
 
@@ -947,6 +1350,176 @@
       <button id="save-status-btn" class="w-full py-3 rounded-full bg-[#0d7252] hover:bg-[#08553d] text-white font-bold text-xs sm:text-sm shadow-md transition-all">
         Appliquer les modifications
       </button>
+    </div>
+  <!-- ==================== QUICK DISCOUNT MODAL (REMISE RAPIDE PRODUIT) ==================== -->
+  <div id="quick-discount-modal-overlay" class="modal-overlay hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl border border-gray-100 overflow-hidden flex flex-col max-h-[90vh]">
+      
+      <!-- Header -->
+      <div class="p-5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-emerald-50/60 to-white">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-[#0d7252] text-white flex items-center justify-center shadow-md">
+            <span class="material-symbols-outlined text-lg">local_offer</span>
+          </div>
+          <div>
+            <h3 class="font-extrabold text-sm sm:text-base text-gray-900">Appliquer une Réduction</h3>
+            <p class="text-[11px] text-gray-400">Modifier la remise pour cet article en direct.</p>
+          </div>
+        </div>
+        <button id="close-quick-discount-modal-btn" type="button" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 flex items-center justify-center transition-colors">
+          <span class="material-symbols-outlined text-base">close</span>
+        </button>
+      </div>
+
+      <!-- Body -->
+      <div class="p-5 space-y-4 overflow-y-auto">
+        <input type="hidden" id="quick-discount-prod-id" value=""/>
+        
+        <!-- Product Recap -->
+        <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-2xl border border-gray-100">
+          <img id="quick-discount-prod-img" src="" class="w-12 h-12 rounded-xl object-contain bg-white p-1 border border-gray-100" alt="Produit"/>
+          <div class="flex-1 min-w-0">
+            <h4 id="quick-discount-prod-title" class="text-xs font-bold text-gray-900 truncate">Titre du produit</h4>
+            <div class="flex items-center gap-2 mt-0.5">
+              <span class="text-[11px] text-gray-500">Prix catalogue :</span>
+              <span id="quick-discount-prod-current-price" class="text-xs font-extrabold text-[#0d7252]">0 FCFA</span>
+              <span id="quick-discount-current-badge" class="hidden text-[10px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Presets -->
+        <div>
+          <label class="block text-[11px] font-bold text-gray-700 mb-1.5">Taux de remise rapide :</label>
+          <div class="grid grid-cols-4 gap-1.5">
+            <button type="button" onclick="setQuickDiscountPct(5)" class="quick-pct-btn py-1.5 px-2 rounded-xl text-xs font-bold bg-gray-100 hover:bg-emerald-50 hover:text-[#0d7252] hover:border-emerald-300 border border-transparent transition-all">-5%</button>
+            <button type="button" onclick="setQuickDiscountPct(10)" class="quick-pct-btn py-1.5 px-2 rounded-xl text-xs font-bold bg-gray-100 hover:bg-emerald-50 hover:text-[#0d7252] hover:border-emerald-300 border border-transparent transition-all">-10%</button>
+            <button type="button" onclick="setQuickDiscountPct(15)" class="quick-pct-btn py-1.5 px-2 rounded-xl text-xs font-bold bg-gray-100 hover:bg-emerald-50 hover:text-[#0d7252] hover:border-emerald-300 border border-transparent transition-all">-15%</button>
+            <button type="button" onclick="setQuickDiscountPct(20)" class="quick-pct-btn py-1.5 px-2 rounded-xl text-xs font-bold bg-gray-100 hover:bg-emerald-50 hover:text-[#0d7252] hover:border-emerald-300 border border-transparent transition-all">-20%</button>
+            <button type="button" onclick="setQuickDiscountPct(25)" class="quick-pct-btn py-1.5 px-2 rounded-xl text-xs font-bold bg-gray-100 hover:bg-emerald-50 hover:text-[#0d7252] hover:border-emerald-300 border border-transparent transition-all">-25%</button>
+            <button type="button" onclick="setQuickDiscountPct(30)" class="quick-pct-btn py-1.5 px-2 rounded-xl text-xs font-bold bg-gray-100 hover:bg-emerald-50 hover:text-[#0d7252] hover:border-emerald-300 border border-transparent transition-all">-30%</button>
+            <button type="button" onclick="setQuickDiscountPct(40)" class="quick-pct-btn py-1.5 px-2 rounded-xl text-xs font-bold bg-gray-100 hover:bg-emerald-50 hover:text-[#0d7252] hover:border-emerald-300 border border-transparent transition-all">-40%</button>
+            <button type="button" onclick="setQuickDiscountPct(50)" class="quick-pct-btn py-1.5 px-2 rounded-xl text-xs font-bold bg-gray-100 hover:bg-emerald-50 hover:text-[#0d7252] hover:border-emerald-300 border border-transparent transition-all">-50%</button>
+          </div>
+        </div>
+
+        <!-- Custom Inputs -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[11px] font-bold text-gray-700 mb-1">Taux personnalisé (%)</label>
+            <input id="quick-discount-pct-input" type="number" min="1" max="99" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-xs font-bold text-[#0d7252] focus:outline-none focus:border-[#0d7252]" placeholder="Ex: 12"/>
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-gray-700 mb-1">Nouveau prix (FCFA)</label>
+            <input id="quick-discount-price-input" type="number" min="500" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-xs font-bold text-gray-900 focus:outline-none focus:border-[#0d7252]" placeholder="Calculé auto"/>
+          </div>
+        </div>
+
+        <!-- Live Preview -->
+        <div id="quick-discount-preview" class="p-3 bg-emerald-50 rounded-2xl border border-emerald-200 text-xs flex items-center justify-between">
+          <div>
+            <span class="text-gray-400 line-through text-[11px]" id="quick-preview-strike">0 FCFA</span>
+            <span class="font-extrabold text-sm text-[#0d7252] block" id="quick-preview-final">0 FCFA</span>
+          </div>
+          <span id="quick-preview-savings" class="text-[11px] font-bold text-[#0d7252] bg-white px-2.5 py-1 rounded-full shadow-2xs">Économie : 0 FCFA</span>
+        </div>
+      </div>
+
+      <!-- Footer Buttons -->
+      <div class="p-4 bg-gray-50 border-t border-gray-100 flex items-center justify-between gap-2">
+        <button id="quick-discount-remove-btn" type="button" class="py-2.5 px-4 rounded-full bg-white hover:bg-red-50 text-red-600 border border-red-200 text-xs font-bold transition-colors">
+          Supprimer la remise
+        </button>
+        <div class="flex items-center gap-2">
+          <button id="cancel-quick-discount-btn" type="button" class="py-2.5 px-4 rounded-full bg-white hover:bg-gray-100 text-gray-700 border border-gray-200 text-xs font-bold transition-colors">
+            Annuler
+          </button>
+          <button id="save-quick-discount-btn" type="button" class="py-2.5 px-5 rounded-full bg-[#0d7252] hover:bg-[#08553d] text-white text-xs font-bold shadow-md transition-all">
+            Appliquer
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==================== BATCH DISCOUNT MODAL (SOLDES / PROMO GROUPÉE) ==================== -->
+  <div id="batch-discount-modal-overlay" class="modal-overlay hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl w-full max-w-lg shadow-2xl border border-gray-100 overflow-hidden flex flex-col max-h-[90vh]">
+      
+      <!-- Header -->
+      <div class="p-5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-emerald-50/60 to-white">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-[#0d7252] text-white flex items-center justify-center shadow-md">
+            <span class="material-symbols-outlined text-lg">percent</span>
+          </div>
+          <div>
+            <h3 class="font-extrabold text-sm sm:text-base text-gray-900">Opération Soldes &amp; Remise Groupée</h3>
+            <p class="text-[11px] text-gray-400">Appliquez une remise instantanée sur tout un rayon ou la totalité du magasin.</p>
+          </div>
+        </div>
+        <button id="close-batch-discount-modal-btn" type="button" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 flex items-center justify-center transition-colors">
+          <span class="material-symbols-outlined text-base">close</span>
+        </button>
+      </div>
+
+      <!-- Body -->
+      <div class="p-5 space-y-4 overflow-y-auto">
+        <div>
+          <label class="block text-xs font-bold text-gray-700 mb-1.5">Rayon / Catégorie cible :</label>
+          <select id="batch-discount-category" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-semibold focus:outline-none focus:border-[#0d7252]">
+            <option value="all">🌟 Tous les articles du catalogue</option>
+            <option value="smartphones">📱 Smartphones &amp; Tablettes</option>
+            <option value="ordinateurs">💻 Ordinateurs &amp; Laptops</option>
+            <option value="televiseurs">📺 Téléviseurs &amp; Écrans 4K</option>
+            <option value="audio">🎧 Audio, Casques &amp; Écouteurs</option>
+            <option value="montres">⌚ Montres Connectées</option>
+            <option value="accessoires">🔌 Accessoires &amp; Câbles</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-gray-700 mb-1.5">Pourcentage de réduction à appliquer :</label>
+          <div class="grid grid-cols-4 gap-2 mb-2.5">
+            <button type="button" onclick="setBatchDiscountPct(5)" class="batch-pct-btn py-2 px-3 rounded-xl text-xs font-extrabold bg-gray-50 hover:bg-emerald-50 hover:text-[#0d7252] border border-gray-200 hover:border-emerald-300 transition-all">-5%</button>
+            <button type="button" onclick="setBatchDiscountPct(10)" class="batch-pct-btn py-2 px-3 rounded-xl text-xs font-extrabold bg-gray-50 hover:bg-emerald-50 hover:text-[#0d7252] border border-gray-200 hover:border-emerald-300 transition-all">-10%</button>
+            <button type="button" onclick="setBatchDiscountPct(15)" class="batch-pct-btn py-2 px-3 rounded-xl text-xs font-extrabold bg-gray-50 hover:bg-emerald-50 hover:text-[#0d7252] border border-gray-200 hover:border-emerald-300 transition-all">-15%</button>
+            <button type="button" onclick="setBatchDiscountPct(20)" class="batch-pct-btn py-2 px-3 rounded-xl text-xs font-extrabold bg-gray-50 hover:bg-emerald-50 hover:text-[#0d7252] border border-gray-200 hover:border-emerald-300 transition-all">-20%</button>
+          </div>
+          <div class="relative">
+            <input id="batch-discount-pct-input" type="number" min="1" max="99" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-bold text-[#0d7252] focus:outline-none focus:border-[#0d7252]" placeholder="Ou entrez un % sur mesure (ex: 12)"/>
+            <span class="absolute right-4 top-2.5 text-xs font-bold text-gray-400">% de réduction</span>
+          </div>
+        </div>
+
+        <div class="p-3.5 bg-emerald-50/70 rounded-2xl border border-emerald-200 text-xs text-gray-700 space-y-1">
+          <div class="font-bold flex items-center gap-1.5 text-[#0d7252]">
+            <span class="material-symbols-outlined text-base">info</span>
+            <span>Fonctionnement de l'opération :</span>
+          </div>
+          <p class="text-[11px] text-gray-600 leading-relaxed">
+            Chaque article ciblé conservera son prix actuel en prix barré (original_price), et son prix de vente sera automatiquement calculé avec la remise. Tous les badges promotionnels s'afficheront instantanément dans la vitrine publique.
+          </p>
+        </div>
+      </div>
+
+      <!-- Footer Buttons -->
+      <div class="p-4 bg-gray-50 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-2.5">
+        <button id="batch-discount-remove-all-btn" type="button" class="w-full sm:w-auto py-2.5 px-4 rounded-full bg-white hover:bg-red-50 text-red-600 border border-red-200 text-xs font-bold transition-colors flex items-center justify-center gap-1.5 cursor-pointer">
+          <span class="material-symbols-outlined text-sm">remove_circle_outline</span>
+          <span>Retirer toutes les remises</span>
+        </button>
+        <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+          <button id="cancel-batch-discount-btn" type="button" class="py-2.5 px-4 rounded-full bg-white hover:bg-gray-100 text-gray-700 border border-gray-200 text-xs font-bold transition-colors cursor-pointer">
+            Fermer
+          </button>
+          <button id="submit-batch-discount-btn" type="button" class="py-2.5 px-5 rounded-full bg-[#0d7252] hover:bg-[#08553d] text-white text-xs font-bold shadow-md transition-all flex items-center gap-1.5 cursor-pointer">
+            <span class="material-symbols-outlined text-sm">bolt</span>
+            <span>Appliquer l'opération</span>
+          </button>
+        </div>
+      </div>
+
     </div>
   </div>
 

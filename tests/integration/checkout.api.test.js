@@ -78,11 +78,21 @@ describe('Checkout API', () => {
     expect(res.body.error).toContain('non trouvée');
   });
 
-  it('serves interactive tracking section and search form on storefront', async () => {
+  it('navigates to dedicated parcel tracking page from storefront', async () => {
     const res = await request(app).get('/');
     expect(res.status).toBe(200);
-    expect(res.text).toContain('id="tracking-section"');
+    expect(res.text).toContain('/tracking');
+    expect(res.text).not.toContain('id="tracking-section"');
+  });
+
+  it('serves the dedicated parcel tracking page at /tracking and /suivi', async () => {
+    const res = await request(app).get('/tracking');
+    expect(res.status).toBe(200);
+    expect(res.headers['content-type']).toMatch(/html/);
     expect(res.text).toContain('id="tracking-search-form"');
     expect(res.text).toContain('Suivre mon Colis en Direct');
+
+    const suiviRes = await request(app).get('/suivi');
+    expect(suiviRes.status).toBe(200);
   });
 });

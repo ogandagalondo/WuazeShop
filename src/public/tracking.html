@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="fr" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Suivre mon Colis en Direct - WuazeShop High-Tech Gabon</title>
+  <meta name="description" content="Consultez l'acheminement en temps réel de votre commande high-tech entre Shenzhen (Chine) et Libreville (Gabon). Fret aérien, dédouanement et livraison."/>
+
+  <!-- Tailwind CSS & Google Fonts & Icons -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/css/style.css"/>
+
+  <style>
+    .drawer-closed {
+      transform: translateX(100%);
+    }
+    .drawer {
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+  </style>
+</head>
+<body class="bg-[#fbfcfd] text-gray-900 min-h-screen flex flex-col font-sans antialiased selection:bg-[#0d7252] selection:text-white pb-20 md:pb-0">
+
+  <!-- ==================== TOP ANNOUNCEMENT BAR ==================== -->
+  <div class="bg-[#04281c] text-emerald-100 text-[11px] sm:text-xs py-2 px-4 text-center font-medium border-b border-emerald-900/50 flex items-center justify-center gap-2">
+    <span class="inline-block w-2 h-2 rounded-full bg-[#10b981] animate-pulse"></span>
+    <span>🇨🇳 Import direct usine Shenzhen &rarr; 🇬🇦 Gabon | Fret cargo aérien inclus | Paiement sécurisé Mobile Money</span>
+  </div>
+
+  <!-- ==================== NAVBAR ==================== -->
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-gray-100 transition-all">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between gap-4">
+      
+      <!-- Left: Hamburger Button (Mobile/Tablet) & Brand Logo -->
+      <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+        <!-- Hamburger Menu Button -->
+        <button 
+          id="hamburger-menu-btn" 
+          type="button"
+          class="flex md:hidden items-center justify-center w-10 h-10 rounded-xl text-gray-700 hover:text-[#0d7252] hover:bg-emerald-50 active:scale-95 transition-all cursor-pointer" 
+          aria-label="Ouvrir le menu de navigation"
+          title="Menu de navigation"
+        >
+          <span class="material-symbols-outlined text-2xl">menu</span>
+        </button>
+
+        <!-- Logo -->
+        <a href="/" class="flex items-center gap-2 sm:gap-2.5 group shrink-0">
+          <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-[#0d7252] text-white flex items-center justify-center shadow-md shadow-emerald-900/20 group-hover:scale-105 transition-transform">
+            <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 14c1 1 3 1 4 0" stroke-width="2.5"/>
+            </svg>
+          </div>
+          <div>
+            <span class="text-lg sm:text-xl font-extrabold tracking-tight text-gray-900 block leading-none">
+              Wuaze<span class="text-[#0d7252]">Shop</span>
+            </span>
+            <span class="text-[9px] uppercase tracking-widest font-black text-gray-400 block mt-0.5">
+              High-Tech Gabon
+            </span>
+          </div>
+        </a>
+      </div>
+
+      <!-- Center Nav Links -->
+      <nav class="hidden md:flex items-center gap-6 text-xs sm:text-sm font-semibold text-gray-600">
+        <a href="/" class="hover:text-[#0d7252] transition-colors pb-1">Accueil</a>
+        <a href="/categories" class="hover:text-[#0d7252] transition-colors pb-1">Toutes les catégories</a>
+        <a href="/tracking" class="text-[#0d7252] font-bold border-b-2 border-[#0d7252] pb-1">Suivi de commande</a>
+        <a href="/#faq-section" class="hover:text-[#0d7252] transition-colors pb-1">FAQ</a>
+      </nav>
+
+      <!-- Right Header Actions -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <!-- Return to shop button -->
+        <a href="/" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-bold text-gray-600 hover:text-[#0d7252] hover:bg-gray-100 transition-colors">
+          <span class="material-symbols-outlined text-base">storefront</span>
+          <span class="hidden sm:inline">Boutique</span>
+        </a>
+
+        <!-- WhatsApp Direct -->
+        <a href="https://wa.me/241074001122" target="_blank" class="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-[#e6f7f0] text-[#0d7252] hover:bg-[#d5f2e6] text-xs font-bold transition-colors">
+          <span class="material-symbols-outlined text-base">chat</span>
+          <span>WhatsApp 7j/7</span>
+        </a>
+
+        <!-- Cart Button -->
+        <button id="cart-toggle-btn" class="relative flex items-center justify-center w-10 h-10 rounded-full bg-[#0d7252] text-white hover:bg-[#08553d] shadow-md transition-all active:scale-95">
+          <span class="material-symbols-outlined text-xl">shopping_cart</span>
+          <span id="cart-badge-count" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center border-2 border-white">0</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ==================== MAIN TRACKING CONTENT ==================== -->
+  <main class="flex-1 max-w-4xl mx-auto w-full px-4 sm:px-6 py-8 sm:py-12 space-y-8">
+    
+    <!-- Breadcrumbs -->
+    <nav class="flex items-center gap-2 text-xs text-gray-400">
+      <a href="/" class="hover:text-[#0d7252] transition-colors">Accueil</a>
+      <span>&rsaquo;</span>
+      <span class="text-gray-900 font-bold">Suivi de commande</span>
+    </nav>
+
+    <!-- Hero Header -->
+    <div class="text-center max-w-2xl mx-auto space-y-3">
+      <span class="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[#e6f7f0] text-[#0d7252] text-xs font-bold border border-emerald-200/60 shadow-xs">
+        <span class="material-symbols-outlined text-sm">flight_takeoff</span>
+        <span>Logistique Internationale Shenzhen &rarr; Libreville</span>
+      </span>
+
+      <h1 class="text-2xl sm:text-4xl font-extrabold text-gray-900 tracking-tight">
+        Suivre mon Colis en Direct
+      </h1>
+
+      <p class="text-xs sm:text-sm text-gray-500 leading-relaxed">
+        Saisissez votre numéro de référence de commande (ex : <strong>WZ-123456</strong>) pour consulter en direct chaque étape de l'acheminement de votre colis entre la Chine et le Gabon.
+      </p>
+    </div>
+
+    <!-- Search Form Card -->
+    <div class="bg-white rounded-3xl p-5 sm:p-7 border border-gray-100 shadow-xl max-w-2xl mx-auto space-y-4">
+      <form id="tracking-search-form" class="flex flex-col sm:flex-row items-stretch gap-2.5">
+        <div class="relative flex-1">
+          <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xl">search</span>
+          <input 
+            id="tracking-search-input" 
+            type="text" 
+            required 
+            placeholder="Ex : WZ-123456" 
+            class="w-full bg-gray-50 border border-gray-200 rounded-full pl-11 pr-4 py-3.5 text-xs sm:text-sm text-gray-900 uppercase font-semibold tracking-wider placeholder:normal-case placeholder:font-normal placeholder:tracking-normal focus:outline-none focus:border-[#0d7252] focus:bg-white focus:ring-2 focus:ring-[#0d7252]/20 transition-all"
+          />
+        </div>
+        <button 
+          type="submit" 
+          id="tracking-search-btn" 
+          class="px-7 py-3.5 rounded-full bg-[#0d7252] hover:bg-[#08553d] text-white text-xs sm:text-sm font-bold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 shrink-0 active:scale-95 cursor-pointer"
+        >
+          <span class="material-symbols-outlined text-base">radar</span>
+          <span>Localiser le colis</span>
+        </button>
+      </form>
+
+      <div class="flex items-center justify-center gap-1.5 text-[11px] text-gray-400 text-center">
+        <span class="material-symbols-outlined text-xs text-[#0d7252]">info</span>
+        <span>Votre référence commence par <strong>WZ-</strong> (indiquée sur votre reçu de confirmation).</span>
+      </div>
+    </div>
+
+    <!-- Tracking Loading State -->
+    <div id="tracking-loading" class="hidden max-w-2xl mx-auto text-center py-8 space-y-2">
+      <div class="inline-block w-8 h-8 border-3 border-[#0d7252] border-t-transparent rounded-full animate-spin"></div>
+      <p class="text-xs font-semibold text-gray-500">Recherche de votre commande dans le registre logistique...</p>
+    </div>
+
+    <!-- Tracking Error State -->
+    <div id="tracking-error" class="hidden max-w-2xl mx-auto p-5 rounded-3xl bg-red-50 border border-red-200 text-center space-y-3">
+      <div class="w-11 h-11 rounded-full bg-red-100 text-red-600 mx-auto flex items-center justify-center">
+        <span class="material-symbols-outlined text-2xl">error_outline</span>
+      </div>
+      <div>
+        <p id="tracking-error-text" class="text-xs font-extrabold text-red-800">Aucune commande trouvée avec cette référence.</p>
+        <p class="text-[11px] text-red-600 mt-1">Vérifiez la référence ou contactez notre conseiller sur WhatsApp pour une vérification manuelle.</p>
+      </div>
+      <a href="https://wa.me/241074001122" target="_blank" class="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full bg-white text-[#0d7252] border border-red-200 text-xs font-bold hover:bg-emerald-50 transition-colors shadow-sm">
+        <span class="material-symbols-outlined text-sm">chat</span>
+        <span>Demander de l'aide sur WhatsApp</span>
+      </a>
+    </div>
+
+    <!-- Tracking Result Card (Dynamically Rendered with Stepper) -->
+    <div id="tracking-result-card" class="hidden max-w-2xl mx-auto bg-white rounded-3xl p-6 sm:p-8 border border-gray-100 shadow-xl space-y-6">
+      <!-- Injected by tracking.js -->
+    </div>
+
+    <!-- Logistics Process Reassurance Grid -->
+    <div class="pt-6 border-t border-gray-100">
+      <div class="text-center max-w-xl mx-auto mb-6 space-y-1">
+        <h3 class="text-base sm:text-lg font-extrabold text-gray-900">Notre Engagement Logistique Chine &rarr; Gabon</h3>
+        <p class="text-xs text-gray-400">Un protocole rigoureux de la sortie d'usine jusqu'à votre domicile à Libreville.</p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+        <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm space-y-2">
+          <div class="w-9 h-9 rounded-xl bg-emerald-50 text-[#0d7252] flex items-center justify-center">
+            <span class="material-symbols-outlined text-lg">fact_check</span>
+          </div>
+          <h4 class="font-extrabold text-gray-900">1. Contrôle en Usine</h4>
+          <p class="text-[11px] text-gray-500 leading-relaxed">Chaque appareil est scellé et testé avant expédition depuis nos entrepôts de Shenzhen.</p>
+        </div>
+
+        <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm space-y-2">
+          <div class="w-9 h-9 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center">
+            <span class="material-symbols-outlined text-lg">speed</span>
+          </div>
+          <h4 class="font-extrabold text-gray-900">2. Fret Aérien Express</h4>
+          <p class="text-[11px] text-gray-500 leading-relaxed">Vol cargo régulier assurant une arrivée à Libreville sous 7 à 10 jours ouvrés.</p>
+        </div>
+
+        <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm space-y-2">
+          <div class="w-9 h-9 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center">
+            <span class="material-symbols-outlined text-lg">verified_user</span>
+          </div>
+          <h4 class="font-extrabold text-gray-900">3. Dédouanement Inclus</h4>
+          <p class="text-[11px] text-gray-500 leading-relaxed">Toutes les formalités douanières sont 100% prises en charge sans aucun frais supplémentaire.</p>
+        </div>
+
+        <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm space-y-2">
+          <div class="w-9 h-9 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center">
+            <span class="material-symbols-outlined text-lg">home_pin</span>
+          </div>
+          <h4 class="font-extrabold text-gray-900">4. Remise Sécurisée</h4>
+          <p class="text-[11px] text-gray-500 leading-relaxed">Livraison en main propre à domicile ou retrait immédiat à notre Point Relais de Glass.</p>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ==================== MOBILE NAVIGATION DRAWER (HAMBURGER MENU) ==================== -->
+  <div id="mobile-nav-overlay" class="modal-overlay hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs transition-opacity"></div>
+  <aside id="mobile-nav-drawer" class="nav-drawer nav-drawer-closed fixed top-0 left-0 z-50 w-[85%] max-w-sm h-full bg-white shadow-2xl flex flex-col justify-between overflow-y-auto">
+    
+    <!-- Drawer Header -->
+    <div class="p-4 sm:p-5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-emerald-50/50 to-white shrink-0">
+      <div class="flex items-center gap-2.5">
+        <div class="w-9 h-9 rounded-xl bg-[#0d7252] text-white flex items-center justify-center shadow-md">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 14c1 1 3 1 4 0" stroke-width="2.5"/>
+          </svg>
+        </div>
+        <div>
+          <span class="text-base font-extrabold tracking-tight text-gray-900 block leading-tight">
+            Wuaze<span class="text-[#0d7252]">Shop</span>
+          </span>
+          <span class="text-[9px] uppercase tracking-wider text-gray-400 font-bold block">
+            Navigation Principale
+          </span>
+        </div>
+      </div>
+      <button id="close-mobile-nav-btn" class="w-9 h-9 rounded-full bg-gray-100 text-gray-500 hover:text-gray-800 hover:bg-gray-200 flex items-center justify-center transition-colors active:scale-95 cursor-pointer" aria-label="Fermer le menu">
+        <span class="material-symbols-outlined text-xl">close</span>
+      </button>
+    </div>
+
+    <!-- Drawer Navigation Content -->
+    <div class="flex-1 overflow-y-auto p-4 sm:p-5 space-y-6">
+      
+      <!-- Primary Links -->
+      <div class="space-y-1">
+        <span class="text-[10px] uppercase font-black text-gray-400 tracking-wider px-3 block mb-1">Menu</span>
+        
+        <!-- 1. Accueil -->
+        <a href="/" class="mobile-nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-800 hover:text-[#0d7252] hover:bg-emerald-50 text-sm font-bold transition-colors">
+          <span class="material-symbols-outlined text-[#0d7252] text-xl">home</span>
+          <span>Accueil</span>
+        </a>
+
+        <!-- 2. Toutes les catégories (Ouvre la page Grid) -->
+        <a href="/categories" class="mobile-nav-link flex items-center justify-between px-3 py-2.5 rounded-xl text-gray-800 hover:text-[#0d7252] hover:bg-emerald-50 text-sm font-bold transition-colors">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-[#0d7252] text-xl">grid_view</span>
+            <span>Toutes les catégories</span>
+          </div>
+          <span class="material-symbols-outlined text-gray-400 text-sm">arrow_forward</span>
+        </a>
+
+        <!-- 3. En dessous de Toutes les catégories: chaque catégorie disponible (Grille 2x3) -->
+        <div class="grid grid-cols-2 gap-1.5 pt-1.5 pb-1 px-1">
+          <a href="/category/smartphones" class="mobile-nav-link flex items-center gap-2 p-2 rounded-xl bg-gray-50 hover:bg-emerald-50 text-gray-800 hover:text-[#0d7252] border border-gray-100 hover:border-emerald-200 transition-all text-xs font-bold">
+            <span class="material-symbols-outlined text-[#0d7252] text-base shrink-0">smartphone</span>
+            <span class="truncate">Smartphones</span>
+          </a>
+          <a href="/category/ordinateurs" class="mobile-nav-link flex items-center gap-2 p-2 rounded-xl bg-gray-50 hover:bg-emerald-50 text-gray-800 hover:text-[#0d7252] border border-gray-100 hover:border-emerald-200 transition-all text-xs font-bold">
+            <span class="material-symbols-outlined text-[#0d7252] text-base shrink-0">laptop_mac</span>
+            <span class="truncate">Ordinateurs</span>
+          </a>
+          <a href="/category/televiseurs" class="mobile-nav-link flex items-center gap-2 p-2 rounded-xl bg-gray-50 hover:bg-emerald-50 text-gray-800 hover:text-[#0d7252] border border-gray-100 hover:border-emerald-200 transition-all text-xs font-bold">
+            <span class="material-symbols-outlined text-[#0d7252] text-base shrink-0">tv</span>
+            <span class="truncate">Téléviseurs</span>
+          </a>
+          <a href="/category/audio" class="mobile-nav-link flex items-center gap-2 p-2 rounded-xl bg-gray-50 hover:bg-emerald-50 text-gray-800 hover:text-[#0d7252] border border-gray-100 hover:border-emerald-200 transition-all text-xs font-bold">
+            <span class="material-symbols-outlined text-[#0d7252] text-base shrink-0">headphones</span>
+            <span class="truncate">Audio</span>
+          </a>
+          <a href="/category/montres" class="mobile-nav-link flex items-center gap-2 p-2 rounded-xl bg-gray-50 hover:bg-emerald-50 text-gray-800 hover:text-[#0d7252] border border-gray-100 hover:border-emerald-200 transition-all text-xs font-bold">
+            <span class="material-symbols-outlined text-[#0d7252] text-base shrink-0">watch</span>
+            <span class="truncate">Montres</span>
+          </a>
+          <a href="/category/accessoires" class="mobile-nav-link flex items-center gap-2 p-2 rounded-xl bg-gray-50 hover:bg-emerald-50 text-gray-800 hover:text-[#0d7252] border border-gray-100 hover:border-emerald-200 transition-all text-xs font-bold">
+            <span class="material-symbols-outlined text-[#0d7252] text-base shrink-0">cable</span>
+            <span class="truncate">Accessoires</span>
+          </a>
+        </div>
+
+        <!-- 4. Suivi de commande -->
+        <a href="/tracking" class="mobile-nav-link flex items-center justify-between px-3 py-2.5 rounded-xl text-[#0d7252] bg-emerald-50 text-sm font-bold transition-colors">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-[#0d7252] text-xl">radar</span>
+            <span>Suivi de commande</span>
+          </div>
+          <span class="px-2 py-0.5 rounded-full text-[9px] font-black bg-[#0d7252] text-white">Actif</span>
+        </a>
+      </div>
+
+      <!-- 5. Section À propos avec Menu Déroulant (Dropdown Accordion) -->
+      <div class="pt-3 border-t border-gray-100">
+        <button 
+          id="drawer-about-toggle-btn"
+          type="button" 
+          class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-gray-800 hover:text-[#0d7252] hover:bg-emerald-50 text-sm font-bold transition-all cursor-pointer"
+          aria-expanded="false"
+        >
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-[#0d7252] text-xl">info</span>
+            <span>À propos</span>
+          </div>
+          <span id="drawer-about-chevron" class="material-symbols-outlined text-gray-400 text-xl transition-transform duration-200">keyboard_arrow_down</span>
+        </button>
+
+        <!-- Dropdown Sub-menu -->
+        <div id="drawer-about-dropdown" class="hidden pl-9 pr-2 py-1 space-y-1 transition-all">
+          <a href="/about" class="mobile-nav-link flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-gray-600 hover:text-[#0d7252] hover:bg-emerald-50 transition-colors">
+            <span class="material-symbols-outlined text-base text-gray-400">corporate_fare</span>
+            <span>À propos de nous</span>
+          </a>
+          <a href="https://wa.me/241074001122" target="_blank" class="mobile-nav-link flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-gray-600 hover:text-[#0d7252] hover:bg-emerald-50 transition-colors">
+            <span class="material-symbols-outlined text-base text-gray-400">support_agent</span>
+            <span>Contact</span>
+          </a>
+          <a href="/#faq-section" class="mobile-nav-link flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-gray-600 hover:text-[#0d7252] hover:bg-emerald-50 transition-colors">
+            <span class="material-symbols-outlined text-base text-gray-400">help_outline</span>
+            <span>FAQ</span>
+          </a>
+          <a href="/#about-section" class="mobile-nav-link flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-gray-600 hover:text-[#0d7252] hover:bg-emerald-50 transition-colors">
+            <span class="material-symbols-outlined text-base text-gray-400">policy</span>
+            <span>Conditions générales</span>
+          </a>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Drawer Footer -->
+    <div class="p-4 border-t border-gray-100 bg-gray-50 space-y-2 shrink-0">
+      <a href="https://wa.me/241074001122" target="_blank" class="w-full py-3 rounded-full bg-[#25D366] hover:bg-[#20ba5a] text-white text-xs font-bold shadow-md flex items-center justify-center gap-2 transition-all">
+        <span class="material-symbols-outlined text-base">chat</span>
+        <span>Conseiller WhatsApp direct 7j/7</span>
+      </a>
+      <p class="text-[10px] text-gray-400 text-center font-medium">
+        WuazeShop Gabon &bull; Libreville &amp; Shenzhen
+      </p>
+    </div>
+
+  </aside>
+
+  <!-- ==================== CART DRAWER ==================== -->
+  <div id="cart-drawer-overlay" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs transition-opacity"></div>
+  <aside id="cart-drawer" class="drawer drawer-closed fixed top-0 right-0 z-50 w-full sm:w-96 h-full bg-white shadow-2xl flex flex-col">
+    <div class="p-4 sm:p-5 border-b border-gray-100 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined text-[#0d7252]">shopping_bag</span>
+        <h3 class="font-extrabold text-base text-gray-900">Mon Panier</h3>
+      </div>
+      <button id="close-cart-btn" class="w-8 h-8 rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 flex items-center justify-center transition-colors">
+        <span class="material-symbols-outlined text-base">close</span>
+      </button>
+    </div>
+
+    <div id="cart-items-container" class="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3">
+      <!-- Injected by tracking.js -->
+    </div>
+
+    <div id="cart-footer-container" class="p-4 sm:p-5 border-t border-gray-100 bg-gray-50 space-y-3">
+      <div id="cart-subtotal-row" class="flex items-center justify-between text-xs sm:text-sm font-bold text-gray-700">
+        <span>Sous-total :</span>
+        <span id="cart-subtotal-display" class="font-black text-[#0d7252] text-sm sm:text-base">0 FCFA</span>
+      </div>
+      <a href="/?checkout=open" class="w-full py-3.5 rounded-full bg-[#0d7252] hover:bg-[#08553d] text-white font-bold text-xs sm:text-sm shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer">
+        <span>Passer la commande</span>
+        <span class="material-symbols-outlined text-sm">arrow_forward</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="bg-[#04281c] text-gray-300 pt-16 pb-8 border-t border-emerald-950 mt-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-10 pb-12 border-b border-emerald-900/60">
+        
+        <div class="space-y-4">
+          <div class="flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-md">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 14c1 1 3 1 4 0" stroke-width="2.2"/>
+              </svg>
+            </div>
+            <span class="text-xl font-extrabold text-white tracking-tight">
+              Wuaze<span class="text-[#10b981]">Shop</span>
+            </span>
+          </div>
+          <p class="text-xs text-gray-400 leading-relaxed">
+            Votre référence high-tech d'importation directe Chine &amp; Gabon. Qualité certifiée, fret aérien rapide et paiement sécurisé Mobile Money.
+          </p>
+        </div>
+
+        <div class="space-y-3">
+          <h5 class="text-sm font-bold text-white tracking-wide">Liens utiles</h5>
+          <ul class="space-y-2 text-xs">
+            <li><a href="/" class="hover:text-[#10b981] transition-colors">Accueil</a></li>
+            <li><a href="/#products-section" class="hover:text-[#10b981] transition-colors">Boutique</a></li>
+            <li><a href="/tracking" class="text-[#10b981] font-bold">Suivi de commande</a></li>
+            <li><a href="/#faq-section" class="hover:text-[#10b981] transition-colors">Questions fréquentes (FAQ)</a></li>
+          </ul>
+        </div>
+
+        <div class="space-y-3">
+          <h5 class="text-sm font-bold text-white tracking-wide">Suivez-nous</h5>
+          <div class="flex items-center gap-2.5">
+            <a href="https://facebook.com/wuazeshop" target="_blank" class="w-9 h-9 rounded-full bg-emerald-950/80 hover:bg-[#1877F2] hover:text-white flex items-center justify-center transition-all text-gray-300">
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+            </a>
+            <a href="https://instagram.com/wuazeshop" target="_blank" class="w-9 h-9 rounded-full bg-emerald-950/80 hover:bg-[#E4405F] hover:text-white flex items-center justify-center transition-all text-gray-300">
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+            </a>
+            <a href="https://wa.me/241074001122" target="_blank" class="w-9 h-9 rounded-full bg-emerald-950/80 hover:bg-[#25D366] hover:text-white flex items-center justify-center transition-all text-gray-300">
+              <span class="material-symbols-outlined text-base">chat</span>
+            </a>
+          </div>
+          <p class="text-[11px] text-gray-400 mt-2">Assistance disponible 7j/7.</p>
+        </div>
+
+        <div class="space-y-3">
+          <h5 class="text-sm font-bold text-white tracking-wide">Assistance Rapide</h5>
+          <p class="text-xs text-gray-400">Une question sur votre numéro de suivi ou votre livraison ?</p>
+          <a href="https://wa.me/241074001122" target="_blank" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#0d7252] hover:bg-[#08553d] text-white text-xs font-bold transition-all shadow-md">
+            <span class="material-symbols-outlined text-sm">chat</span>
+            <span>Écrire sur WhatsApp</span>
+          </a>
+        </div>
+
+      </div>
+
+      <div class="pt-8 text-center text-xs text-gray-500">
+        &copy; 2026 WuazeShop. Tous droits réservés. Libreville, Gabon &amp; Shenzhen, Chine.
+      </div>
+    </div>
+  </footer>
+
+  <!-- ==================== MOBILE BOTTOM STICKY NAVIGATION ==================== -->
+  <nav class="fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-gray-100 py-1.5 px-3 flex sm:hidden items-center justify-around shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
+    <a href="/" class="flex flex-col items-center gap-0.5 text-gray-500 hover:text-[#0d7252] text-[10px] font-medium">
+      <span class="material-symbols-outlined text-xl">home</span>
+      <span>Accueil</span>
+    </a>
+    <a href="/categories" class="flex flex-col items-center gap-0.5 text-gray-500 hover:text-[#0d7252] text-[10px] font-medium">
+      <span class="material-symbols-outlined text-xl">grid_view</span>
+      <span>Catégories</span>
+    </a>
+    <button id="mobile-cart-btn" class="relative flex flex-col items-center gap-0.5 text-gray-500 hover:text-[#0d7252] text-[10px] font-medium">
+      <span class="material-symbols-outlined text-xl">shopping_cart</span>
+      <span id="mobile-cart-badge" class="absolute -top-1 right-2 bg-red-500 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">0</span>
+      <span>Panier</span>
+    </button>
+    <a href="/tracking" class="flex flex-col items-center gap-0.5 text-[#0d7252] text-[10px] font-extrabold">
+      <span class="material-symbols-outlined text-xl">local_shipping</span>
+      <span>Suivi</span>
+    </a>
+    <a href="https://wa.me/241074001122" target="_blank" class="flex flex-col items-center gap-0.5 text-[#25D366] text-[10px] font-medium">
+      <span class="material-symbols-outlined text-xl">chat</span>
+      <span>WhatsApp</span>
+    </a>
+  </nav>
+
+  <script src="/js/tracking.js"></script>
+</body>
+</html>

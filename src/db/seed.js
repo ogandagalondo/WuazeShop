@@ -3,19 +3,59 @@ import bcrypt from 'bcryptjs';
 export function seedData(db) {
   // 1. Seed Categories (Full 6 categories matching TechNova storefront & CMS)
   const categories = [
-    { name: 'Smartphones & Tablettes', slug: 'smartphones', icon: 'smartphone' },
-    { name: 'Ordinateurs & MacBooks', slug: 'ordinateurs', icon: 'laptop_mac' },
-    { name: 'Téléviseurs & Écrans', slug: 'televiseurs', icon: 'tv' },
-    { name: 'Audio, Casques & Écouteurs', slug: 'audio', icon: 'headphones' },
-    { name: 'Montres Connectées', slug: 'montres', icon: 'watch' },
-    { name: 'Accessoires & Câbles', slug: 'accessoires', icon: 'electrical_services' }
+    { 
+      name: 'Smartphones & Tablettes', 
+      slug: 'smartphones', 
+      icon: 'smartphone',
+      description: 'Les plus récents smartphones flagships Apple, Samsung et Xiaomi importés directement d’usines certifiées avec garantie 12 mois.',
+      banner_url: '/images/hero-devices.jpg'
+    },
+    { 
+      name: 'Ordinateurs & MacBooks', 
+      slug: 'ordinateurs', 
+      icon: 'laptop_mac',
+      description: 'Laptops performants, ultrabooks professionnels et MacBooks Apple Silicon pour la productivité et le gaming.',
+      banner_url: '/images/promo-banner.jpg'
+    },
+    { 
+      name: 'Téléviseurs & Écrans', 
+      slug: 'televiseurs', 
+      icon: 'tv',
+      description: 'Smart TV 4K UHD, dalles OLED & QLED sans bordure avec Dolby Vision et applications intégrées.',
+      banner_url: '/images/promo-banner.jpg'
+    },
+    { 
+      name: 'Audio, Casques & Écouteurs', 
+      slug: 'audio', 
+      icon: 'headphones',
+      description: 'Casques à réduction de bruit active, écouteurs True Wireless et enceintes haute-fidélité pour audiophiles.',
+      banner_url: '/images/hero-devices.jpg'
+    },
+    { 
+      name: 'Montres Connectées', 
+      slug: 'montres', 
+      icon: 'watch',
+      description: 'Smartwatches et bracelets connectés pour le suivi santé, sport et notifications instantanées.',
+      banner_url: '/images/hero-devices.jpg'
+    },
+    { 
+      name: 'Accessoires & Câbles', 
+      slug: 'accessoires', 
+      icon: 'electrical_services',
+      description: 'Chargeurs rapides 20W/65W, câbles certifiés et coques de protection premium.',
+      banner_url: '/images/hero-devices.jpg'
+    }
   ];
 
-  const insertCategory = db.prepare(
-    `INSERT OR IGNORE INTO categories (name, slug, icon) VALUES (?, ?, ?)`
-  );
+  const insertOrUpdateCategory = db.prepare(`
+    INSERT INTO categories (name, slug, icon, description, banner_url) 
+    VALUES (?, ?, ?, ?, ?)
+    ON CONFLICT(slug) DO UPDATE SET 
+      description = COALESCE(categories.description, excluded.description),
+      banner_url = COALESCE(categories.banner_url, excluded.banner_url)
+  `);
   for (const cat of categories) {
-    insertCategory.run(cat.name, cat.slug, cat.icon);
+    insertOrUpdateCategory.run(cat.name, cat.slug, cat.icon, cat.description, cat.banner_url);
   }
 
   // 2. Seed Products across categories
@@ -114,8 +154,8 @@ export function seedData(db) {
         badge: '✦ Nouveauté',
         title: 'La technologie\nà portée de main',
         subtitle: 'Découvrez les derniers smartphones, ordinateurs et accessoires importés directement de Chine au Gabon avec une qualité exceptionnelle et des prix imbattables.',
-        ctaText: 'Découvrir la collection',
-        ctaLink: '#products-section',
+        ctaText: 'Découvrir',
+        ctaLink: '/categories',
         imageUrl: '/images/hero-devices.jpg',
         prop1Title: 'Livraison rapide',
         prop1Sub: 'en 24/48h',
@@ -237,6 +277,28 @@ WuazeShop s'engage formellement à ne jamais vendre, louer, céder ni diffuser v
           answer: "Tout à fait ! Notre acheteur basé directement à Shenzhen peut rechercher le produit exact de votre choix (spécifications précises, coloris, marque). Contactez simplement notre support sur WhatsApp pour recevoir un devis personnalisé."
         }
       ])
+    },
+    {
+      key: 'about_section',
+      value: JSON.stringify({
+        badge: '✦ Notre Histoire & Notre Mission',
+        title: 'Le pont high-tech direct entre Shenzhen et Libreville',
+        subtitle: 'WuazeShop révolutionne l\'accès aux nouvelles technologies au Gabon en éliminant les intermédiaires coûteux et en garantissant des appareils certifiés 100% neufs avec un accompagnement local dédié.',
+        storyTitle: 'Pourquoi WuazeShop ?',
+        storyParagraph1: 'Pendant des années, acquérir un smartphone de dernière génération, un MacBook ou un téléviseur 4K au Gabon relevait du parcours du combattant : prix exorbitants chez les revendeurs locaux, incertitude sur l\'authenticité des produits reconditionnés et délais imprévisibles.',
+        storyParagraph2: 'WuazeShop est né d\'une conviction simple : chaque Gabonais a le droit de profiter des toutes dernières innovations high-tech au prix direct usine, avec une transparence absolue et une sécurité totale du paiement à la livraison.',
+        storyParagraph3: 'Grâce à notre acheteur basé en immersion au cœur de Shenzhen (la capitale mondiale de l\'électronique) et à notre équipe logistique établie à Libreville, nous sélectionnons, inspectons et acheminons vos commandes par fret cargo aérien express en 7 à 10 jours ouvrés.',
+        missionTitle: 'Nos Engagements Inébranlables',
+        missionText: 'Garantir des produits 100% neufs d\'origine constructeur sous blister, un dédouanement intégral sans mauvaise surprise à l\'arrivée, et un service client gabonais joignable 7j/7 sur WhatsApp.',
+        stat1Number: '100%',
+        stat1Label: 'Appareils neufs certifiés & inspectés',
+        stat2Number: '7-10 j',
+        stat2Label: 'Délai moyen de fret cargo express',
+        stat3Number: '1 An',
+        stat3Label: 'Garantie constructeur pièces & main d\'œuvre',
+        stat4Number: '+1 500',
+        stat4Label: 'Clients livrés partout au Gabon'
+      })
     }
   ];
 

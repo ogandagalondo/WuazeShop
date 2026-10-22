@@ -39,6 +39,31 @@ app.get(['/admin', '/admin/'], (req, res) => {
   res.sendFile(path.join(__dirname, 'public/admin.html'));
 });
 
+// Dedicated product detail page route: /product/:slug or /product
+app.get(['/product', '/product/:slug'], (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/product.html'));
+});
+
+// All categories grid page: /categories or /rayons
+app.get(['/categories', '/categories/', '/rayons', '/rayons/'], (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/categories.html'));
+});
+
+// Dedicated single category catalog page route: /category/:slug or /category
+app.get(['/category', '/category/:slug', '/categories/:slug'], (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/category.html'));
+});
+
+// Dedicated parcel tracking page route: /tracking or /suivi
+app.get(['/tracking', '/tracking/', '/suivi', '/suivi/'], (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/tracking.html'));
+});
+
+// Dedicated About Us page route: /about or /a-propos
+app.get(['/about', '/about/', '/a-propos', '/a-propos/'], (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/about.html'));
+});
+
 // Uploaded images (supports local & serverless /tmp)
 const uploadsPath = process.env.VERCEL
   ? path.resolve('/tmp', 'uploads')

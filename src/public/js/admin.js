@@ -2,6 +2,7 @@
 let adminToken = sessionStorage.getItem('wuazeshop_admin_token') || null;
 let currentOrders = [];
 let currentAdminProducts = [];
+let currentCategories = [];
 let activeOrderFilter = 'all';
 let activeCatFilter = 'all';
 let selectedOrderForStatus = null;
@@ -20,14 +21,34 @@ const adminLogoutBtn = document.getElementById('admin-logout-btn');
 // Tabs
 const tabOrdersBtn = document.getElementById('tab-orders-btn');
 const tabProductsBtn = document.getElementById('tab-products-btn');
+const tabCategoriesBtn = document.getElementById('tab-categories-btn');
 const tabCmsBtn = document.getElementById('tab-cms-btn');
 const tabOrdersContent = document.getElementById('tab-orders-content');
 const tabProductsContent = document.getElementById('tab-products-content');
+const tabCategoriesContent = document.getElementById('tab-categories-content');
 const tabCmsContent = document.getElementById('tab-cms-content');
+const tabCategoriesBadge = document.getElementById('tab-categories-badge');
 const mobileTabOrdersBtn = document.getElementById('mobile-tab-orders-btn');
 const mobileTabProductsBtn = document.getElementById('mobile-tab-products-btn');
+const mobileTabCategoriesBtn = document.getElementById('mobile-tab-categories-btn');
 const mobileTabCmsBtn = document.getElementById('mobile-tab-cms-btn');
 const mobileAddProductBtn = document.getElementById('mobile-add-product-btn');
+
+// Category Management Elements
+const openAddCategoryBtn = document.getElementById('open-add-category-btn');
+const adminCategoriesGrid = document.getElementById('admin-categories-grid');
+const categoryModalOverlay = document.getElementById('category-modal-overlay');
+const closeCategoryModalBtn = document.getElementById('close-category-modal-btn');
+const cancelCategoryModalBtn = document.getElementById('cancel-category-modal-btn');
+const categoryForm = document.getElementById('category-form');
+const categoryModalTitle = document.getElementById('category-modal-title');
+const categoryEditId = document.getElementById('category-edit-id');
+const catFormName = document.getElementById('cat-form-name');
+const catFormSlug = document.getElementById('cat-form-slug');
+const catFormIcon = document.getElementById('cat-form-icon');
+const catIconPreview = document.getElementById('cat-icon-preview');
+const catFormDescription = document.getElementById('cat-form-description');
+const catFormBanner = document.getElementById('cat-form-banner');
 
 // Stats
 const statTotalRevenue = document.getElementById('stat-total-revenue');
@@ -73,6 +94,36 @@ const ordersCardsContainer = document.getElementById('orders-cards-container');
 const adminProductsGrid = document.getElementById('admin-products-grid');
 
 // Helpers
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+const PRESET_COLOR_LABELS = {
+  '#9c9589': 'Titane Naturel',
+  '#1e1e1e': 'Noir Sidéral',
+  '#293644': 'Bleu Titane',
+  '#1e2530': 'Minuit',
+  '#d2d4d7': 'Argent',
+  '#f0e4d3': 'Or / Starlight',
+  '#f97316': 'Orange Alpine',
+  '#ffffff': 'Blanc Pur',
+  '#10b981': 'Vert Émeraude'
+};
+
+function resolveColorLabel(colorStr) {
+  if (!colorStr) return 'Couleur';
+  const lower = colorStr.toLowerCase().trim();
+  if (PRESET_COLOR_LABELS[lower]) return PRESET_COLOR_LABELS[lower];
+  if (lower.startsWith('#')) return colorStr.toUpperCase();
+  return colorStr.charAt(0).toUpperCase() + colorStr.slice(1);
+}
+
 function formatFCFA(amount) {
   return new Intl.NumberFormat('fr-FR').format(amount || 0) + ' FCFA';
 }
@@ -169,7 +220,7 @@ adminLogoutBtn.addEventListener('click', () => {
 
 // 3. Tab Switching
 function switchTab(tab) {
-  const allBtns = [tabOrdersBtn, tabProductsBtn, tabCmsBtn].filter(Boolean);
+  const allBtns = [tabOrdersBtn, tabProductsBtn, tabCategoriesBtn, tabCmsBtn].filter(Boolean);
   allBtns.forEach(btn => {
     btn.classList.remove('active', 'bg-[#0d7252]', 'text-white');
     btn.classList.add('text-gray-500');
@@ -177,9 +228,10 @@ function switchTab(tab) {
 
   if (tabOrdersContent) tabOrdersContent.classList.add('hidden');
   if (tabProductsContent) tabProductsContent.classList.add('hidden');
+  if (tabCategoriesContent) tabCategoriesContent.classList.add('hidden');
   if (tabCmsContent) tabCmsContent.classList.add('hidden');
 
-  const allMobileBtns = [mobileTabOrdersBtn, mobileTabProductsBtn, mobileTabCmsBtn].filter(Boolean);
+  const allMobileBtns = [mobileTabOrdersBtn, mobileTabProductsBtn, mobileTabCategoriesBtn, mobileTabCmsBtn].filter(Boolean);
   allMobileBtns.forEach(btn => {
     btn.classList.remove('text-[#0d7252]', 'font-bold');
     btn.classList.add('text-gray-400');
@@ -201,6 +253,17 @@ function switchTab(tab) {
       mobileTabProductsBtn.classList.add('text-[#0d7252]', 'font-bold');
       mobileTabProductsBtn.classList.remove('text-gray-400');
     }
+  } else if (tab === 'categories') {
+    if (tabCategoriesBtn) {
+      tabCategoriesBtn.classList.add('active', 'bg-[#0d7252]', 'text-white');
+      tabCategoriesBtn.classList.remove('text-gray-500');
+    }
+    if (tabCategoriesContent) tabCategoriesContent.classList.remove('hidden');
+    if (mobileTabCategoriesBtn) {
+      mobileTabCategoriesBtn.classList.add('text-[#0d7252]', 'font-bold');
+      mobileTabCategoriesBtn.classList.remove('text-gray-400');
+    }
+    loadAdminCategories();
   } else if (tab === 'cms') {
     if (tabCmsBtn) {
       tabCmsBtn.classList.add('active', 'bg-[#0d7252]', 'text-white');
@@ -217,14 +280,16 @@ function switchTab(tab) {
 
 tabOrdersBtn.addEventListener('click', () => switchTab('orders'));
 tabProductsBtn.addEventListener('click', () => switchTab('products'));
+if (tabCategoriesBtn) tabCategoriesBtn.addEventListener('click', () => switchTab('categories'));
 if (tabCmsBtn) tabCmsBtn.addEventListener('click', () => switchTab('cms'));
 mobileTabOrdersBtn.addEventListener('click', () => switchTab('orders'));
 mobileTabProductsBtn.addEventListener('click', () => switchTab('products'));
+if (mobileTabCategoriesBtn) mobileTabCategoriesBtn.addEventListener('click', () => switchTab('categories'));
 if (mobileTabCmsBtn) mobileTabCmsBtn.addEventListener('click', () => switchTab('cms'));
 
 // 4. Load Data
 async function loadDashboardData() {
-  await Promise.all([loadOrders(), loadAdminProducts(), loadAdminSettings()]);
+  await Promise.all([loadOrders(), loadAdminProducts(), loadAdminCategories(), loadAdminSettings()]);
 }
 
 async function loadOrders() {
@@ -357,15 +422,23 @@ function renderOrders() {
           price: totalAmount / (order.quantity || 1)
         }];
 
-    const itemsHtml = items.map(item => `
-      <div class="flex items-center justify-between text-xs py-1 border-b border-surface-low last:border-0">
-        <div class="flex items-center gap-2 truncate">
-          <span class="w-5 h-5 rounded bg-surface-low flex items-center justify-center font-bold text-[10px] shrink-0">${item.quantity}x</span>
-          <span class="truncate text-on-surface">${item.title}</span>
+    const itemsHtml = items.map(item => {
+      let titleHtml = escapeHtml(item.title);
+      const variantMatch = item.title.match(/\[(.*?)\]/);
+      if (variantMatch) {
+        const baseTitle = item.title.replace(/\[(.*?)\]/, '').trim();
+        titleHtml = `${escapeHtml(baseTitle)} <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-[#e6f7f0] text-[#0d7252] border border-emerald-200/60 ml-1">Finition : ${escapeHtml(variantMatch[1])}</span>`;
+      }
+      return `
+        <div class="flex items-center justify-between text-xs py-1.5 border-b border-surface-low last:border-0">
+          <div class="flex items-center gap-2 truncate">
+            <span class="w-5 h-5 rounded bg-surface-low flex items-center justify-center font-bold text-[10px] shrink-0">${item.quantity}x</span>
+            <div class="truncate text-on-surface font-medium">${titleHtml}</div>
+          </div>
+          <span class="font-bold text-on-surface shrink-0 ml-2">${formatFCFA(item.price * item.quantity)}</span>
         </div>
-        <span class="font-bold text-on-surface shrink-0 ml-2">${formatFCFA(item.price * item.quantity)}</span>
-      </div>
-    `).join('');
+      `;
+    }).join('');
 
     // WhatsApp Direct Link
     const cleanPhone = cleanPhoneForWhatsApp(clientPhone);
@@ -425,10 +498,16 @@ function renderOrders() {
             <span class="px-2.5 py-1 rounded-xl text-xs ${fulfillmentBadgeClass}">${fulfillmentLabel}</span>
           </div>
 
-          <button onclick="openStatusModal('${orderNum}', '${clientName}', '${fulfillmentStatus}', '${paymentStatus}')" class="px-3 py-1.5 rounded-xl bg-surface-low hover:bg-surface-border text-on-surface text-xs font-bold border border-surface-border flex items-center gap-1 transition-colors">
-            <span class="material-symbols-outlined text-[15px]">edit</span>
-            <span>Mettre à jour statut</span>
-          </button>
+          <div class="flex items-center gap-2">
+            <a href="/tracking?track=${orderNum}" target="_blank" class="px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-[#0d7252] text-xs font-bold border border-emerald-200/60 flex items-center gap-1 transition-colors" title="Consulter la page de suivi public">
+              <span class="material-symbols-outlined text-[15px]">route</span>
+              <span>Suivi public</span>
+            </a>
+            <button onclick="openStatusModal('${orderNum}', '${clientName}', '${fulfillmentStatus}', '${paymentStatus}')" class="px-3 py-1.5 rounded-xl bg-surface-low hover:bg-surface-border text-on-surface text-xs font-bold border border-surface-border flex items-center gap-1 transition-colors">
+              <span class="material-symbols-outlined text-[15px]">edit</span>
+              <span>Mettre à jour statut</span>
+            </button>
+          </div>
         </div>
       </div>
     `;
@@ -524,7 +603,35 @@ function renderAdminProducts() {
   }
 
   adminProductsGrid.innerHTML = filtered.map(prod => {
-    const specsSummary = (prod.specs || []).slice(0, 2).join(' • ');
+    const specsSummary = (prod.specs || []).slice(0, 3).map(s => 
+      `<span class="px-2 py-0.5 rounded-md bg-gray-100 text-[10px] text-gray-700 font-medium">${escapeHtml(s)}</span>`
+    ).join(' ');
+
+    const colorsDots = (prod.colors || []).map(col => {
+      const bg = col.startsWith('#') ? `background-color: ${col};` : 'background-color: #333;';
+      return `<span class="w-3.5 h-3.5 rounded-full border border-black/15 shadow-2xs inline-block" style="${bg}" title="${escapeHtml(col)}"></span>`;
+    }).join(' ');
+
+    const hasDiscount = prod.original_price && prod.original_price > prod.price;
+    const discountPct = hasDiscount 
+      ? Math.round(((prod.original_price - prod.price) / prod.original_price) * 100) 
+      : 0;
+
+    const pricingHtml = hasDiscount
+      ? `
+        <div class="mt-2 flex flex-wrap items-baseline gap-1.5">
+          <span class="font-extrabold text-xs sm:text-sm text-[#0d7252]">${formatFCFA(prod.price)}</span>
+          <span class="text-[11px] text-gray-400 line-through">${formatFCFA(prod.original_price)}</span>
+          <span class="bg-[#10b981] text-white text-[10px] font-extrabold px-2 py-0.5 rounded-full shadow-2xs">-${discountPct}%</span>
+        </div>
+      `
+      : `
+        <div class="mt-2 flex items-baseline gap-2">
+          <span class="font-extrabold text-xs sm:text-sm text-[#0d7252]">${formatFCFA(prod.price)}</span>
+          <span class="text-[10px] text-gray-400 font-medium">Plein tarif</span>
+        </div>
+      `;
+
     return `
       <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm flex flex-col justify-between space-y-3 hover:shadow-md transition-all">
         <div class="flex gap-3">
@@ -532,19 +639,30 @@ function renderAdminProducts() {
             <img class="w-full h-full object-contain" src="${prod.image_url}" alt="${prod.title}"/>
           </div>
           <div class="flex-1 min-w-0">
-            <span class="uppercase tracking-wider font-extrabold text-[10px] text-[#0d7252] block mb-0.5">${prod.category}</span>
-            <h4 class="text-xs sm:text-sm font-bold text-gray-900 line-clamp-2 leading-snug">${prod.title}</h4>
-            <div class="text-[10px] text-gray-400 truncate mt-0.5">${prod.description ? prod.description : (specsSummary || 'Origine Chine Neuf')}</div>
-            <div class="mt-1.5 font-extrabold text-xs sm:text-sm text-[#0d7252]">${formatFCFA(prod.price)}</div>
+            <div class="flex items-center justify-between gap-1 mb-0.5">
+              <span class="uppercase tracking-wider font-extrabold text-[10px] text-[#0d7252]">${escapeHtml(prod.category)}</span>
+              ${prod.colors && prod.colors.length > 0 ? `<div class="flex items-center gap-1">${colorsDots}</div>` : ''}
+            </div>
+            <h4 class="text-xs sm:text-sm font-bold text-gray-900 line-clamp-2 leading-snug">${escapeHtml(prod.title)}</h4>
+            <div class="text-[10px] text-gray-400 truncate mt-0.5">${prod.description ? escapeHtml(prod.description) : 'Origine Chine Neuf'}</div>
+            ${prod.specs && prod.specs.length > 0 ? `<div class="flex flex-wrap gap-1 mt-1.5">${specsSummary}</div>` : ''}
+            ${pricingHtml}
           </div>
         </div>
 
-        <div class="pt-2 border-t border-gray-100 flex gap-2">
-          <button onclick="openEditProductModal(${prod.id})" class="flex-1 py-1.5 px-3 rounded-full bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-700 text-xs font-bold flex items-center justify-center gap-1 transition-colors">
-            <span class="material-symbols-outlined text-[15px]">edit</span>
+        <div class="pt-2 border-t border-gray-100 flex items-center gap-1.5">
+          <button onclick="openQuickDiscountModal(${prod.id})" class="py-1.5 px-2.5 rounded-full ${hasDiscount ? 'bg-emerald-100 text-[#0d7252] border border-emerald-200 font-extrabold' : 'bg-gray-50 hover:bg-emerald-50 text-gray-700 hover:text-[#0d7252] border border-gray-200'} text-xs font-bold flex items-center justify-center gap-1 transition-colors cursor-pointer" title="Gérer la remise / réduction">
+            <span class="material-symbols-outlined text-[14px]">local_offer</span>
+            <span>${hasDiscount ? `-${discountPct}%` : 'Remise'}</span>
+          </button>
+          <button onclick="openEditProductModal(${prod.id})" class="flex-1 py-1.5 px-2.5 rounded-full bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-700 text-xs font-bold flex items-center justify-center gap-1 transition-colors cursor-pointer">
+            <span class="material-symbols-outlined text-[14px]">edit</span>
             <span>Modifier</span>
           </button>
-          <button onclick="deleteProduct(${prod.id})" class="py-1.5 px-3 rounded-full bg-red-50 hover:bg-red-100 text-red-700 text-xs font-bold flex items-center justify-center transition-colors" title="Archiver le produit">
+          <a href="/product/${prod.slug || prod.id}" target="_blank" class="w-8 h-8 rounded-full bg-emerald-50 hover:bg-emerald-100 text-[#0d7252] flex items-center justify-center transition-colors shrink-0" title="Voir la fiche en direct">
+            <span class="material-symbols-outlined text-[15px]">visibility</span>
+          </a>
+          <button onclick="deleteProduct(${prod.id})" class="w-8 h-8 rounded-full bg-red-50 hover:bg-red-100 text-red-700 flex items-center justify-center transition-colors shrink-0 cursor-pointer" title="Archiver le produit">
             <span class="material-symbols-outlined text-[15px]">delete</span>
           </button>
         </div>
@@ -688,6 +806,212 @@ if (prodImageUrlManual) {
   });
 }
 
+// Interactive Technical Specs & Colors Variant Builders
+let activeSpecs = [];
+let activeColors = [];
+
+window.addSuggestedSpec = function(spec) {
+  if (spec && !activeSpecs.includes(spec)) {
+    activeSpecs.push(spec);
+    renderActiveSpecs();
+  }
+};
+
+window.removeSpec = function(index) {
+  activeSpecs.splice(index, 1);
+  renderActiveSpecs();
+};
+
+function renderActiveSpecs() {
+  const container = document.getElementById('active-specs-container');
+  if (!container) return;
+  if (activeSpecs.length === 0) {
+    container.innerHTML = '<span class="text-[11px] text-gray-400 italic">Aucune spécification ajoutée. Cliquez sur les suggestions ou tapez ci-dessus.</span>';
+    return;
+  }
+  container.innerHTML = activeSpecs.map((spec, idx) => `
+    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white border border-gray-200 text-xs font-semibold text-gray-800 shadow-2xs">
+      <span class="material-symbols-outlined text-[#0d7252] text-sm">check_circle</span>
+      <span>${escapeHtml(spec)}</span>
+      <button type="button" onclick="removeSpec(${idx})" class="text-gray-400 hover:text-red-500 ml-1 p-0.5 rounded-full hover:bg-red-50 transition-colors">
+        <span class="material-symbols-outlined text-xs">close</span>
+      </button>
+    </span>
+  `).join('');
+}
+
+const addSpecBtn = document.getElementById('add-spec-btn');
+const specInputCustom = document.getElementById('spec-input-custom');
+if (addSpecBtn && specInputCustom) {
+  const doAddSpec = () => {
+    const val = specInputCustom.value.trim();
+    if (val) {
+      addSuggestedSpec(val);
+      specInputCustom.value = '';
+    }
+  };
+  addSpecBtn.addEventListener('click', doAddSpec);
+  specInputCustom.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      doAddSpec();
+    }
+  });
+}
+
+window.addColorPreset = function(hex, name) {
+  if (hex && !activeColors.includes(hex)) {
+    activeColors.push(hex);
+    renderActiveColors();
+  }
+};
+
+window.removeColor = function(index) {
+  activeColors.splice(index, 1);
+  renderActiveColors();
+};
+
+function renderActiveColors() {
+  const container = document.getElementById('active-colors-container');
+  if (!container) return;
+  if (activeColors.length === 0) {
+    container.innerHTML = '<span class="text-[11px] text-gray-400 italic">Aucune couleur sélectionnée. Choisissez parmi la palette rapide ou ajoutez une couleur personnalisée.</span>';
+    return;
+  }
+  container.innerHTML = activeColors.map((col, idx) => {
+    const isHex = col.startsWith('#');
+    const bgStyle = isHex ? `background-color: ${col};` : 'background-color: #333;';
+    const label = resolveColorLabel(col);
+    return `
+      <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white border border-gray-200 text-xs font-semibold text-gray-800 shadow-2xs">
+        <span class="w-3.5 h-3.5 rounded-full border border-black/10 shadow-inner" style="${bgStyle}"></span>
+        <span>${escapeHtml(label)}</span>
+        <button type="button" onclick="removeColor(${idx})" class="text-gray-400 hover:text-red-500 ml-1 p-0.5 rounded-full hover:bg-red-50 transition-colors">
+          <span class="material-symbols-outlined text-xs">close</span>
+        </button>
+      </span>
+    `;
+  }).join('');
+}
+
+const addCustomColorBtn = document.getElementById('add-custom-color-btn');
+const customColorPicker = document.getElementById('custom-color-picker');
+const customColorName = document.getElementById('custom-color-name');
+if (addCustomColorBtn && customColorPicker && customColorName) {
+  addCustomColorBtn.addEventListener('click', () => {
+    const hex = customColorPicker.value;
+    const nameVal = customColorName.value.trim();
+    const finalColor = nameVal || hex;
+    if (finalColor && !activeColors.includes(finalColor)) {
+      activeColors.push(finalColor);
+      renderActiveColors();
+      customColorName.value = '';
+    }
+  });
+}
+
+// ==================== PRODUCT MODAL DISCOUNT CALCULATOR ====================
+const prodDiscountEnable = document.getElementById('prod-discount-enable');
+const prodDiscountFields = document.getElementById('prod-discount-fields');
+const prodDiscountToggleLabel = document.getElementById('prod-discount-toggle-label');
+const prodDiscountRegular = document.getElementById('prod-discount-regular');
+const prodDiscountPercent = document.getElementById('prod-discount-percent');
+const prodDiscountFinal = document.getElementById('prod-discount-final');
+const prodOriginalPriceHidden = document.getElementById('prod-original-price');
+
+function updateDiscountPreview(regular, finalPrice) {
+  const badgePreview = document.getElementById('prod-discount-badge-preview');
+  const strikePreview = document.getElementById('prod-discount-strike-preview');
+  const pricePreview = document.getElementById('prod-discount-price-preview');
+  const savingsPreview = document.getElementById('prod-discount-savings-preview');
+
+  if (regular > 0 && finalPrice > 0 && regular > finalPrice) {
+    const pct = Math.round(((regular - finalPrice) / regular) * 100);
+    const saving = regular - finalPrice;
+    if (badgePreview) badgePreview.textContent = `-${pct}% PROMO`;
+    if (strikePreview) strikePreview.textContent = formatFCFA(regular);
+    if (pricePreview) pricePreview.textContent = formatFCFA(finalPrice);
+    if (savingsPreview) savingsPreview.textContent = `Économie : ${formatFCFA(saving)}`;
+    if (prodOriginalPriceHidden) prodOriginalPriceHidden.value = regular;
+  }
+}
+
+window.applyDiscountPreset = function(pct) {
+  if (prodDiscountPercent) {
+    prodDiscountPercent.value = pct;
+  }
+  recalculateProductDiscount('percent');
+};
+
+function recalculateProductDiscount(source = 'percent') {
+  const basePriceInput = document.getElementById('prod-price');
+  let regular = Number(prodDiscountRegular.value) || Number(basePriceInput.value) || 0;
+  
+  if (regular <= 0) return;
+  prodDiscountRegular.value = regular;
+
+  if (source === 'percent') {
+    const pct = Number(prodDiscountPercent.value) || 0;
+    if (pct > 0 && pct < 100) {
+      const finalPrice = Math.round(regular * (1 - (pct / 100)));
+      prodDiscountFinal.value = finalPrice;
+      updateDiscountPreview(regular, finalPrice);
+    }
+  } else if (source === 'final') {
+    const finalPrice = Number(prodDiscountFinal.value) || 0;
+    if (finalPrice > 0 && finalPrice < regular) {
+      const pct = Math.round(((regular - finalPrice) / regular) * 100);
+      prodDiscountPercent.value = pct;
+      updateDiscountPreview(regular, finalPrice);
+    }
+  } else if (source === 'regular') {
+    const pct = Number(prodDiscountPercent.value) || 15;
+    prodDiscountPercent.value = pct;
+    const finalPrice = Math.round(regular * (1 - (pct / 100)));
+    prodDiscountFinal.value = finalPrice;
+    updateDiscountPreview(regular, finalPrice);
+  }
+}
+
+if (prodDiscountEnable) {
+  prodDiscountEnable.addEventListener('change', () => {
+    if (prodDiscountEnable.checked) {
+      prodDiscountFields.classList.remove('hidden');
+      prodDiscountToggleLabel.textContent = 'Remise active';
+      const basePrice = Number(document.getElementById('prod-price').value) || 0;
+      if (!prodDiscountRegular.value && basePrice > 0) {
+        prodDiscountRegular.value = basePrice;
+      }
+      if (!prodDiscountPercent.value) {
+        prodDiscountPercent.value = 15;
+      }
+      recalculateProductDiscount('percent');
+    } else {
+      cancelProductDiscount();
+    }
+  });
+}
+
+if (prodDiscountRegular) {
+  prodDiscountRegular.addEventListener('input', () => recalculateProductDiscount('regular'));
+}
+if (prodDiscountPercent) {
+  prodDiscountPercent.addEventListener('input', () => recalculateProductDiscount('percent'));
+}
+if (prodDiscountFinal) {
+  prodDiscountFinal.addEventListener('input', () => recalculateProductDiscount('final'));
+}
+
+window.cancelProductDiscount = function() {
+  if (prodDiscountEnable) prodDiscountEnable.checked = false;
+  if (prodDiscountFields) prodDiscountFields.classList.add('hidden');
+  if (prodDiscountToggleLabel) prodDiscountToggleLabel.textContent = 'Sans remise';
+  if (prodDiscountRegular) prodDiscountRegular.value = '';
+  if (prodDiscountPercent) prodDiscountPercent.value = '';
+  if (prodDiscountFinal) prodDiscountFinal.value = '';
+  if (prodOriginalPriceHidden) prodOriginalPriceHidden.value = '';
+};
+
 function openProductModal(isEdit = false, productData = null) {
   productForm.reset();
   if (prodImageFile) prodImageFile.value = '';
@@ -704,11 +1028,28 @@ function openProductModal(isEdit = false, productData = null) {
     document.getElementById('prod-title').value = productData.title;
     if (prodDescription) prodDescription.value = productData.description || '';
     document.getElementById('prod-category').value = productData.category;
-    document.getElementById('prod-price').value = productData.price;
-    document.getElementById('prod-original-price').value = productData.original_price || '';
     document.getElementById('prod-instock').checked = productData.in_stock === 1;
-    document.getElementById('prod-specs').value = (productData.specs || []).join(', ');
-    document.getElementById('prod-colors').value = (productData.colors || []).join(', ');
+
+    // Check discount status
+    const hasDiscount = productData.original_price && productData.original_price > productData.price;
+    if (hasDiscount) {
+      document.getElementById('prod-price').value = productData.original_price;
+      if (prodDiscountEnable) prodDiscountEnable.checked = true;
+      if (prodDiscountFields) prodDiscountFields.classList.remove('hidden');
+      if (prodDiscountToggleLabel) prodDiscountToggleLabel.textContent = 'Remise active';
+      if (prodDiscountRegular) prodDiscountRegular.value = productData.original_price;
+      if (prodDiscountFinal) prodDiscountFinal.value = productData.price;
+      const pct = Math.round(((productData.original_price - productData.price) / productData.original_price) * 100);
+      if (prodDiscountPercent) prodDiscountPercent.value = pct;
+      updateDiscountPreview(productData.original_price, productData.price);
+    } else {
+      document.getElementById('prod-price').value = productData.price;
+      cancelProductDiscount();
+    }
+    
+    // Initialize active specs & colors
+    activeSpecs = Array.isArray(productData.specs) ? [...productData.specs] : [];
+    activeColors = Array.isArray(productData.colors) ? [...productData.colors] : [];
 
     if (productData.image_url) {
       prodImageUrl.value = productData.image_url;
@@ -727,7 +1068,13 @@ function openProductModal(isEdit = false, productData = null) {
     productEditId.value = '';
     if (prodDescription) prodDescription.value = '';
     document.getElementById('prod-instock').checked = true;
+    cancelProductDiscount();
+    activeSpecs = [];
+    activeColors = [];
   }
+
+  renderActiveSpecs();
+  renderActiveColors();
   productModalOverlay.classList.remove('hidden');
 }
 
@@ -774,15 +1121,23 @@ productForm.addEventListener('submit', async (e) => {
   const title = document.getElementById('prod-title').value.trim();
   const description = prodDescription ? prodDescription.value.trim() : '';
   const category = document.getElementById('prod-category').value;
-  const price = Number(document.getElementById('prod-price').value);
-  const originalPriceVal = document.getElementById('prod-original-price').value;
-  const originalPrice = originalPriceVal ? Number(originalPriceVal) : null;
   const inStock = document.getElementById('prod-instock').checked;
   const imageUrl = prodImageUrl.value.trim();
-  const specsRaw = document.getElementById('prod-specs').value;
-  const specs = specsRaw ? specsRaw.split(',').map(s => s.trim()).filter(Boolean) : [];
-  const colorsRaw = document.getElementById('prod-colors').value;
-  const colors = colorsRaw ? colorsRaw.split(',').map(c => c.trim()).filter(Boolean) : [];
+  const specs = [...activeSpecs];
+  const colors = [...activeColors];
+
+  // Pricing & Discounts
+  let price = Number(document.getElementById('prod-price').value);
+  let originalPrice = null;
+
+  if (prodDiscountEnable && prodDiscountEnable.checked) {
+    const regularVal = Number(prodDiscountRegular.value) || price;
+    const finalVal = Number(prodDiscountFinal.value);
+    if (regularVal > 0 && finalVal > 0 && regularVal > finalVal) {
+      originalPrice = regularVal;
+      price = finalVal;
+    }
+  }
 
   if (!imageUrl) {
     alert('Veuillez téléverser une photo ou renseigner une URL pour ce produit.');
@@ -816,6 +1171,209 @@ productForm.addEventListener('submit', async (e) => {
     alert('Erreur réseau lors de l’enregistrement');
   }
 });
+
+// ==================== CATEGORY / RAYON MANAGEMENT ====================
+async function loadAdminCategories() {
+  if (!adminToken) return;
+  try {
+    const res = await fetch('/api/categories');
+    if (!res.ok) return;
+    currentCategories = await res.json();
+    if (tabCategoriesBadge) {
+      tabCategoriesBadge.textContent = currentCategories.length;
+    }
+    renderAdminCategories(currentCategories);
+  } catch (err) {
+    console.error('Erreur chargement catégories admin:', err);
+  }
+}
+
+function renderAdminCategories(categories) {
+  if (!adminCategoriesGrid) return;
+  if (!categories || categories.length === 0) {
+    adminCategoriesGrid.innerHTML = `
+      <div class="col-span-full text-center py-10 bg-white rounded-2xl border border-gray-100 p-6 text-gray-400">
+        <span class="material-symbols-outlined text-4xl mb-2 text-gray-300">category</span>
+        <p class="text-xs sm:text-sm font-semibold text-gray-700">Aucun rayon configuré.</p>
+      </div>
+    `;
+    return;
+  }
+
+  adminCategoriesGrid.innerHTML = categories.map(cat => {
+    const count = cat.productCount || 0;
+    const bannerHtml = cat.banner_url ? `
+      <div class="w-full h-24 rounded-xl overflow-hidden mb-3 border border-gray-100 bg-gray-50">
+        <img src="${escapeHtml(cat.banner_url)}" alt="${escapeHtml(cat.name)}" class="w-full h-full object-cover"/>
+      </div>
+    ` : '';
+
+    return `
+      <div class="bg-white rounded-2xl p-4 sm:p-5 border border-gray-100 shadow-sm flex flex-col justify-between space-y-3 hover:shadow-md transition-all">
+        <div>
+          ${bannerHtml}
+          <div class="flex items-center justify-between gap-2 mb-2">
+            <div class="flex items-center gap-2">
+              <span class="w-9 h-9 rounded-xl bg-emerald-50 text-[#0d7252] flex items-center justify-center border border-emerald-200/60 shrink-0">
+                <span class="material-symbols-outlined text-xl">${escapeHtml(cat.icon || 'category')}</span>
+              </span>
+              <div>
+                <h4 class="text-sm font-extrabold text-gray-900 leading-tight">${escapeHtml(cat.name)}</h4>
+                <a href="/category/${escapeHtml(cat.slug)}" target="_blank" class="text-[10px] font-mono text-gray-400 hover:text-[#0d7252] transition-colors flex items-center gap-0.5">
+                  <span>/category/${escapeHtml(cat.slug)}</span>
+                  <span class="material-symbols-outlined text-[11px]">open_in_new</span>
+                </a>
+              </div>
+            </div>
+            <span class="px-2.5 py-1 rounded-full text-[10px] font-bold ${count > 0 ? 'bg-[#e6f7f0] text-[#0d7252]' : 'bg-gray-100 text-gray-500'}">
+              ${count} ${count > 1 ? 'produits' : 'produit'}
+            </span>
+          </div>
+
+          <p class="text-xs text-gray-500 line-clamp-2 leading-relaxed">
+            ${cat.description ? escapeHtml(cat.description) : '<em>Aucune description personnalisée.</em>'}
+          </p>
+        </div>
+
+        <div class="pt-2 border-t border-gray-100 flex items-center gap-2">
+          <a href="/category/${escapeHtml(cat.slug)}" target="_blank" class="py-1.5 px-3 rounded-full bg-emerald-50 hover:bg-emerald-100 text-[#0d7252] text-xs font-bold flex items-center justify-center gap-1 transition-colors" title="Voir la page dédiée du rayon">
+            <span class="material-symbols-outlined text-[15px]">visibility</span>
+            <span class="hidden sm:inline">Voir la page</span>
+          </a>
+          <button type="button" onclick="window.openEditCategoryModal && window.openEditCategoryModal(${cat.id})" class="flex-1 py-1.5 px-3 rounded-full bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-700 text-xs font-bold flex items-center justify-center gap-1 transition-colors cursor-pointer">
+            <span class="material-symbols-outlined text-[15px]">edit</span>
+            <span>Modifier</span>
+          </button>
+          <button type="button" onclick="window.handleDeleteCategory && window.handleDeleteCategory(${cat.id}, '${escapeHtml(cat.name)}', ${count})" class="p-1.5 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors cursor-pointer" title="Supprimer ce rayon">
+            <span class="material-symbols-outlined text-[17px]">delete</span>
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function openAddCategoryModal() {
+  if (!categoryForm) return;
+  categoryForm.reset();
+  if (categoryEditId) categoryEditId.value = '';
+  if (categoryModalTitle) categoryModalTitle.textContent = 'Nouveau Rayon';
+  if (catIconPreview) {
+    catIconPreview.innerHTML = '<span class="material-symbols-outlined text-xl">category</span>';
+  }
+  if (categoryModalOverlay) categoryModalOverlay.classList.remove('hidden');
+}
+
+window.openEditCategoryModal = function(id) {
+  const cat = currentCategories.find(c => c.id === id);
+  if (!cat || !categoryForm) return;
+
+  categoryForm.reset();
+  if (categoryEditId) categoryEditId.value = cat.id;
+  if (categoryModalTitle) categoryModalTitle.textContent = `Modifier le Rayon : ${cat.name}`;
+  if (catFormName) catFormName.value = cat.name || '';
+  if (catFormSlug) catFormSlug.value = cat.slug || '';
+  if (catFormIcon) catFormIcon.value = cat.icon || 'category';
+  if (catFormDescription) catFormDescription.value = cat.description || '';
+  if (catFormBanner) catFormBanner.value = cat.banner_url || '';
+  if (catIconPreview) {
+    catIconPreview.innerHTML = `<span class="material-symbols-outlined text-xl">${escapeHtml(cat.icon || 'category')}</span>`;
+  }
+
+  if (categoryModalOverlay) categoryModalOverlay.classList.remove('hidden');
+};
+
+function closeCategoryModal() {
+  if (categoryModalOverlay) categoryModalOverlay.classList.add('hidden');
+}
+
+window.setCategoryIcon = function(icon) {
+  if (catFormIcon) catFormIcon.value = icon;
+  if (catIconPreview) {
+    catIconPreview.innerHTML = `<span class="material-symbols-outlined text-xl">${escapeHtml(icon)}</span>`;
+  }
+};
+
+window.handleDeleteCategory = async function(id, name, count) {
+  if (count > 0) {
+    alert(`Impossible de supprimer le rayon "${name}" car ${count} produit(s) y sont rattachés.\nVeuillez modifier ou supprimer ces produits au préalable.`);
+    return;
+  }
+
+  if (!confirm(`Confirmez-vous la suppression du rayon "${name}" ?`)) return;
+
+  try {
+    const res = await fetch(`/api/admin/categories/${id}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${adminToken}` }
+    });
+    if (res.ok) {
+      await loadAdminCategories();
+    } else {
+      const err = await res.json();
+      alert(`Erreur: ${err.error || 'Impossible de supprimer ce rayon'}`);
+    }
+  } catch (err) {
+    alert('Erreur réseau lors de la suppression.');
+  }
+};
+
+async function handleCategoryFormSubmit(e) {
+  e.preventDefault();
+
+  const id = categoryEditId.value;
+  const name = catFormName.value.trim();
+  const slug = catFormSlug.value.trim().toLowerCase();
+  const icon = catFormIcon.value.trim() || 'category';
+  const description = catFormDescription.value.trim();
+  const banner_url = catFormBanner.value.trim() || null;
+
+  if (!name || !slug) {
+    alert('Veuillez renseigner le nom et le slug du rayon.');
+    return;
+  }
+
+  const payload = { name, slug, icon, description, banner_url };
+
+  try {
+    const url = id ? `/api/admin/categories/${id}` : '/api/admin/categories';
+    const method = id ? 'PUT' : 'POST';
+
+    const res = await fetch(url, {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${adminToken}`
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (res.ok) {
+      closeCategoryModal();
+      await loadAdminCategories();
+    } else {
+      const errData = await res.json();
+      alert(`Erreur: ${errData.error || 'Impossible d’enregistrer le rayon'}`);
+    }
+  } catch (err) {
+    alert('Erreur réseau lors de l’enregistrement du rayon.');
+  }
+}
+
+if (openAddCategoryBtn) openAddCategoryBtn.addEventListener('click', openAddCategoryModal);
+if (closeCategoryModalBtn) closeCategoryModalBtn.addEventListener('click', closeCategoryModal);
+if (cancelCategoryModalBtn) cancelCategoryModalBtn.addEventListener('click', closeCategoryModal);
+if (categoryModalOverlay) {
+  categoryModalOverlay.addEventListener('click', (e) => {
+    if (e.target === categoryModalOverlay) closeCategoryModal();
+  });
+}
+if (categoryForm) categoryForm.addEventListener('submit', handleCategoryFormSubmit);
+if (catFormIcon) {
+  catFormIcon.addEventListener('input', () => {
+    window.setCategoryIcon(catFormIcon.value.trim() || 'category');
+  });
+}
 
 // 9. CMS Vitrine Management Logic
 let currentCmsSettings = {};
@@ -919,6 +1477,28 @@ async function loadAdminSettings() {
     }
     renderAdminFaqList();
 
+    // 9. About Page Section
+    if (currentCmsSettings.about_section) {
+      const a = currentCmsSettings.about_section;
+      if (document.getElementById('cms-about-badge')) document.getElementById('cms-about-badge').value = a.badge || '';
+      if (document.getElementById('cms-about-title')) document.getElementById('cms-about-title').value = a.title || '';
+      if (document.getElementById('cms-about-subtitle')) document.getElementById('cms-about-subtitle').value = a.subtitle || '';
+      if (document.getElementById('cms-about-story-title')) document.getElementById('cms-about-story-title').value = a.storyTitle || '';
+      if (document.getElementById('cms-about-story-p1')) document.getElementById('cms-about-story-p1').value = a.storyParagraph1 || '';
+      if (document.getElementById('cms-about-story-p2')) document.getElementById('cms-about-story-p2').value = a.storyParagraph2 || '';
+      if (document.getElementById('cms-about-story-p3')) document.getElementById('cms-about-story-p3').value = a.storyParagraph3 || '';
+      if (document.getElementById('cms-about-mission-title')) document.getElementById('cms-about-mission-title').value = a.missionTitle || '';
+      if (document.getElementById('cms-about-mission-text')) document.getElementById('cms-about-mission-text').value = a.missionText || '';
+      if (document.getElementById('cms-about-stat1-num')) document.getElementById('cms-about-stat1-num').value = a.stat1Number || '';
+      if (document.getElementById('cms-about-stat1-label')) document.getElementById('cms-about-stat1-label').value = a.stat1Label || '';
+      if (document.getElementById('cms-about-stat2-num')) document.getElementById('cms-about-stat2-num').value = a.stat2Number || '';
+      if (document.getElementById('cms-about-stat2-label')) document.getElementById('cms-about-stat2-label').value = a.stat2Label || '';
+      if (document.getElementById('cms-about-stat3-num')) document.getElementById('cms-about-stat3-num').value = a.stat3Number || '';
+      if (document.getElementById('cms-about-stat3-label')) document.getElementById('cms-about-stat3-label').value = a.stat3Label || '';
+      if (document.getElementById('cms-about-stat4-num')) document.getElementById('cms-about-stat4-num').value = a.stat4Number || '';
+      if (document.getElementById('cms-about-stat4-label')) document.getElementById('cms-about-stat4-label').value = a.stat4Label || '';
+    }
+
   } catch (err) {
     console.error('Erreur chargement réglages CMS admin:', err);
   }
@@ -1013,8 +1593,8 @@ document.getElementById('save-cms-hero-btn')?.addEventListener('click', () => {
     badge: document.getElementById('cms-hero-badge')?.value.trim() || '✦ Nouveauté',
     title: document.getElementById('cms-hero-title')?.value.trim() || 'La technologie\nà portée de main',
     subtitle: document.getElementById('cms-hero-subtitle')?.value.trim() || '',
-    ctaText: document.getElementById('cms-hero-cta-text')?.value.trim() || 'Découvrir la collection',
-    ctaLink: document.getElementById('cms-hero-cta-link')?.value.trim() || '#products-section',
+    ctaText: document.getElementById('cms-hero-cta-text')?.value.trim() || 'Découvrir',
+    ctaLink: document.getElementById('cms-hero-cta-link')?.value.trim() || '/categories',
     imageUrl: document.getElementById('cms-hero-img-url')?.value.trim() || '/images/hero-devices.jpg',
     prop1Title: document.getElementById('cms-hero-prop1-title')?.value.trim() || 'Livraison rapide',
     prop1Sub: document.getElementById('cms-hero-prop1-sub')?.value.trim() || 'en 24/48h',
@@ -1182,6 +1762,300 @@ document.getElementById('save-cms-faq-btn')?.addEventListener('click', () => {
   const payload = adminFaqItems.filter(item => item.question.trim().length > 0 || item.answer.trim().length > 0);
   saveCmsSection('faq_section', payload, 'cms-faq-saved');
 });
+
+document.getElementById('save-cms-about-btn')?.addEventListener('click', () => {
+  const payload = {
+    badge: document.getElementById('cms-about-badge')?.value.trim() || '✦ Notre Histoire & Notre Mission',
+    title: document.getElementById('cms-about-title')?.value.trim() || 'Le pont high-tech direct entre Shenzhen et Libreville',
+    subtitle: document.getElementById('cms-about-subtitle')?.value.trim() || '',
+    storyTitle: document.getElementById('cms-about-story-title')?.value.trim() || 'Pourquoi WuazeShop ?',
+    storyParagraph1: document.getElementById('cms-about-story-p1')?.value.trim() || '',
+    storyParagraph2: document.getElementById('cms-about-story-p2')?.value.trim() || '',
+    storyParagraph3: document.getElementById('cms-about-story-p3')?.value.trim() || '',
+    missionTitle: document.getElementById('cms-about-mission-title')?.value.trim() || 'Nos Engagements Inébranlables',
+    missionText: document.getElementById('cms-about-mission-text')?.value.trim() || '',
+    stat1Number: document.getElementById('cms-about-stat1-num')?.value.trim() || '100%',
+    stat1Label: document.getElementById('cms-about-stat1-label')?.value.trim() || 'Appareils neufs certifiés & inspectés',
+    stat2Number: document.getElementById('cms-about-stat2-num')?.value.trim() || '7-10 j',
+    stat2Label: document.getElementById('cms-about-stat2-label')?.value.trim() || 'Délai moyen de fret cargo express',
+    stat3Number: document.getElementById('cms-about-stat3-num')?.value.trim() || '1 An',
+    stat3Label: document.getElementById('cms-about-stat3-label')?.value.trim() || 'Garantie constructeur pièces & main d\'œuvre',
+    stat4Number: document.getElementById('cms-about-stat4-num')?.value.trim() || '+1 500',
+    stat4Label: document.getElementById('cms-about-stat4-label')?.value.trim() || 'Clients livrés partout au Gabon'
+  };
+  saveCmsSection('about_section', payload, 'cms-about-saved');
+});
+
+// ==================== QUICK DISCOUNT MODAL LOGIC ====================
+let quickDiscountProduct = null;
+const quickDiscountModalOverlay = document.getElementById('quick-discount-modal-overlay');
+const closeQuickDiscountModalBtn = document.getElementById('close-quick-discount-modal-btn');
+const cancelQuickDiscountBtn = document.getElementById('cancel-quick-discount-btn');
+const saveQuickDiscountBtn = document.getElementById('save-quick-discount-btn');
+const quickDiscountRemoveBtn = document.getElementById('quick-discount-remove-btn');
+
+window.openQuickDiscountModal = function(productId) {
+  quickDiscountProduct = currentAdminProducts.find(p => p.id === productId);
+  if (!quickDiscountProduct) return;
+
+  document.getElementById('quick-discount-prod-id').value = quickDiscountProduct.id;
+  document.getElementById('quick-discount-prod-title').textContent = quickDiscountProduct.title;
+  document.getElementById('quick-discount-prod-img').src = quickDiscountProduct.image_url;
+
+  const hasDiscount = quickDiscountProduct.original_price && quickDiscountProduct.original_price > quickDiscountProduct.price;
+  const basePrice = hasDiscount ? quickDiscountProduct.original_price : quickDiscountProduct.price;
+  
+  document.getElementById('quick-discount-prod-current-price').textContent = formatFCFA(basePrice);
+  const badgeEl = document.getElementById('quick-discount-current-badge');
+  if (hasDiscount) {
+    const currentPct = Math.round(((quickDiscountProduct.original_price - quickDiscountProduct.price) / quickDiscountProduct.original_price) * 100);
+    badgeEl.textContent = `Promo active (-${currentPct}%)`;
+    badgeEl.classList.remove('hidden');
+    setQuickDiscountPct(currentPct);
+  } else {
+    badgeEl.classList.add('hidden');
+    setQuickDiscountPct(15);
+  }
+
+  if (quickDiscountModalOverlay) quickDiscountModalOverlay.classList.remove('hidden');
+};
+
+function updateQuickDiscountPreview(basePrice, finalPrice) {
+  const strikeEl = document.getElementById('quick-preview-strike');
+  const finalEl = document.getElementById('quick-preview-final');
+  const savingsEl = document.getElementById('quick-preview-savings');
+
+  if (strikeEl) strikeEl.textContent = formatFCFA(basePrice);
+  if (finalEl) finalEl.textContent = formatFCFA(finalPrice);
+  const saving = basePrice - finalPrice;
+  if (savingsEl) savingsEl.textContent = `Économie : ${formatFCFA(saving)}`;
+}
+
+window.setQuickDiscountPct = function(pct) {
+  if (!quickDiscountProduct) return;
+  const pctInput = document.getElementById('quick-discount-pct-input');
+  const priceInput = document.getElementById('quick-discount-price-input');
+  
+  if (pctInput) pctInput.value = pct;
+  const hasDiscount = quickDiscountProduct.original_price && quickDiscountProduct.original_price > quickDiscountProduct.price;
+  const basePrice = hasDiscount ? quickDiscountProduct.original_price : quickDiscountProduct.price;
+  
+  const finalPrice = Math.round(basePrice * (1 - (pct / 100)));
+  if (priceInput) priceInput.value = finalPrice;
+
+  updateQuickDiscountPreview(basePrice, finalPrice);
+};
+
+document.getElementById('quick-discount-pct-input')?.addEventListener('input', (e) => {
+  if (!quickDiscountProduct) return;
+  const pct = Number(e.target.value) || 0;
+  const hasDiscount = quickDiscountProduct.original_price && quickDiscountProduct.original_price > quickDiscountProduct.price;
+  const basePrice = hasDiscount ? quickDiscountProduct.original_price : quickDiscountProduct.price;
+  
+  if (pct > 0 && pct < 100) {
+    const finalPrice = Math.round(basePrice * (1 - (pct / 100)));
+    const priceInput = document.getElementById('quick-discount-price-input');
+    if (priceInput) priceInput.value = finalPrice;
+    updateQuickDiscountPreview(basePrice, finalPrice);
+  }
+});
+
+document.getElementById('quick-discount-price-input')?.addEventListener('input', (e) => {
+  if (!quickDiscountProduct) return;
+  const finalPrice = Number(e.target.value) || 0;
+  const hasDiscount = quickDiscountProduct.original_price && quickDiscountProduct.original_price > quickDiscountProduct.price;
+  const basePrice = hasDiscount ? quickDiscountProduct.original_price : quickDiscountProduct.price;
+  
+  if (finalPrice > 0 && finalPrice < basePrice) {
+    const pct = Math.round(((basePrice - finalPrice) / basePrice) * 100);
+    const pctInput = document.getElementById('quick-discount-pct-input');
+    if (pctInput) pctInput.value = pct;
+    updateQuickDiscountPreview(basePrice, finalPrice);
+  }
+});
+
+if (closeQuickDiscountModalBtn) {
+  closeQuickDiscountModalBtn.addEventListener('click', () => quickDiscountModalOverlay?.classList.add('hidden'));
+}
+if (cancelQuickDiscountBtn) {
+  cancelQuickDiscountBtn.addEventListener('click', () => quickDiscountModalOverlay?.classList.add('hidden'));
+}
+
+if (saveQuickDiscountBtn) {
+  saveQuickDiscountBtn.addEventListener('click', async () => {
+    if (!quickDiscountProduct) return;
+    const pct = Number(document.getElementById('quick-discount-pct-input')?.value);
+    const finalPrice = Number(document.getElementById('quick-discount-price-input')?.value);
+    const hasDiscount = quickDiscountProduct.original_price && quickDiscountProduct.original_price > quickDiscountProduct.price;
+    const basePrice = hasDiscount ? quickDiscountProduct.original_price : quickDiscountProduct.price;
+
+    try {
+      const res = await fetch(`/api/admin/products/${quickDiscountProduct.id}/discount`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${adminToken}`
+        },
+        body: JSON.stringify({
+          discountPercent: pct,
+          discountedPrice: finalPrice,
+          originalPrice: basePrice
+        })
+      });
+
+      if (res.ok) {
+        quickDiscountModalOverlay?.classList.add('hidden');
+        await loadAdminProducts();
+      } else {
+        const err = await res.json();
+        alert(err.error || 'Erreur lors de l’application de la remise');
+      }
+    } catch (e) {
+      console.error(e);
+      alert('Erreur réseau');
+    }
+  });
+}
+
+if (quickDiscountRemoveBtn) {
+  quickDiscountRemoveBtn.addEventListener('click', async () => {
+    if (!quickDiscountProduct) return;
+    if (!confirm(`Supprimer la remise sur "${quickDiscountProduct.title}" et revenir au prix normal ?`)) return;
+
+    try {
+      const res = await fetch(`/api/admin/products/${quickDiscountProduct.id}/discount`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${adminToken}`
+        },
+        body: JSON.stringify({ action: 'remove' })
+      });
+
+      if (res.ok) {
+        quickDiscountModalOverlay?.classList.add('hidden');
+        await loadAdminProducts();
+      } else {
+        const err = await res.json();
+        alert(err.error || 'Erreur lors de la suppression de la remise');
+      }
+    } catch (e) {
+      console.error(e);
+      alert('Erreur réseau');
+    }
+  });
+}
+
+// ==================== BATCH DISCOUNT MODAL LOGIC ====================
+const batchDiscountModalOverlay = document.getElementById('batch-discount-modal-overlay');
+const openBatchDiscountBtn = document.getElementById('open-batch-discount-btn');
+const closeBatchDiscountModalBtn = document.getElementById('close-batch-discount-modal-btn');
+const cancelBatchDiscountBtn = document.getElementById('cancel-batch-discount-btn');
+const submitBatchDiscountBtn = document.getElementById('submit-batch-discount-btn');
+const batchDiscountRemoveAllBtn = document.getElementById('batch-discount-remove-all-btn');
+const batchDiscountPctInput = document.getElementById('batch-discount-pct-input');
+const batchDiscountCategory = document.getElementById('batch-discount-category');
+
+if (openBatchDiscountBtn) {
+  openBatchDiscountBtn.addEventListener('click', () => {
+    if (activeCatFilter && activeCatFilter !== 'all' && batchDiscountCategory) {
+      batchDiscountCategory.value = activeCatFilter;
+    }
+    setBatchDiscountPct(15);
+    if (batchDiscountModalOverlay) batchDiscountModalOverlay.classList.remove('hidden');
+  });
+}
+
+window.setBatchDiscountPct = function(pct) {
+  if (batchDiscountPctInput) batchDiscountPctInput.value = pct;
+};
+
+if (closeBatchDiscountModalBtn) {
+  closeBatchDiscountModalBtn.addEventListener('click', () => batchDiscountModalOverlay?.classList.add('hidden'));
+}
+if (cancelBatchDiscountBtn) {
+  cancelBatchDiscountBtn.addEventListener('click', () => batchDiscountModalOverlay?.classList.add('hidden'));
+}
+
+if (submitBatchDiscountBtn) {
+  submitBatchDiscountBtn.addEventListener('click', async () => {
+    const category = batchDiscountCategory?.value || 'all';
+    const discountPercent = Number(batchDiscountPctInput?.value);
+
+    if (!discountPercent || discountPercent <= 0 || discountPercent >= 100) {
+      alert('Veuillez saisir un pourcentage valide (entre 1% et 99%).');
+      return;
+    }
+
+    const catName = batchDiscountCategory ? batchDiscountCategory.options[batchDiscountCategory.selectedIndex].text : 'les articles';
+    if (!confirm(`Confirmez-vous l'application d'une remise de -${discountPercent}% sur ${catName} ?`)) {
+      return;
+    }
+
+    try {
+      submitBatchDiscountBtn.disabled = true;
+      submitBatchDiscountBtn.textContent = 'Application en cours...';
+
+      const res = await fetch('/api/admin/products/batch-discount', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${adminToken}`
+        },
+        body: JSON.stringify({ category, discountPercent })
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        batchDiscountModalOverlay?.classList.add('hidden');
+        alert(data.message || 'Remises appliquées avec succès !');
+        await loadAdminProducts();
+      } else {
+        alert(data.error || 'Erreur lors de l’opération');
+      }
+    } catch (e) {
+      console.error(e);
+      alert('Erreur réseau');
+    } finally {
+      submitBatchDiscountBtn.disabled = false;
+      submitBatchDiscountBtn.innerHTML = '<span class="material-symbols-outlined text-sm">bolt</span><span>Appliquer l\'opération</span>';
+    }
+  });
+}
+
+if (batchDiscountRemoveAllBtn) {
+  batchDiscountRemoveAllBtn.addEventListener('click', async () => {
+    const category = batchDiscountCategory?.value || 'all';
+    const catName = batchDiscountCategory ? batchDiscountCategory.options[batchDiscountCategory.selectedIndex].text : 'la sélection';
+
+    if (!confirm(`Voulez-vous réinitialiser et retirer TOUTES les remises sur ${catName} ? Tous les articles reviendront à leur prix normal.`)) {
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/admin/products/batch-discount', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${adminToken}`
+        },
+        body: JSON.stringify({ category, action: 'remove' })
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        batchDiscountModalOverlay?.classList.add('hidden');
+        alert(data.message || 'Toutes les remises ont été réinitialisées.');
+        await loadAdminProducts();
+      } else {
+        alert(data.error || 'Erreur');
+      }
+    } catch (e) {
+      console.error(e);
+      alert('Erreur réseau');
+    }
+  });
+}
 
 // Initialize on Load
 document.addEventListener('DOMContentLoaded', () => {

@@ -21,7 +21,42 @@ export const productService = {
     return formatProduct(row);
   },
 
+  getProductBySlug(slug) {
+    const row = productRepository.findBySlug(slug);
+    return formatProduct(row);
+  },
+
   getCategories() {
-    return productRepository.findAllCategories();
+    const categories = productRepository.findAllCategories();
+    return categories.map(cat => {
+      const prods = productRepository.findAll({ category: cat.slug });
+      return {
+        ...cat,
+        productCount: prods.length
+      };
+    });
+  },
+
+  getCategoryBySlug(slug) {
+    const category = productRepository.findCategoryBySlug(slug);
+    if (!category) return null;
+    const products = this.getProducts({ category: slug });
+    return {
+      ...category,
+      products,
+      productCount: products.length
+    };
+  },
+
+  createCategory(data) {
+    return productRepository.createCategory(data);
+  },
+
+  updateCategory(id, data) {
+    return productRepository.updateCategory(id, data);
+  },
+
+  deleteCategory(id) {
+    return productRepository.deleteCategory(id);
   }
 };

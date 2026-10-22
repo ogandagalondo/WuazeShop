@@ -14,11 +14,19 @@ productRouter.get('/products', (req, res) => {
   }
 });
 
-// GET /api/products/:id
-productRouter.get('/products/:id', (req, res) => {
+// GET /api/products/:identifier (supports numeric ID or slug)
+productRouter.get('/products/:identifier', (req, res) => {
   try {
-    const id = Number(req.params.id);
-    const product = productService.getProductById(id);
+    const { identifier } = req.params;
+    let product = null;
+
+    if (/^\d+$/.test(identifier)) {
+      product = productService.getProductById(Number(identifier));
+    }
+    if (!product) {
+      product = productService.getProductBySlug(identifier);
+    }
+
     if (!product) {
       return res.status(404).json({ error: 'Produit non trouvé' });
     }
@@ -33,6 +41,20 @@ productRouter.get('/categories', (req, res) => {
   try {
     const categories = productService.getCategories();
     res.json(categories);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// GET /api/categories/:slug
+productRouter.get('/categories/:slug', (req, res) => {
+  try {
+    const { slug } = req.params;
+    const category = productService.getCategoryBySlug(slug);
+    if (!category) {
+      return res.status(404).json({ error: 'Catégorie non trouvée' });
+    }
+    res.json(category);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

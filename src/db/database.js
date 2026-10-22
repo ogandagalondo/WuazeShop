@@ -128,6 +128,19 @@ export function initDb(dbPath = resolveDbPath()) {
     // Column may already exist or table not ready
   }
 
+  // Migration: Ensure description and banner_url columns exist on categories
+  try {
+    const catInfo = db.prepare(`PRAGMA table_info(categories)`).all();
+    if (!catInfo.some(col => col.name === 'description')) {
+      db.exec(`ALTER TABLE categories ADD COLUMN description TEXT;`);
+    }
+    if (!catInfo.some(col => col.name === 'banner_url')) {
+      db.exec(`ALTER TABLE categories ADD COLUMN banner_url TEXT;`);
+    }
+  } catch (err) {
+    // Columns may already exist or table not ready
+  }
+
   // Seed default data
   seedData(db);
 

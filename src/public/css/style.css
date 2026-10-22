@@ -82,6 +82,14 @@ h1, h2, h3, h4, h5, .font-heading {
   }
 }
 
+/* Navigation slide-out drawer (from left) */
+.nav-drawer {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.nav-drawer-closed {
+  transform: translateX(-100%);
+}
+
 /* Custom scrollbars */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
