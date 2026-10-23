@@ -1108,6 +1108,8 @@ window.cancelProductDiscount = function() {
 
 function openProductModal(isEdit = false, productData = null) {
   productForm.reset();
+  const productModalError = document.getElementById('product-modal-error');
+  if (productModalError) productModalError.classList.add('hidden');
   if (prodImageFile) prodImageFile.value = '';
   prodImageUrl.value = '';
   prodImageUrlManual.value = '';
@@ -1206,23 +1208,68 @@ window.deleteProduct = async function(productId) {
 productForm.addEventListener('submit', async (e) => {
   e.preventDefault();
 
+  const productModalError = document.getElementById('product-modal-error');
+  const productModalErrorText = document.getElementById('product-modal-error-text');
+  const saveProductBtn = document.getElementById('save-product-btn');
+  const saveProductBtnText = document.getElementById('save-product-btn-text');
+
+  function showProductError(msg) {
+    if (productModalError && productModalErrorText) {
+      productModalErrorText.textContent = msg;
+      productModalError.classList.remove('hidden');
+      productForm.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      alert(msg);
+    }
+  }
+
+  if (productModalError) productModalError.classList.add('hidden');
+
   if (isUploadingImage) {
-    alert('Veuillez patienter pendant la fin du téléversement de la photo.');
+    showProductError('Veuillez patienter pendant la fin du téléversement de la photo.');
     return;
   }
 
   const id = productEditId.value;
-  const title = document.getElementById('prod-title').value.trim();
+  const title = document.getElementById('prod-title')?.value.trim();
   const description = prodDescription ? prodDescription.value.trim() : '';
-  const category = document.getElementById('prod-category').value;
-  const inStock = document.getElementById('prod-instock').checked;
-  const imageUrl = prodImageUrl.value.trim();
+  const category = document.getElementById('prod-category')?.value;
+  const inStock = document.getElementById('prod-instock')?.checked;
+  const imageUrl = prodImageUrl?.value.trim();
   const specs = [...activeSpecs];
   const colors = [...activeColors];
 
+  if (!title) {
+    showProductError('Veuillez renseigner le titre du produit (en haut du formulaire).');
+    const titleInput = document.getElementById('prod-title');
+    if (titleInput) {
+      titleInput.focus();
+      titleInput.classList.add('border-red-400');
+      setTimeout(() => titleInput.classList.remove('border-red-400'), 3000);
+    }
+    return;
+  }
+
+  if (!category) {
+    showProductError('Veuillez sélectionner une catégorie pour ce produit.');
+    document.getElementById('prod-category')?.focus();
+    return;
+  }
+
   // Pricing & Discounts
-  let price = Number(document.getElementById('prod-price').value);
+  const priceInput = document.getElementById('prod-price');
+  let price = Number(priceInput?.value);
   let originalPrice = null;
+
+  if (isNaN(price) || price < 500) {
+    showProductError('Veuillez saisir un prix de vente normal valide (minimum 500 FCFA, chiffres uniquement).');
+    if (priceInput) {
+      priceInput.focus();
+      priceInput.classList.add('border-red-400');
+      setTimeout(() => priceInput.classList.remove('border-red-400'), 3000);
+    }
+    return;
+  }
 
   if (prodDiscountEnable && prodDiscountEnable.checked) {
     const regularVal = Number(prodDiscountRegular.value) || price;
@@ -1234,11 +1281,14 @@ productForm.addEventListener('submit', async (e) => {
   }
 
   if (!imageUrl) {
-    alert('Veuillez téléverser une photo ou renseigner une URL pour ce produit.');
+    showProductError('Veuillez téléverser une photo pour ce produit (ou renseigner une URL web).');
     return;
   }
 
   const payload = { title, description, category, price, originalPrice, imageUrl, specs, colors, inStock };
+
+  if (saveProductBtn) saveProductBtn.disabled = true;
+  if (saveProductBtnText) saveProductBtnText.textContent = 'Enregistrement en cours...';
 
   try {
     const url = id ? `/api/admin/products/${id}` : '/api/admin/products';
@@ -1256,13 +1306,17 @@ productForm.addEventListener('submit', async (e) => {
     if (res.ok) {
       productModalOverlay.classList.add('hidden');
       await loadAdminProducts();
+      alert(`✓ Le produit "${title}" a été enregistré avec succès dans le catalogue !`);
     } else {
       const errData = await res.json();
-      alert(`Erreur: ${errData.error || 'Impossible d’enregistrer le produit'}`);
+      showProductError(`Erreur: ${errData.error || 'Impossible d’enregistrer le produit'}`);
     }
   } catch (err) {
     console.error('Erreur enregistrement produit:', err);
-    alert('Erreur réseau lors de l’enregistrement');
+    showProductError('Erreur réseau lors de l’enregistrement');
+  } finally {
+    if (saveProductBtn) saveProductBtn.disabled = false;
+    if (saveProductBtnText) saveProductBtnText.textContent = id ? 'Mettre à jour le produit' : 'Enregistrer le produit';
   }
 });
 
