@@ -52,11 +52,26 @@ CREATE TABLE IF NOT EXISTS admin_users (
   email TEXT UNIQUE,
   username TEXT NOT NULL UNIQUE,
   full_name TEXT,
+  phone TEXT,
   role TEXT NOT NULL DEFAULT 'SUPER_ADMIN',
+  permissions TEXT,
   password_hash TEXT NOT NULL,
   is_active INTEGER NOT NULL DEFAULT 1,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   last_login_at DATETIME
+);
+
+-- Collaborator invitations log table
+CREATE TABLE IF NOT EXISTS collaborator_invitations (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  collaborator_id INTEGER,
+  email TEXT NOT NULL,
+  phone TEXT,
+  role TEXT NOT NULL,
+  invitation_url TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'SENT',
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (collaborator_id) REFERENCES admin_users (id) ON DELETE CASCADE
 );
 
 -- Site settings / CMS showcase configuration table

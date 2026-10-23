@@ -1656,17 +1656,17 @@
 
   <!-- ==================== ADD / EDIT COLLABORATOR MODAL ==================== -->
   <div id="collaborator-modal-overlay" class="modal-overlay hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
-    <div class="bg-white rounded-t-3xl sm:rounded-3xl w-full max-w-lg max-h-[90vh] flex flex-col shadow-2xl border border-gray-100 overflow-hidden">
+    <div class="bg-white rounded-t-3xl sm:rounded-3xl w-full max-w-xl max-h-[92vh] flex flex-col shadow-2xl border border-gray-100 overflow-hidden">
       
       <!-- Modal Header -->
-      <div class="p-5 border-b border-gray-100 flex items-center justify-between shrink-0 bg-gray-50/50">
+      <div class="p-5 border-b border-gray-100 flex items-center justify-between shrink-0 bg-gray-50/70">
         <div class="flex items-center gap-2.5">
-          <div class="w-10 h-10 rounded-2xl bg-purple-100 flex items-center justify-center text-purple-700">
+          <div class="w-10 h-10 rounded-2xl bg-purple-100 flex items-center justify-center text-purple-700 shadow-2xs">
             <span class="material-symbols-outlined text-2xl">person_add</span>
           </div>
           <div>
             <h3 id="collaborator-modal-title" class="font-extrabold text-base sm:text-lg text-gray-900">Nouveau Collaborateur</h3>
-            <p class="text-[11px] text-gray-400">Définissez ses accès et identifiants de connexion</p>
+            <p class="text-[11px] text-gray-400">Définissez ses fonctions, permissions et identifiants de connexion</p>
           </div>
         </div>
         <button id="close-collaborator-modal-btn" type="button" class="w-8 h-8 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center hover:bg-gray-200 transition-colors cursor-pointer">
@@ -1681,7 +1681,7 @@
         <div id="collaborator-modal-error" class="hidden p-3 rounded-xl bg-red-50 text-red-700 text-xs font-semibold border border-red-200"></div>
 
         <div>
-          <label class="block font-bold text-gray-700 mb-1">Nom complet *</label>
+          <label class="block font-bold text-gray-700 mb-1">Nom complet du collaborateur *</label>
           <input id="collab-fullname" required class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:border-[#0d7252] focus:bg-white" placeholder="Ex: Marc Ndong" type="text"/>
         </div>
 
@@ -1691,27 +1691,75 @@
             <input id="collab-email" required class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:border-[#0d7252] focus:bg-white" placeholder="ex: marc@wuazeshop.ga" type="email"/>
           </div>
           <div>
+            <label class="block font-bold text-gray-700 mb-1">Numéro WhatsApp (Gabon)</label>
+            <div class="flex items-center bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2 focus-within:border-[#0d7252] focus-within:bg-white">
+              <span class="material-symbols-outlined text-gray-400 text-base mr-1.5">chat</span>
+              <input id="collab-phone" class="w-full bg-transparent text-xs sm:text-sm text-gray-900 focus:outline-none" placeholder="Ex: +241 77 12 34 56" type="tel"/>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <div>
+            <label class="block font-bold text-gray-700 mb-1">Poste / Rôle principal *</label>
+            <select id="collab-role" required class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm focus:outline-none focus:border-[#0d7252] focus:bg-white font-medium">
+              <option value="GESTIONNAIRE">Gestionnaire (Catalogue &amp; Commandes)</option>
+              <option value="AGENT">Agent Logistique (Expéditions &amp; Fret)</option>
+              <option value="SUPER_ADMIN">Super Administrateur (Accès Total)</option>
+            </select>
+          </div>
+          <div>
             <label class="block font-bold text-gray-700 mb-1">Identifiant unique (Optionnel)</label>
             <input id="collab-username" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:border-[#0d7252] focus:bg-white" placeholder="ex: marc_ndong" type="text"/>
           </div>
         </div>
 
-        <div>
-          <label class="block font-bold text-gray-700 mb-1">Rôle et Niveau d'accès *</label>
-          <select id="collab-role" required class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:border-[#0d7252] focus:bg-white">
-            <option value="GESTIONNAIRE">Gestionnaire (Catalogue, Prix &amp; Commandes)</option>
-            <option value="AGENT">Agent Opérationnel (Suivi Logistique &amp; Expéditions)</option>
-            <option value="SUPER_ADMIN">Super Administrateur (Accès Total &amp; Équipe)</option>
-          </select>
-          <p class="text-[10px] text-gray-400 mt-1">Le rôle détermine les modules et fonctionnalités accessibles par ce collaborateur.</p>
+        <!-- Fonctions & Permissions personnalisées -->
+        <div class="p-3.5 bg-purple-50/40 rounded-2xl border border-purple-100 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-gray-800 flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-purple-700 text-base">checklist</span>
+              <span>Fonctions &amp; Modules autorisés :</span>
+            </span>
+            <span class="text-[10px] text-purple-700 font-bold uppercase">Permissions</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 text-xs">
+            <label class="flex items-center gap-2 p-2 rounded-xl bg-white border border-gray-200/70 hover:bg-gray-50 transition-colors cursor-pointer">
+              <input id="perm-orders" type="checkbox" checked class="w-4 h-4 rounded text-[#0d7252] focus:ring-[#0d7252] cursor-pointer"/>
+              <span class="font-medium text-gray-700 text-[11px]">Commandes &amp; Expéditions</span>
+            </label>
+
+            <label class="flex items-center gap-2 p-2 rounded-xl bg-white border border-gray-200/70 hover:bg-gray-50 transition-colors cursor-pointer">
+              <input id="perm-products" type="checkbox" checked class="w-4 h-4 rounded text-[#0d7252] focus:ring-[#0d7252] cursor-pointer"/>
+              <span class="font-medium text-gray-700 text-[11px]">Catalogue &amp; Produits</span>
+            </label>
+
+            <label class="flex items-center gap-2 p-2 rounded-xl bg-white border border-gray-200/70 hover:bg-gray-50 transition-colors cursor-pointer">
+              <input id="perm-discounts" type="checkbox" checked class="w-4 h-4 rounded text-[#0d7252] focus:ring-[#0d7252] cursor-pointer"/>
+              <span class="font-medium text-gray-700 text-[11px]">Prix &amp; Remises / Soldes</span>
+            </label>
+
+            <label class="flex items-center gap-2 p-2 rounded-xl bg-white border border-gray-200/70 hover:bg-gray-50 transition-colors cursor-pointer">
+              <input id="perm-cms" type="checkbox" class="w-4 h-4 rounded text-[#0d7252] focus:ring-[#0d7252] cursor-pointer"/>
+              <span class="font-medium text-gray-700 text-[11px]">Édition Vitrine CMS</span>
+            </label>
+          </div>
         </div>
 
+        <!-- Password Generator Row -->
         <div>
-          <label class="block font-bold text-gray-700 mb-1">
-            Mot de passe <span id="collab-password-required-label">*</span>
-          </label>
+          <div class="flex items-center justify-between mb-1">
+            <label class="block font-bold text-gray-700 text-xs">
+              Mot de passe <span id="collab-password-required-label">*</span>
+            </label>
+            <button type="button" id="generate-collab-password-btn" class="text-[11px] font-extrabold text-[#0d7252] hover:text-[#08553d] flex items-center gap-1 cursor-pointer">
+              <span class="material-symbols-outlined text-sm">casino</span>
+              <span>Générer automatiquement</span>
+            </button>
+          </div>
           <div class="relative">
-            <input id="collab-password" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:border-[#0d7252] focus:bg-white pr-10" placeholder="Minimum 6 caractères" type="password" minlength="6"/>
+            <input id="collab-password" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:border-[#0d7252] focus:bg-white pr-10 font-mono" placeholder="Minimum 6 caractères (ou cliquez sur Générer)" type="password" minlength="6"/>
             <button type="button" id="toggle-collab-password-btn" class="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600 cursor-pointer">
               <span class="material-symbols-outlined text-lg">visibility</span>
             </button>
@@ -1719,12 +1767,12 @@
           <p id="collab-password-hint" class="text-[10px] text-gray-400 mt-1 hidden">Laissez vide si vous ne souhaitez pas modifier le mot de passe actuel.</p>
         </div>
 
-        <div class="pt-2">
+        <div class="pt-1">
           <label class="flex items-center gap-2.5 p-3 rounded-xl bg-gray-50 border border-gray-200 cursor-pointer hover:bg-gray-100/70 transition-colors">
             <input id="collab-is-active" type="checkbox" checked class="w-4 h-4 rounded text-[#0d7252] focus:ring-[#0d7252] cursor-pointer"/>
             <div class="flex flex-col">
-              <span class="text-xs font-bold text-gray-800">Compte Actif</span>
-              <span class="text-[10px] text-gray-500">Si décoché, le collaborateur sera immédiatement bloqué lors de la tentative de connexion.</span>
+              <span class="text-xs font-bold text-gray-800">Compte Actif immédiatement</span>
+              <span class="text-[10px] text-gray-500">Le collaborateur pourra se connecter dès réception de son lien d'invitation.</span>
             </div>
           </label>
         </div>
@@ -1735,12 +1783,116 @@
             Annuler
           </button>
           <button id="save-collaborator-btn" type="submit" class="py-2.5 px-6 rounded-full bg-[#0d7252] hover:bg-[#08553d] text-white font-bold text-xs shadow-md transition-all flex items-center gap-1.5 cursor-pointer">
-            <span class="material-symbols-outlined text-sm">save</span>
-            <span>Enregistrer le collaborateur</span>
+            <span class="material-symbols-outlined text-sm">send</span>
+            <span>Enregistrer &amp; Préparer l'accès</span>
           </button>
         </div>
 
       </form>
+    </div>
+  </div>
+
+  <!-- ==================== COLLABORATOR INVITATION SUCCESS MODAL ==================== -->
+  <div id="collaborator-invite-modal" class="modal-overlay hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white rounded-t-3xl sm:rounded-3xl w-full max-w-lg max-h-[90vh] flex flex-col shadow-2xl border border-gray-100 overflow-hidden">
+      
+      <!-- Modal Header -->
+      <div class="p-5 border-b border-gray-100 flex items-center justify-between shrink-0 bg-emerald-50/70">
+        <div class="flex items-center gap-2.5">
+          <div class="w-10 h-10 rounded-2xl bg-emerald-100 flex items-center justify-center text-[#0d7252] shadow-2xs">
+            <span class="material-symbols-outlined text-2xl">mark_email_read</span>
+          </div>
+          <div>
+            <h3 class="font-extrabold text-base sm:text-lg text-gray-900">Accès Collaborateur Créé !</h3>
+            <p class="text-[11px] text-gray-500">Le compte est prêt et ses identifiants sont générés</p>
+          </div>
+        </div>
+        <button id="close-invite-modal-btn" type="button" class="w-8 h-8 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center hover:bg-gray-200 transition-colors cursor-pointer">
+          <span class="material-symbols-outlined text-lg">close</span>
+        </button>
+      </div>
+
+      <!-- Invite Details Body -->
+      <div class="p-5 sm:p-6 space-y-4 text-xs sm:text-sm overflow-y-auto">
+        <div class="p-4 bg-gray-50 rounded-2xl border border-gray-200/80 space-y-3">
+          <div class="flex items-center justify-between border-b border-gray-200 pb-2">
+            <div>
+              <span id="invite-collab-name" class="font-bold text-gray-900 text-sm">Marc Ndong</span>
+              <span id="invite-collab-role" class="block text-[10px] font-extrabold uppercase text-[#0d7252]">Gestionnaire</span>
+            </div>
+            <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-emerald-100 text-[#0d7252]">Compte Actif</span>
+          </div>
+
+          <!-- Direct Link -->
+          <div>
+            <span class="text-[10px] font-bold uppercase text-gray-400 block mb-0.5">Lien d'accès Espace Administrateur</span>
+            <div class="flex items-center gap-2 bg-white rounded-xl p-2 border border-gray-200">
+              <span id="invite-collab-url" class="font-mono text-xs text-gray-700 truncate select-all flex-1">http://localhost:3000/admin.html</span>
+              <button type="button" onclick="copyInviteElement('invite-collab-url')" class="p-1 text-gray-400 hover:text-[#0d7252] cursor-pointer" title="Copier le lien">
+                <span class="material-symbols-outlined text-base">content_copy</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Identifiants -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <div>
+              <span class="text-[10px] font-bold uppercase text-gray-400 block mb-0.5">Identifiant de connexion</span>
+              <div class="flex items-center gap-2 bg-white rounded-xl p-2 border border-gray-200">
+                <span id="invite-collab-id" class="font-mono text-xs text-gray-800 truncate select-all flex-1">marc@wuazeshop.ga</span>
+                <button type="button" onclick="copyInviteElement('invite-collab-id')" class="p-1 text-gray-400 hover:text-[#0d7252] cursor-pointer" title="Copier">
+                  <span class="material-symbols-outlined text-base">content_copy</span>
+                </button>
+              </div>
+            </div>
+            <div>
+              <span class="text-[10px] font-bold uppercase text-gray-400 block mb-0.5">Mot de passe temporaire</span>
+              <div class="flex items-center gap-2 bg-white rounded-xl p-2 border border-gray-200">
+                <span id="invite-collab-password" class="font-mono text-xs font-bold text-[#0d7252] truncate select-all flex-1">Wuaze#492Ga</span>
+                <button type="button" onclick="copyInviteElement('invite-collab-password')" class="p-1 text-gray-400 hover:text-[#0d7252] cursor-pointer" title="Copier">
+                  <span class="material-symbols-outlined text-base">content_copy</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sharing Channels -->
+        <div>
+          <span class="text-xs font-bold text-gray-700 block mb-2">Transmettre ces identifiants au collaborateur :</span>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <!-- Copy Full Message -->
+            <button id="copy-full-invite-btn" type="button" class="py-2.5 px-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer">
+              <span class="material-symbols-outlined text-base">content_copy</span>
+              <span>Copier tout</span>
+            </button>
+
+            <!-- WhatsApp Direct Share -->
+            <a id="share-whatsapp-invite-btn" target="_blank" href="#" class="py-2.5 px-3 rounded-xl bg-[#25D366] hover:bg-[#1EBE5D] text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-2xs">
+              <span class="material-symbols-outlined text-base">chat</span>
+              <span>WhatsApp</span>
+            </a>
+
+            <!-- Mail Direct Share -->
+            <a id="share-mail-invite-btn" href="#" class="py-2.5 px-3 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors">
+              <span class="material-symbols-outlined text-base">mail</span>
+              <span>E-mail</span>
+            </a>
+          </div>
+        </div>
+
+        <div id="copy-toast" class="hidden p-2 rounded-xl bg-emerald-100 text-emerald-800 text-xs font-bold text-center border border-emerald-200">
+          ✓ Accès et message d'invitation copiés dans le presse-papier !
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="p-4 bg-gray-50 border-t border-gray-100 flex items-center justify-end">
+        <button id="finish-invite-btn" type="button" class="py-2.5 px-6 rounded-full bg-[#0d7252] hover:bg-[#08553d] text-white font-bold text-xs shadow-md transition-all cursor-pointer">
+          Terminer
+        </button>
+      </div>
+
     </div>
   </div>
 

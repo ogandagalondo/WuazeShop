@@ -121,7 +121,7 @@ export function initDb(dbPath = resolveDbPath()) {
   }
   db.exec(schemaSql);
 
-  // Migration: Ensure email, full_name, role, is_active, last_login_at exist on admin_users
+  // Migration: Ensure email, full_name, role, is_active, last_login_at, phone, permissions exist on admin_users
   try {
     const tableInfo = db.prepare(`PRAGMA table_info(admin_users)`).all();
     if (!tableInfo.some(col => col.name === 'email')) {
@@ -130,8 +130,14 @@ export function initDb(dbPath = resolveDbPath()) {
     if (!tableInfo.some(col => col.name === 'full_name')) {
       db.exec(`ALTER TABLE admin_users ADD COLUMN full_name TEXT;`);
     }
+    if (!tableInfo.some(col => col.name === 'phone')) {
+      db.exec(`ALTER TABLE admin_users ADD COLUMN phone TEXT;`);
+    }
     if (!tableInfo.some(col => col.name === 'role')) {
       db.exec(`ALTER TABLE admin_users ADD COLUMN role TEXT DEFAULT 'SUPER_ADMIN';`);
+    }
+    if (!tableInfo.some(col => col.name === 'permissions')) {
+      db.exec(`ALTER TABLE admin_users ADD COLUMN permissions TEXT;`);
     }
     if (!tableInfo.some(col => col.name === 'is_active')) {
       db.exec(`ALTER TABLE admin_users ADD COLUMN is_active INTEGER DEFAULT 1;`);
@@ -139,6 +145,20 @@ export function initDb(dbPath = resolveDbPath()) {
     if (!tableInfo.some(col => col.name === 'last_login_at')) {
       db.exec(`ALTER TABLE admin_users ADD COLUMN last_login_at DATETIME;`);
     }
+
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS collaborator_invitations (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        collaborator_id INTEGER,
+        email TEXT NOT NULL,
+        phone TEXT,
+        role TEXT NOT NULL,
+        invitation_url TEXT NOT NULL,
+        status TEXT NOT NULL DEFAULT 'SENT',
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (collaborator_id) REFERENCES admin_users (id) ON DELETE CASCADE
+      );
+    `);
   } catch (err) {
     // Column may already exist or table not ready
   }

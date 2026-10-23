@@ -4,6 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { authService, requireAdminAuth, requireSuperAdmin } from './auth.service.js';
+import { inviteService } from './invite.service.js';
 import { getDb } from '../../db/database.js';
 import { orderService } from '../orders/order.service.js';
 
@@ -554,7 +555,7 @@ adminRouter.get('/admin/collaborators', requireSuperAdmin, (req, res) => {
   try {
     const db = getDb();
     const collaborators = db.prepare(`
-      SELECT id, email, username, full_name, role, is_active, created_at, last_login_at
+      SELECT id, email, username, full_name, phone, role, permissions, is_active, created_at, last_login_at
       FROM admin_users
       ORDER BY id ASC
     `).all();
@@ -564,18 +565,20 @@ adminRouter.get('/admin/collaborators', requireSuperAdmin, (req, res) => {
   }
 });
 
-// POST /api/admin/collaborators - Créer un nouveau collaborateur (réservé Super Admin)
+// POST /api/admin/collaborators - Créer un nouveau collaborateur & générer l'invitation (réservé Super Admin)
 adminRouter.post('/admin/collaborators', requireSuperAdmin, (req, res) => {
   try {
-    const { email, username, fullName, role, password } = req.body;
-    if (!email || !password) {
-      return res.status(400).json({ error: 'Adresse e-mail et mot de passe requis' });
+    const { email, username, fullName, phone, role, permissions, password } = req.body;
+    if (!email) {
+      return res.status(400).json({ error: 'Adresse e-mail requise pour transmettre les accès au collaborateur' });
     }
 
     const cleanEmail = email.trim().toLowerCase();
     const cleanUsername = username && username.trim() ? username.trim().toLowerCase() : cleanEmail.split('@')[0].replace(/[^a-zA-Z0-9_-]/g, '');
     const cleanRole = ['SUPER_ADMIN', 'GESTIONNAIRE', 'AGENT'].includes(role) ? role : 'GESTIONNAIRE';
     const cleanFullName = fullName && fullName.trim() ? fullName.trim() : cleanUsername;
+    const cleanPhone = phone && phone.trim() ? phone.trim() : null;
+    const permissionsStr = permissions ? (typeof permissions === 'string' ? permissions : JSON.stringify(permissions)) : null;
 
     const db = getDb();
     const existing = db.prepare(`
@@ -586,21 +589,39 @@ adminRouter.post('/admin/collaborators', requireSuperAdmin, (req, res) => {
       return res.status(400).json({ error: 'Un collaborateur avec cette adresse email ou cet identifiant existe déjà' });
     }
 
+    // Si aucun mot de passe n'est fourni, en générer un fort automatiquement
+    const effectivePassword = password && password.trim().length >= 6 
+      ? password.trim() 
+      : inviteService.generateTempPassword();
+
     const salt = bcrypt.genSaltSync(10);
-    const passwordHash = bcrypt.hashSync(password, salt);
+    const passwordHash = bcrypt.hashSync(effectivePassword, salt);
 
     const result = db.prepare(`
-      INSERT INTO admin_users (email, username, full_name, role, password_hash, is_active)
-      VALUES (?, ?, ?, ?, ?, 1)
-    `).run(cleanEmail, cleanUsername, cleanFullName, cleanRole, passwordHash);
+      INSERT INTO admin_users (email, username, full_name, phone, role, permissions, password_hash, is_active)
+      VALUES (?, ?, ?, ?, ?, ?, ?, 1)
+    `).run(cleanEmail, cleanUsername, cleanFullName, cleanPhone, cleanRole, permissionsStr, passwordHash);
 
     const newCollaborator = db.prepare(`
-      SELECT id, email, username, full_name, role, is_active, created_at, last_login_at
+      SELECT id, email, username, full_name, phone, role, permissions, is_active, created_at, last_login_at
       FROM admin_users
       WHERE id = ?
     `).get(result.lastInsertRowid);
 
-    res.status(201).json(newCollaborator);
+    // Préparer le pack d'invitation avec URL et identifiants
+    const protocol = req.headers['x-forwarded-proto'] || req.protocol || 'http';
+    const host = req.get('host') || 'localhost:3000';
+    const baseUrl = `${protocol}://${host}`;
+    const invitation = inviteService.buildInvitation({
+      collaborator: newCollaborator,
+      password: effectivePassword,
+      baseUrl
+    });
+
+    res.status(201).json({
+      ...newCollaborator,
+      invitation
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -687,6 +708,48 @@ adminRouter.delete('/admin/collaborators/:id', requireSuperAdmin, (req, res) => 
 
     db.prepare(`DELETE FROM admin_users WHERE id = ?`).run(id);
     res.json({ success: true, message: 'Collaborateur supprimé avec succès' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /api/admin/collaborators/:id/resend-invite - Régénérer et renvoyer une invitation (réservé Super Admin)
+adminRouter.post('/admin/collaborators/:id/resend-invite', requireSuperAdmin, (req, res) => {
+  try {
+    const { id } = req.params;
+    const db = getDb();
+
+    const collaborator = db.prepare(`
+      SELECT id, email, username, full_name, phone, role, permissions, is_active, created_at, last_login_at
+      FROM admin_users
+      WHERE id = ?
+    `).get(id);
+
+    if (!collaborator) {
+      return res.status(404).json({ error: 'Collaborateur introuvable' });
+    }
+
+    // Régénérer un nouveau mot de passe temporaire pour l'invitation
+    const tempPassword = inviteService.generateTempPassword();
+    const salt = bcrypt.genSaltSync(10);
+    const passwordHash = bcrypt.hashSync(tempPassword, salt);
+
+    db.prepare(`UPDATE admin_users SET password_hash = ? WHERE id = ?`).run(passwordHash, id);
+
+    const protocol = req.headers['x-forwarded-proto'] || req.protocol || 'http';
+    const host = req.get('host') || 'localhost:3000';
+    const baseUrl = `${protocol}://${host}`;
+    const invitation = inviteService.buildInvitation({
+      collaborator,
+      password: tempPassword,
+      baseUrl
+    });
+
+    res.json({
+      success: true,
+      message: 'Invitation régénérée avec succès',
+      invitation
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

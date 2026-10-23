@@ -61,6 +61,12 @@ const collabFullname = document.getElementById('collab-fullname');
 const collabEmail = document.getElementById('collab-email');
 const collabUsername = document.getElementById('collab-username');
 const collabRole = document.getElementById('collab-role');
+const collabPhone = document.getElementById('collab-phone');
+const permOrders = document.getElementById('perm-orders');
+const permProducts = document.getElementById('perm-products');
+const permDiscounts = document.getElementById('perm-discounts');
+const permCms = document.getElementById('perm-cms');
+const generateCollabPasswordBtn = document.getElementById('generate-collab-password-btn');
 const collabPassword = document.getElementById('collab-password');
 const collabPasswordRequiredLabel = document.getElementById('collab-password-required-label');
 const collabPasswordHint = document.getElementById('collab-password-hint');
@@ -71,6 +77,21 @@ const teamStatTotal = document.getElementById('team-stat-total');
 const teamStatSuperadmin = document.getElementById('team-stat-superadmin');
 const teamStatGestionnaires = document.getElementById('team-stat-gestionnaires');
 const teamStatAgents = document.getElementById('team-stat-agents');
+
+// Invitation Modal Elements
+const collaboratorInviteModal = document.getElementById('collaborator-invite-modal');
+const closeInviteModalBtn = document.getElementById('close-invite-modal-btn');
+const finishInviteBtn = document.getElementById('finish-invite-btn');
+const inviteCollabName = document.getElementById('invite-collab-name');
+const inviteCollabRole = document.getElementById('invite-collab-role');
+const inviteCollabUrl = document.getElementById('invite-collab-url');
+const inviteCollabId = document.getElementById('invite-collab-id');
+const inviteCollabPassword = document.getElementById('invite-collab-password');
+const copyFullInviteBtn = document.getElementById('copy-full-invite-btn');
+const shareWhatsappInviteBtn = document.getElementById('share-whatsapp-invite-btn');
+const shareMailInviteBtn = document.getElementById('share-mail-invite-btn');
+const copyToast = document.getElementById('copy-toast');
+let currentInviteShareText = '';
 
 // Category Management Elements
 const openAddCategoryBtn = document.getElementById('open-add-category-btn');
@@ -2291,6 +2312,18 @@ function renderCollaborators() {
       ? new Date(collab.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })
       : 'Récemment';
 
+    let permsList = [];
+    try {
+      permsList = typeof collab.permissions === 'string' ? JSON.parse(collab.permissions) : (collab.permissions || []);
+    } catch(e) { permsList = []; }
+
+    const permLabels = {
+      orders: 'Commandes',
+      products: 'Catalogue',
+      discounts: 'Remises',
+      cms: 'Vitrine CMS'
+    };
+
     return `
       <div class="bg-white rounded-3xl p-5 border border-gray-100/90 shadow-sm hover:shadow-md transition-all flex flex-col justify-between relative group">
         <div>
@@ -2316,13 +2349,35 @@ function renderCollaborators() {
             </span>
           </div>
 
-          <!-- Contact & Timestamps Details -->
+          <!-- Contact Details -->
           <div class="space-y-2 py-2.5 border-y border-gray-100/80 text-xs">
             <div class="flex items-center gap-2 text-gray-600 truncate">
               <span class="material-symbols-outlined text-gray-400 text-base shrink-0">mail</span>
               <span class="truncate font-medium">${escapeHtml(collab.email)}</span>
             </div>
-            <div class="flex items-center justify-between text-[11px] text-gray-400 pt-0.5">
+            ${collab.phone ? `
+            <div class="flex items-center gap-2 text-gray-600 truncate">
+              <span class="material-symbols-outlined text-[#25D366] text-base shrink-0">chat</span>
+              <span class="truncate font-medium">${escapeHtml(collab.phone)}</span>
+            </div>
+            ` : ''}
+
+            <!-- Permissions / Modules autorisés -->
+            ${permsList && permsList.length > 0 ? `
+            <div class="pt-1">
+              <span class="text-[10px] font-bold text-gray-400 block mb-1 uppercase tracking-wider">Accès autorisés :</span>
+              <div class="flex flex-wrap gap-1">
+                ${permsList.map(p => `
+                  <span class="px-2 py-0.5 rounded-md text-[9px] font-bold bg-purple-50 text-purple-700 border border-purple-100 flex items-center gap-0.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
+                    <span>${escapeHtml(permLabels[p] || p)}</span>
+                  </span>
+                `).join('')}
+              </div>
+            </div>
+            ` : ''}
+
+            <div class="flex items-center justify-between text-[11px] text-gray-400 pt-1">
               <div class="flex items-center gap-1">
                 <span class="material-symbols-outlined text-xs">history</span>
                 <span>${formattedLastLogin}</span>
@@ -2352,13 +2407,21 @@ function renderCollaborators() {
             <span>${isActive ? 'Actif' : 'Désactivé'}</span>
           </button>
 
-          <!-- Edit & Delete Buttons -->
+          <!-- Action Buttons: Resend Invite, Edit, Delete -->
           <div class="flex items-center gap-1.5">
+            <button 
+              type="button" 
+              onclick="resendInvite(${collab.id})"
+              class="w-8 h-8 rounded-full bg-emerald-50 hover:bg-emerald-100 text-[#0d7252] flex items-center justify-center transition-colors cursor-pointer border border-emerald-200/70 shadow-2xs" 
+              title="Partager / Renvoyer le lien et les identifiants d'accès"
+            >
+              <span class="material-symbols-outlined text-sm">share</span>
+            </button>
             <button 
               type="button" 
               onclick="editCollaboratorById(${collab.id})"
               class="w-8 h-8 rounded-full bg-gray-50 hover:bg-gray-100 text-gray-700 flex items-center justify-center transition-colors cursor-pointer border border-gray-200/60" 
-              title="Modifier les informations ou réinitialiser le mot de passe"
+              title="Modifier les informations ou permissions"
             >
               <span class="material-symbols-outlined text-sm">edit</span>
             </button>
@@ -2382,6 +2445,40 @@ function renderCollaborators() {
   }).join('');
 }
 
+function generateSecurePassword() {
+  const letters = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz';
+  const digits = '23456789';
+  const symbols = '!@#$%';
+  let pass = 'Wuaze#';
+  for (let i = 0; i < 3; i++) {
+    pass += digits.charAt(Math.floor(Math.random() * digits.length));
+  }
+  for (let i = 0; i < 2; i++) {
+    pass += letters.charAt(Math.floor(Math.random() * letters.length));
+  }
+  return pass;
+}
+
+function applyRolePermissionsPreset(role) {
+  if (role === 'SUPER_ADMIN') {
+    if (permOrders) permOrders.checked = true;
+    if (permProducts) permProducts.checked = true;
+    if (permDiscounts) permDiscounts.checked = true;
+    if (permCms) permCms.checked = true;
+  } else if (role === 'AGENT') {
+    if (permOrders) permOrders.checked = true;
+    if (permProducts) permProducts.checked = false;
+    if (permDiscounts) permDiscounts.checked = false;
+    if (permCms) permCms.checked = false;
+  } else {
+    // GESTIONNAIRE
+    if (permOrders) permOrders.checked = true;
+    if (permProducts) permProducts.checked = true;
+    if (permDiscounts) permDiscounts.checked = true;
+    if (permCms) permCms.checked = false;
+  }
+}
+
 function openCollaboratorModal(collab = null) {
   if (!collaboratorModalOverlay) return;
   if (collaboratorModalError) collaboratorModalError.classList.add('hidden');
@@ -2391,8 +2488,24 @@ function openCollaboratorModal(collab = null) {
     if (collaboratorEditId) collaboratorEditId.value = collab.id;
     if (collabFullname) collabFullname.value = collab.full_name || '';
     if (collabEmail) collabEmail.value = collab.email || '';
+    if (collabPhone) collabPhone.value = collab.phone || '';
     if (collabUsername) collabUsername.value = collab.username || '';
     if (collabRole) collabRole.value = collab.role || 'GESTIONNAIRE';
+
+    let perms = [];
+    try {
+      perms = typeof collab.permissions === 'string' ? JSON.parse(collab.permissions) : (collab.permissions || []);
+    } catch(e) { perms = []; }
+
+    if (perms.length > 0) {
+      if (permOrders) permOrders.checked = perms.includes('orders');
+      if (permProducts) permProducts.checked = perms.includes('products');
+      if (permDiscounts) permDiscounts.checked = perms.includes('discounts');
+      if (permCms) permCms.checked = perms.includes('cms');
+    } else {
+      applyRolePermissionsPreset(collab.role || 'GESTIONNAIRE');
+    }
+
     if (collabPassword) {
       collabPassword.value = '';
       collabPassword.required = false;
@@ -2405,11 +2518,19 @@ function openCollaboratorModal(collab = null) {
     if (collaboratorEditId) collaboratorEditId.value = '';
     if (collabFullname) collabFullname.value = '';
     if (collabEmail) collabEmail.value = '';
+    if (collabPhone) collabPhone.value = '';
     if (collabUsername) collabUsername.value = '';
     if (collabRole) collabRole.value = 'GESTIONNAIRE';
+    applyRolePermissionsPreset('GESTIONNAIRE');
+
+    const autoPass = generateSecurePassword();
     if (collabPassword) {
-      collabPassword.value = '';
+      collabPassword.value = autoPass;
+      collabPassword.type = 'text';
       collabPassword.required = true;
+    }
+    if (toggleCollabPasswordBtn) {
+      toggleCollabPasswordBtn.innerHTML = '<span class="material-symbols-outlined text-lg">visibility_off</span>';
     }
     if (collabPasswordRequiredLabel) collabPasswordRequiredLabel.classList.remove('hidden');
     if (collabPasswordHint) collabPasswordHint.classList.add('hidden');
@@ -2424,6 +2545,79 @@ function closeCollaboratorModal() {
   collaboratorModalOverlay.classList.add('hidden');
   if (collaboratorModalError) collaboratorModalError.classList.add('hidden');
 }
+
+function showInviteModal(invitation, collabName, collabRole) {
+  if (!collaboratorInviteModal || !invitation) return;
+
+  const roleLabels = {
+    SUPER_ADMIN: 'Super Administrateur',
+    GESTIONNAIRE: 'Gestionnaire',
+    AGENT: 'Agent Logistique'
+  };
+
+  if (inviteCollabName) inviteCollabName.textContent = collabName || 'Collaborateur';
+  if (inviteCollabRole) inviteCollabRole.textContent = roleLabels[collabRole] || collabRole || 'Membre de l\'équipe';
+  if (inviteCollabUrl) inviteCollabUrl.textContent = invitation.inviteUrl || `${window.location.origin}/admin.html`;
+  if (inviteCollabId) inviteCollabId.textContent = invitation.loginId || '';
+  if (inviteCollabPassword) inviteCollabPassword.textContent = invitation.tempPassword || '***';
+
+  currentInviteShareText = invitation.fullShareText || '';
+
+  if (shareWhatsappInviteBtn) {
+    shareWhatsappInviteBtn.href = invitation.directWhatsAppUrl || '#';
+  }
+  if (shareMailInviteBtn) {
+    shareMailInviteBtn.href = invitation.mailtoUrl || '#';
+  }
+
+  if (copyToast) copyToast.classList.add('hidden');
+  collaboratorInviteModal.classList.remove('hidden');
+}
+
+function closeInviteModal() {
+  if (collaboratorInviteModal) {
+    collaboratorInviteModal.classList.add('hidden');
+  }
+}
+
+window.copyInviteElement = async function(elementId) {
+  const el = document.getElementById(elementId);
+  if (!el) return;
+  const text = (el.textContent || el.innerText || '').trim();
+  try {
+    await navigator.clipboard.writeText(text);
+    if (copyToast) {
+      copyToast.textContent = `✓ Copié : "${text.slice(0, 32)}${text.length > 32 ? '...' : ''}"`;
+      copyToast.classList.remove('hidden');
+      setTimeout(() => copyToast.classList.add('hidden'), 3000);
+    }
+  } catch(e) {
+    console.error('Clipboard copy error', e);
+  }
+};
+
+window.resendInvite = async function(collabId) {
+  if (!adminToken) return;
+  try {
+    const res = await fetch(`/api/admin/collaborators/${collabId}/resend-invite`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${adminToken}`
+      }
+    });
+    const data = await res.json();
+    if (res.ok && data.invitation) {
+      const collab = currentCollaborators.find(c => c.id === collabId);
+      showInviteModal(data.invitation, collab?.full_name || collab?.username, collab?.role);
+    } else {
+      alert(data.error || 'Impossible de générer l\'invitation.');
+    }
+  } catch (err) {
+    console.error('Erreur renvoi invitation:', err);
+    alert('Erreur réseau');
+  }
+};
 
 window.editCollaboratorById = function(id) {
   const collab = currentCollaborators.find(c => c.id === id);
@@ -2500,10 +2694,17 @@ if (collaboratorForm) {
     const editId = collaboratorEditId?.value;
     const fullName = collabFullname?.value.trim();
     const email = collabEmail?.value.trim();
+    const phone = collabPhone?.value.trim() || undefined;
     const username = collabUsername?.value.trim() || undefined;
     const role = collabRole?.value || 'GESTIONNAIRE';
     const password = collabPassword?.value;
     const isActive = collabIsActive ? collabIsActive.checked : true;
+
+    const permissions = [];
+    if (permOrders?.checked) permissions.push('orders');
+    if (permProducts?.checked) permissions.push('products');
+    if (permDiscounts?.checked) permissions.push('discounts');
+    if (permCms?.checked) permissions.push('cms');
 
     if (!fullName || !email) {
       if (collaboratorModalError) {
@@ -2524,8 +2725,10 @@ if (collaboratorForm) {
     const payload = {
       fullName,
       email,
+      phone,
       username,
       role,
+      permissions,
       isActive,
       password: password && password.length >= 6 ? password : undefined
     };
@@ -2554,11 +2757,53 @@ if (collaboratorForm) {
 
       closeCollaboratorModal();
       await loadCollaborators();
+
+      if (!editId && data.invitation) {
+        showInviteModal(data.invitation, fullName, role);
+      }
     } catch (err) {
       if (collaboratorModalError) {
         collaboratorModalError.textContent = 'Erreur réseau lors de l\'enregistrement';
         collaboratorModalError.classList.remove('hidden');
       }
+    }
+  });
+}
+
+if (collabRole) {
+  collabRole.addEventListener('change', () => {
+    applyRolePermissionsPreset(collabRole.value);
+  });
+}
+
+if (generateCollabPasswordBtn && collabPassword) {
+  generateCollabPasswordBtn.addEventListener('click', () => {
+    collabPassword.value = generateSecurePassword();
+    collabPassword.type = 'text';
+    if (toggleCollabPasswordBtn) {
+      toggleCollabPasswordBtn.innerHTML = '<span class="material-symbols-outlined text-lg">visibility_off</span>';
+    }
+  });
+}
+
+if (closeInviteModalBtn) {
+  closeInviteModalBtn.addEventListener('click', closeInviteModal);
+}
+if (finishInviteBtn) {
+  finishInviteBtn.addEventListener('click', closeInviteModal);
+}
+if (copyFullInviteBtn) {
+  copyFullInviteBtn.addEventListener('click', async () => {
+    if (!currentInviteShareText) return;
+    try {
+      await navigator.clipboard.writeText(currentInviteShareText);
+      if (copyToast) {
+        copyToast.textContent = '✓ Message complet avec lien et identifiants copié !';
+        copyToast.classList.remove('hidden');
+        setTimeout(() => copyToast.classList.add('hidden'), 3500);
+      }
+    } catch(e) {
+      console.error(e);
     }
   });
 }
