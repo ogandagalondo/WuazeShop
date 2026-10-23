@@ -328,6 +328,10 @@ function switchTab(tab) {
     }
     loadAdminSettings();
   } else if (tab === 'team') {
+    if (currentAdminUser && currentAdminUser.role !== 'SUPER_ADMIN') {
+      switchTab('orders');
+      return;
+    }
     if (tabTeamBtn) {
       tabTeamBtn.classList.add('active', 'bg-[#0d7252]', 'text-white');
       tabTeamBtn.classList.remove('text-gray-500');
@@ -354,7 +358,11 @@ if (mobileTabTeamBtn) mobileTabTeamBtn.addEventListener('click', () => switchTab
 
 // 4. Load Data
 async function loadDashboardData() {
-  await Promise.all([loadOrders(), loadAdminProducts(), loadAdminCategories(), loadAdminSettings(), loadCollaborators()]);
+  const tasks = [loadOrders(), loadAdminProducts(), loadAdminCategories(), loadAdminSettings()];
+  if (currentAdminUser && currentAdminUser.role === 'SUPER_ADMIN') {
+    tasks.push(loadCollaborators());
+  }
+  await Promise.all(tasks);
 }
 
 async function loadOrders() {
@@ -2140,6 +2148,40 @@ function renderAdminUserProfile() {
     } else {
       adminUserAvatar.className = 'w-7 h-7 rounded-full bg-blue-100 text-blue-700 font-black text-xs flex items-center justify-center uppercase shadow-2xs';
     }
+  }
+
+  // Protection d'accès : Seul le SUPER_ADMIN (fondateur) peut gérer l'équipe & les collaborateurs
+  const isSuperAdmin = role === 'SUPER_ADMIN';
+  if (tabTeamBtn) {
+    if (isSuperAdmin) {
+      tabTeamBtn.classList.remove('hidden');
+    } else {
+      tabTeamBtn.classList.add('hidden');
+    }
+  }
+  if (mobileTabTeamBtn) {
+    if (isSuperAdmin) {
+      mobileTabTeamBtn.classList.remove('hidden');
+    } else {
+      mobileTabTeamBtn.classList.add('hidden');
+    }
+  }
+
+  // Si l'utilisateur connecté n'est pas Super Admin et qu'il est sur l'onglet équipe, le rediriger
+  if (!isSuperAdmin && tabTeamContent && !tabTeamContent.classList.contains('hidden')) {
+    switchTab('orders');
+  }
+
+  // Restrictions spécifiques pour l'Agent Logistique
+  const openBatchDiscountBtn = document.getElementById('open-batch-discount-btn');
+  if (role === 'AGENT') {
+    if (tabCmsBtn) tabCmsBtn.classList.add('hidden');
+    if (mobileTabCmsBtn) mobileTabCmsBtn.classList.add('hidden');
+    if (openBatchDiscountBtn) openBatchDiscountBtn.classList.add('hidden');
+  } else {
+    if (tabCmsBtn) tabCmsBtn.classList.remove('hidden');
+    if (mobileTabCmsBtn) mobileTabCmsBtn.classList.remove('hidden');
+    if (openBatchDiscountBtn) openBatchDiscountBtn.classList.remove('hidden');
   }
 }
 

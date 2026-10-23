@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { authService, requireAdminAuth } from './auth.service.js';
+import { authService, requireAdminAuth, requireSuperAdmin } from './auth.service.js';
 import { getDb } from '../../db/database.js';
 import { orderService } from '../orders/order.service.js';
 
@@ -549,8 +549,8 @@ adminRouter.put('/admin/settings', (req, res) => {
 
 // ==================== COLLABORATORS MANAGEMENT ====================
 
-// GET /api/admin/collaborators - Lister tous les collaborateurs de l'équipe
-adminRouter.get('/admin/collaborators', (req, res) => {
+// GET /api/admin/collaborators - Lister tous les collaborateurs (réservé Super Admin)
+adminRouter.get('/admin/collaborators', requireSuperAdmin, (req, res) => {
   try {
     const db = getDb();
     const collaborators = db.prepare(`
@@ -564,20 +564,24 @@ adminRouter.get('/admin/collaborators', (req, res) => {
   }
 });
 
-// POST /api/admin/collaborators - Créer un nouveau collaborateur
-adminRouter.post('/admin/collaborators', (req, res) => {
+// POST /api/admin/collaborators - Créer un nouveau collaborateur (réservé Super Admin)
+adminRouter.post('/admin/collaborators', requireSuperAdmin, (req, res) => {
   try {
     const { email, username, fullName, role, password } = req.body;
     if (!email || !password) {
       return res.status(400).json({ error: 'Adresse e-mail et mot de passe requis' });
     }
 
-    const cleanUsername = username && username.trim() ? username.trim() : email.split('@')[0].replace(/[^a-zA-Z0-9_-]/g, '');
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanUsername = username && username.trim() ? username.trim().toLowerCase() : cleanEmail.split('@')[0].replace(/[^a-zA-Z0-9_-]/g, '');
     const cleanRole = ['SUPER_ADMIN', 'GESTIONNAIRE', 'AGENT'].includes(role) ? role : 'GESTIONNAIRE';
     const cleanFullName = fullName && fullName.trim() ? fullName.trim() : cleanUsername;
 
     const db = getDb();
-    const existing = db.prepare(`SELECT id FROM admin_users WHERE email = ? OR username = ?`).get(email, cleanUsername);
+    const existing = db.prepare(`
+      SELECT id FROM admin_users 
+      WHERE LOWER(email) = LOWER(?) OR LOWER(username) = LOWER(?)
+    `).get(cleanEmail, cleanUsername);
     if (existing) {
       return res.status(400).json({ error: 'Un collaborateur avec cette adresse email ou cet identifiant existe déjà' });
     }
@@ -588,7 +592,7 @@ adminRouter.post('/admin/collaborators', (req, res) => {
     const result = db.prepare(`
       INSERT INTO admin_users (email, username, full_name, role, password_hash, is_active)
       VALUES (?, ?, ?, ?, ?, 1)
-    `).run(email, cleanUsername, cleanFullName, cleanRole, passwordHash);
+    `).run(cleanEmail, cleanUsername, cleanFullName, cleanRole, passwordHash);
 
     const newCollaborator = db.prepare(`
       SELECT id, email, username, full_name, role, is_active, created_at, last_login_at
@@ -602,8 +606,8 @@ adminRouter.post('/admin/collaborators', (req, res) => {
   }
 });
 
-// PUT /api/admin/collaborators/:id - Mettre à jour un collaborateur
-adminRouter.put('/admin/collaborators/:id', (req, res) => {
+// PUT /api/admin/collaborators/:id - Mettre à jour un collaborateur (réservé Super Admin)
+adminRouter.put('/admin/collaborators/:id', requireSuperAdmin, (req, res) => {
   try {
     const { id } = req.params;
     const { email, username, fullName, role, isActive, password } = req.body;
@@ -633,9 +637,9 @@ adminRouter.put('/admin/collaborators/:id', (req, res) => {
       passwordHash = bcrypt.hashSync(password, salt);
     }
 
-    const updatedEmail = email !== undefined ? email : existing.email;
-    const updatedUsername = username !== undefined ? username : existing.username;
-    const updatedFullName = fullName !== undefined ? fullName : existing.full_name;
+    const updatedEmail = email !== undefined ? email.trim().toLowerCase() : existing.email;
+    const updatedUsername = username !== undefined ? username.trim().toLowerCase() : existing.username;
+    const updatedFullName = fullName !== undefined ? fullName.trim() : existing.full_name;
     const updatedRole = role !== undefined ? role : existing.role;
     const updatedIsActive = isActive !== undefined ? (isActive ? 1 : 0) : existing.is_active;
 
@@ -657,8 +661,8 @@ adminRouter.put('/admin/collaborators/:id', (req, res) => {
   }
 });
 
-// DELETE /api/admin/collaborators/:id - Supprimer un collaborateur
-adminRouter.delete('/admin/collaborators/:id', (req, res) => {
+// DELETE /api/admin/collaborators/:id - Supprimer un collaborateur (réservé Super Admin)
+adminRouter.delete('/admin/collaborators/:id', requireSuperAdmin, (req, res) => {
   try {
     const { id } = req.params;
     const db = getDb();

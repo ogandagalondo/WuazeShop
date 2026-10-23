@@ -456,18 +456,50 @@ describe('Admin CMS API', () => {
     newCollaboratorId = res.body.id;
   });
 
-  it('allows new collaborator to log in with their own credentials', async () => {
-    const res = await request(app)
+  let collabToken;
+  it('allows new collaborator to log in with their own credentials (email or username, case-insensitive)', async () => {
+    // Login with username with mixed case
+    const resUsername = await request(app)
+      .post('/api/admin/login')
+      .send({
+        email: 'Collab_Marc',
+        password: 'collabpassword123'
+      });
+
+    expect(resUsername.status).toBe(200);
+    expect(resUsername.body.token).toBeDefined();
+    expect(resUsername.body.role).toBe('GESTIONNAIRE');
+    expect(resUsername.body.fullName).toBe('Marc Ndong');
+    collabToken = resUsername.body.token;
+
+    // Login with email
+    const resEmail = await request(app)
       .post('/api/admin/login')
       .send({
         email: 'collaborateur@wuazeshop.ga',
         password: 'collabpassword123'
       });
 
-    expect(res.status).toBe(200);
-    expect(res.body.token).toBeDefined();
-    expect(res.body.role).toBe('GESTIONNAIRE');
-    expect(res.body.fullName).toBe('Marc Ndong');
+    expect(resEmail.status).toBe(200);
+  });
+
+  it('forbids non-superadmin collaborator from accessing collaborator management (403 Forbidden)', async () => {
+    const listRes = await request(app)
+      .get('/api/admin/collaborators')
+      .set('Authorization', `Bearer ${collabToken}`);
+
+    expect(listRes.status).toBe(403);
+    expect(listRes.body.error).toContain('Super Administrateur');
+
+    const createRes = await request(app)
+      .post('/api/admin/collaborators')
+      .set('Authorization', `Bearer ${collabToken}`)
+      .send({
+        email: 'intruder@wuazeshop.ga',
+        password: 'password123'
+      });
+
+    expect(createRes.status).toBe(403);
   });
 
   it('allows admin to update collaborator role and status', async () => {

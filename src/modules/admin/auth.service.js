@@ -9,7 +9,11 @@ const AUTH_SECRET = process.env.JWT_SECRET || 'wuazeshop-admin-hmac-secret-gabon
 export const authService = {
   login(identifier, password) {
     const db = getDb();
-    const user = db.prepare(`SELECT * FROM admin_users WHERE email = ? OR username = ?`).get(identifier, identifier);
+    const cleanId = (identifier || '').trim();
+    const user = db.prepare(`
+      SELECT * FROM admin_users 
+      WHERE LOWER(email) = LOWER(?) OR LOWER(username) = LOWER(?)
+    `).get(cleanId, cleanId);
     if (!user) {
       throw new Error('Identifiants incorrects');
     }
@@ -99,5 +103,12 @@ export function requireAdminAuth(req, res, next) {
   }
 
   req.admin = session;
+  next();
+}
+
+export function requireSuperAdmin(req, res, next) {
+  if (!req.admin || req.admin.role !== 'SUPER_ADMIN') {
+    return res.status(403).json({ error: 'Accès interdit : Seul le Super Administrateur (fondateur) a le droit de gérer l\'équipe et les collaborateurs.' });
+  }
   next();
 }
