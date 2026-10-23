@@ -111,8 +111,26 @@ adminRouter.post('/admin/upload', (req, res) => {
 // POST /api/admin/products - Créer un produit
 adminRouter.post('/admin/products', (req, res) => {
   try {
-    const { title, description, category, price, originalPrice, imageUrl, specs, colors, inStock } = req.body;
-    if (!title || !category || !price || !imageUrl) {
+    let { title, description, category, price, originalPrice, imageUrl, images, specs, colors, inStock } = req.body;
+
+    let imagesArr = [];
+    if (Array.isArray(images) && images.length > 0) {
+      imagesArr = images.filter(Boolean);
+    } else if (typeof images === 'string') {
+      try {
+        imagesArr = JSON.parse(images);
+      } catch {
+        imagesArr = images ? [images] : [];
+      }
+    }
+    if (imagesArr.length === 0 && imageUrl) {
+      imagesArr = [imageUrl];
+    }
+    if (!imageUrl && imagesArr.length > 0) {
+      imageUrl = imagesArr[0];
+    }
+
+    if (!title || !category || !price || (!imageUrl && imagesArr.length === 0)) {
       return res.status(400).json({ error: 'Champs obligatoires manquants (title, category, price, imageUrl)' });
     }
 
@@ -120,8 +138,8 @@ adminRouter.post('/admin/products', (req, res) => {
     const db = getDb();
     const stmt = db.prepare(`
       INSERT INTO products (
-        title, description, slug, category, price, original_price, image_url, specs, colors, in_stock, is_active
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
+        title, description, slug, category, price, original_price, image_url, images, specs, colors, in_stock, is_active
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
     `);
 
     stmt.run(
@@ -132,6 +150,7 @@ adminRouter.post('/admin/products', (req, res) => {
       Number(price),
       originalPrice ? Number(originalPrice) : null,
       imageUrl,
+      JSON.stringify(imagesArr),
       specs ? JSON.stringify(specs) : null,
       colors ? JSON.stringify(colors) : null,
       inStock === false ? 0 : 1
@@ -161,16 +180,26 @@ adminRouter.put('/admin/products/:id', (req, res) => {
     const originalPrice = req.body.originalPrice !== undefined 
       ? (req.body.originalPrice !== null && req.body.originalPrice !== '' && Number(req.body.originalPrice) > 0 ? Number(req.body.originalPrice) : null)
       : existing.original_price;
-    const imageUrl = req.body.imageUrl !== undefined ? req.body.imageUrl : existing.image_url;
+
+    let imageUrl = req.body.imageUrl !== undefined ? req.body.imageUrl : existing.image_url;
+    let imagesVal = existing.images;
+    if (req.body.images !== undefined) {
+      let imagesArr = Array.isArray(req.body.images) ? req.body.images.filter(Boolean) : [];
+      if (imagesArr.length > 0) {
+        imagesVal = JSON.stringify(imagesArr);
+        imageUrl = imagesArr[0];
+      }
+    }
+
     const specs = req.body.specs !== undefined ? JSON.stringify(req.body.specs) : existing.specs;
     const colors = req.body.colors !== undefined ? JSON.stringify(req.body.colors) : existing.colors;
     const inStock = req.body.inStock !== undefined ? (req.body.inStock ? 1 : 0) : existing.in_stock;
 
     db.prepare(`
       UPDATE products 
-      SET title = ?, description = ?, category = ?, price = ?, original_price = ?, image_url = ?, specs = ?, colors = ?, in_stock = ?, updated_at = CURRENT_TIMESTAMP
+      SET title = ?, description = ?, category = ?, price = ?, original_price = ?, image_url = ?, images = ?, specs = ?, colors = ?, in_stock = ?, updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
-    `).run(title, description, category, price, originalPrice, imageUrl, specs, colors, inStock, id);
+    `).run(title, description, category, price, originalPrice, imageUrl, imagesVal, specs, colors, inStock, id);
 
     const updated = db.prepare(`SELECT * FROM products WHERE id = ?`).get(id);
     res.json(updated);

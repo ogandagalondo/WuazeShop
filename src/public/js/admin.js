@@ -785,117 +785,191 @@ document.getElementById('admin-product-search-input')?.addEventListener('input',
   renderAdminProducts();
 });
 
-// 8. Add / Edit Product Modal Logic
-async function handleImageFileSelection(file) {
-  if (!file) return;
+// 8. Add / Edit Product Modal - Multi-Image Gallery Logic
+let currentProductImages = [];
 
-  if (file.size > 25 * 1024 * 1024) {
-    alert('Le fichier est trop volumineux (maximum 25 Mo).');
+function renderProductGallery() {
+  const grid = document.getElementById('prod-gallery-grid');
+  const countBadge = document.getElementById('gallery-count-badge');
+  const hiddenUrl = document.getElementById('prod-image-url');
+  
+  if (hiddenUrl) {
+    hiddenUrl.value = currentProductImages[0] || '';
+  }
+
+  if (countBadge) {
+    const len = currentProductImages.length;
+    countBadge.textContent = `${len} photo${len > 1 ? 's' : ''}`;
+  }
+
+  if (!grid) return;
+
+  if (currentProductImages.length === 0) {
+    grid.innerHTML = '';
     return;
   }
 
-  const reader = new FileReader();
-  reader.onload = async (e) => {
-    const base64Data = e.target.result;
-    uploadPreviewImg.src = base64Data;
-    uploadFileName.textContent = file.name;
-    uploadStatus.innerHTML = `
-      <span class="material-symbols-outlined text-[13px] text-blue-600 animate-spin">sync</span>
-      <span class="text-blue-600">Téléversement en cours...</span>
+  grid.innerHTML = currentProductImages.map((url, idx) => {
+    const isPrimary = idx === 0;
+    return `
+      <div class="relative group rounded-2xl border ${isPrimary ? 'border-[#0d7252] ring-2 ring-[#0d7252]/20 bg-emerald-50/20' : 'border-gray-200 bg-white'} p-2 flex flex-col gap-1.5 shadow-2xs transition-all">
+        <div class="w-full aspect-square bg-gray-50 rounded-xl overflow-hidden flex items-center justify-center p-1 relative border border-gray-100">
+          <img src="${escapeHtml(url)}" alt="Angle ${idx + 1}" class="w-full h-full object-contain"/>
+          
+          <!-- Primary badge vs angle index -->
+          ${isPrimary ? `
+            <span class="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-full bg-[#0d7252] text-white text-[9px] font-black uppercase tracking-wider shadow-xs flex items-center gap-0.5">
+              <span class="material-symbols-outlined text-[11px]">star</span>
+              <span>Principale</span>
+            </span>
+          ` : `
+            <span class="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-full bg-black/60 text-white text-[9px] font-bold">
+              Angle ${idx + 1}
+            </span>
+          `}
+
+          <!-- Delete button -->
+          <button type="button" onclick="removeProductGalleryImage(${idx})" class="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-white/95 hover:bg-red-50 text-gray-500 hover:text-red-600 shadow-sm flex items-center justify-center transition-colors cursor-pointer border border-gray-200" title="Retirer cette photo">
+            <span class="material-symbols-outlined text-sm">close</span>
+          </button>
+        </div>
+
+        <!-- Action: Set as primary -->
+        ${!isPrimary ? `
+          <button type="button" onclick="setMainProductGalleryImage(${idx})" class="w-full py-1 px-2 rounded-lg bg-gray-50 hover:bg-emerald-50 text-gray-700 hover:text-[#0d7252] border border-gray-200 text-[10px] font-bold flex items-center justify-center gap-1 transition-colors cursor-pointer">
+            <span class="material-symbols-outlined text-xs">star</span>
+            <span>Définir principale</span>
+          </button>
+        ` : `
+          <div class="w-full py-1 px-2 rounded-lg bg-emerald-100/60 text-[#0d7252] text-[10px] font-extrabold text-center">
+            ★ Couverture catalogue
+          </div>
+        `}
+      </div>
     `;
-    uploadPlaceholder.classList.add('hidden');
-    uploadPreviewContainer.classList.remove('hidden');
+  }).join('');
+}
 
-    try {
-      isUploadingImage = true;
-      const res = await fetch('/api/admin/upload', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${adminToken}`
-        },
-        body: JSON.stringify({
-          image: base64Data,
-          filename: file.name
-        })
-      });
+window.removeProductGalleryImage = function(index) {
+  if (index >= 0 && index < currentProductImages.length) {
+    currentProductImages.splice(index, 1);
+    renderProductGallery();
+  }
+};
 
-      const data = await res.json();
-      if (res.ok && data.success) {
-        prodImageUrl.value = data.imageUrl;
-        prodImageUrlManual.value = data.imageUrl;
-        uploadStatus.innerHTML = `
-          <span class="material-symbols-outlined text-[13px] text-green-600">check_circle</span>
-          <span class="text-green-700">Photo prête et enregistrée</span>
-        `;
-      } else {
-        uploadStatus.innerHTML = `
-          <span class="material-symbols-outlined text-[13px] text-red-500">error</span>
-          <span class="text-red-600">Échec envoi (${data.error || 'Erreur'})</span>
-        `;
-        alert(`Erreur lors du téléversement: ${data.error || 'Erreur inconnue'}`);
-      }
-    } catch (err) {
-      console.error('Erreur upload:', err);
-      uploadStatus.innerHTML = `
-        <span class="material-symbols-outlined text-[13px] text-red-500">error</span>
-        <span class="text-red-600">Erreur réseau</span>
-      `;
-      alert('Erreur réseau lors du téléversement de la photo.');
-    } finally {
-      isUploadingImage = false;
+window.setMainProductGalleryImage = function(index) {
+  if (index > 0 && index < currentProductImages.length) {
+    const [selected] = currentProductImages.splice(index, 1);
+    currentProductImages.unshift(selected);
+    renderProductGallery();
+  }
+};
+
+async function uploadSingleImageFile(file) {
+  return new Promise((resolve) => {
+    if (file.size > 25 * 1024 * 1024) {
+      alert(`Le fichier "${file.name}" dépasse 25 Mo.`);
+      return resolve(null);
     }
-  };
-  reader.readAsDataURL(file);
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      try {
+        const res = await fetch('/api/admin/upload', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${adminToken}`
+          },
+          body: JSON.stringify({
+            image: e.target.result,
+            filename: file.name
+          })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          resolve(data.imageUrl);
+        } else {
+          alert(`Erreur upload pour "${file.name}": ${data.error || 'Erreur'}`);
+          resolve(null);
+        }
+      } catch (err) {
+        console.error('Erreur upload:', err);
+        alert(`Erreur réseau pour "${file.name}".`);
+        resolve(null);
+      }
+    };
+    reader.onerror = () => resolve(null);
+    reader.readAsDataURL(file);
+  });
+}
+
+async function handleMultiImageFiles(fileList) {
+  if (!fileList || fileList.length === 0) return;
+  const files = Array.from(fileList);
+  const spinner = document.getElementById('upload-spinner-container');
+  const spinnerText = document.getElementById('upload-spinner-text');
+  const placeholder = document.getElementById('upload-placeholder');
+
+  isUploadingImage = true;
+  if (spinner) spinner.classList.remove('hidden');
+  if (placeholder) placeholder.classList.add('hidden');
+
+  for (let i = 0; i < files.length; i++) {
+    if (spinnerText) {
+      spinnerText.textContent = `Téléversement image ${i + 1} sur ${files.length}...`;
+    }
+    const url = await uploadSingleImageFile(files[i]);
+    if (url && !currentProductImages.includes(url)) {
+      currentProductImages.push(url);
+      renderProductGallery();
+    }
+  }
+
+  isUploadingImage = false;
+  if (spinner) spinner.classList.add('hidden');
+  if (placeholder) placeholder.classList.remove('hidden');
+  if (prodImageFile) prodImageFile.value = '';
 }
 
 if (prodImageFile) {
   prodImageFile.addEventListener('change', (e) => {
-    const file = e.target.files && e.target.files[0];
-    if (file) {
-      handleImageFileSelection(file);
+    if (e.target.files && e.target.files.length > 0) {
+      handleMultiImageFiles(e.target.files);
     }
   });
 }
 
-if (removeUploadedImageBtn) {
-  removeUploadedImageBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    e.preventDefault();
-    if (prodImageFile) prodImageFile.value = '';
-    prodImageUrl.value = '';
-    prodImageUrlManual.value = '';
-    uploadPreviewImg.src = '';
-    uploadPreviewContainer.classList.add('hidden');
-    uploadPlaceholder.classList.remove('hidden');
+function addManualImageUrl() {
+  const input = document.getElementById('prod-image-url-manual');
+  if (!input) return;
+  const val = input.value.trim();
+  if (!val) return;
+  if (!currentProductImages.includes(val)) {
+    currentProductImages.push(val);
+    renderProductGallery();
+  }
+  input.value = '';
+}
+
+const addImageUrlBtn = document.getElementById('add-image-url-btn');
+if (addImageUrlBtn) {
+  addImageUrlBtn.addEventListener('click', addManualImageUrl);
+}
+
+if (prodImageUrlManual) {
+  prodImageUrlManual.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      addManualImageUrl();
+    }
   });
 }
 
 if (toggleUrlInputBtn && urlInputContainer) {
   toggleUrlInputBtn.addEventListener('click', () => {
     urlInputContainer.classList.toggle('hidden');
-    if (!urlInputContainer.classList.contains('hidden')) {
+    if (!urlInputContainer.classList.contains('hidden') && prodImageUrlManual) {
       prodImageUrlManual.focus();
-    }
-  });
-}
-
-if (prodImageUrlManual) {
-  prodImageUrlManual.addEventListener('input', (e) => {
-    const val = e.target.value.trim();
-    prodImageUrl.value = val;
-    if (val) {
-      uploadPreviewImg.src = val;
-      uploadFileName.textContent = 'Image URL externe';
-      uploadStatus.innerHTML = `
-        <span class="material-symbols-outlined text-[13px] text-green-600">link</span>
-        <span class="text-green-700">Lien web configuré</span>
-      `;
-      uploadPlaceholder.classList.add('hidden');
-      uploadPreviewContainer.classList.remove('hidden');
-    } else {
-      uploadPreviewContainer.classList.add('hidden');
-      uploadPlaceholder.classList.remove('hidden');
     }
   });
 }
@@ -1112,11 +1186,9 @@ function openProductModal(isEdit = false, productData = null) {
   if (productModalError) productModalError.classList.add('hidden');
   if (prodImageFile) prodImageFile.value = '';
   prodImageUrl.value = '';
-  prodImageUrlManual.value = '';
-  uploadPreviewImg.src = '';
-  uploadPreviewContainer.classList.add('hidden');
-  uploadPlaceholder.classList.remove('hidden');
+  if (prodImageUrlManual) prodImageUrlManual.value = '';
   if (urlInputContainer) urlInputContainer.classList.add('hidden');
+  currentProductImages = [];
 
   if (isEdit && productData) {
     productModalTitle.textContent = 'Modifier le produit';
@@ -1147,17 +1219,11 @@ function openProductModal(isEdit = false, productData = null) {
     activeSpecs = Array.isArray(productData.specs) ? [...productData.specs] : [];
     activeColors = Array.isArray(productData.colors) ? [...productData.colors] : [];
 
-    if (productData.image_url) {
-      prodImageUrl.value = productData.image_url;
-      prodImageUrlManual.value = productData.image_url;
-      uploadPreviewImg.src = productData.image_url;
-      uploadFileName.textContent = productData.title || 'Photo produit';
-      uploadStatus.innerHTML = `
-        <span class="material-symbols-outlined text-[13px] text-green-600">check_circle</span>
-        <span class="text-green-700">Photo actuelle du produit</span>
-      `;
-      uploadPlaceholder.classList.add('hidden');
-      uploadPreviewContainer.classList.remove('hidden');
+    // Initialize multi-image gallery
+    if (Array.isArray(productData.images) && productData.images.length > 0) {
+      currentProductImages = [...productData.images];
+    } else if (productData.image_url) {
+      currentProductImages = [productData.image_url];
     }
   } else {
     productModalTitle.textContent = 'Ajouter un produit (Import Chine)';
@@ -1167,8 +1233,10 @@ function openProductModal(isEdit = false, productData = null) {
     cancelProductDiscount();
     activeSpecs = [];
     activeColors = [];
+    currentProductImages = [];
   }
 
+  renderProductGallery();
   renderActiveSpecs();
   renderActiveColors();
   productModalOverlay.classList.remove('hidden');
@@ -1280,12 +1348,26 @@ productForm.addEventListener('submit', async (e) => {
     }
   }
 
-  if (!imageUrl) {
-    showProductError('Veuillez téléverser une photo pour ce produit (ou renseigner une URL web).');
+  if (currentProductImages.length === 0 && !imageUrl) {
+    showProductError('Veuillez ajouter au moins une photo pour ce produit (ou renseigner une URL web).');
     return;
   }
 
-  const payload = { title, description, category, price, originalPrice, imageUrl, specs, colors, inStock };
+  const primaryImage = currentProductImages[0] || imageUrl;
+  const imagesList = currentProductImages.length > 0 ? currentProductImages : [imageUrl];
+
+  const payload = { 
+    title, 
+    description, 
+    category, 
+    price, 
+    originalPrice, 
+    imageUrl: primaryImage, 
+    images: imagesList, 
+    specs, 
+    colors, 
+    inStock 
+  };
 
   if (saveProductBtn) saveProductBtn.disabled = true;
   if (saveProductBtnText) saveProductBtnText.textContent = 'Enregistrement en cours...';

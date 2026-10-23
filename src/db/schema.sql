@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS products (
   price INTEGER NOT NULL,          -- Price in FCFA (XAF)
   original_price INTEGER,          -- Strikethrough price in FCFA
   image_url TEXT NOT NULL,
+  images TEXT,                     -- JSON array of all angle image URLs
   specs TEXT,                      -- JSON string of bullet points
   colors TEXT,                     -- JSON string of colors
   in_stock INTEGER DEFAULT 1,      -- 1 for in stock, 0 for out

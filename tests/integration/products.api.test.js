@@ -123,4 +123,25 @@ describe('Products API', () => {
       expect(res.text).toContain('/tracking');
     }
   });
+
+  it('GET /api/products returns products with images array', async () => {
+    const res = await request(app).get('/api/products');
+    expect(res.status).toBe(200);
+    const iphone = res.body.find(p => p.slug === 'iphone-15-pro-max-256gb');
+    expect(iphone).toBeDefined();
+    expect(Array.isArray(iphone.images)).toBe(true);
+    expect(iphone.images.length).toBeGreaterThanOrEqual(2);
+    expect(iphone.image_url).toBe(iphone.images[0]);
+  });
+
+  it('GET /product/:slug includes multi-angle gallery HTML controls', async () => {
+    const res = await request(app).get('/product/iphone-15-pro-max-256gb');
+    expect(res.status).toBe(200);
+    expect(res.text).toContain('gallery-card');
+    expect(res.text).toContain('gallery-prev-btn');
+    expect(res.text).toContain('gallery-next-btn');
+    expect(res.text).toContain('gallery-dots-container');
+    expect(res.text).toContain('gallery-counter-pill');
+    expect(res.text).toContain('detail-thumbnails-wrapper');
+  });
 });

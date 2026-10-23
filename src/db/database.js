@@ -27,6 +27,7 @@ CREATE TABLE IF NOT EXISTS products (
   price INTEGER NOT NULL,
   original_price INTEGER,
   image_url TEXT NOT NULL,
+  images TEXT,
   specs TEXT,
   colors TEXT,
   in_stock INTEGER DEFAULT 1,
@@ -174,6 +175,16 @@ export function initDb(dbPath = resolveDbPath()) {
     }
   } catch (err) {
     // Columns may already exist or table not ready
+  }
+
+  // Migration: Ensure images column exists on products
+  try {
+    const prodInfo = db.prepare(`PRAGMA table_info(products)`).all();
+    if (!prodInfo.some(col => col.name === 'images')) {
+      db.exec(`ALTER TABLE products ADD COLUMN images TEXT;`);
+    }
+  } catch (err) {
+    // Column may already exist or table not ready
   }
 
   // Seed default data

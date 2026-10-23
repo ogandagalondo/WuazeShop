@@ -162,6 +162,51 @@ describe('Admin CMS API', () => {
     expect(updateRes.body.description).toBe(updatedDesc);
   });
 
+  it('allows authenticated admin to add and update a product with multiple gallery angle images', async () => {
+    const galleryAngles = [
+      '/uploads/phone-front.png',
+      '/uploads/phone-back.png',
+      '/uploads/phone-side.png'
+    ];
+
+    const createRes = await request(app)
+      .post('/api/admin/products')
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({
+        title: 'Pixel 9 Pro Multi-Angles',
+        category: 'smartphones',
+        price: 680000,
+        images: galleryAngles
+      });
+
+    expect(createRes.status).toBe(201);
+    expect(createRes.body.id).toBeDefined();
+
+    // Verify stored and returned via public API
+    const getRes = await request(app).get(`/api/products/${createRes.body.id}`);
+    expect(getRes.status).toBe(200);
+    expect(getRes.body.image_url).toBe(galleryAngles[0]);
+    expect(getRes.body.images).toEqual(galleryAngles);
+
+    // Update with new angles
+    const updatedAngles = [
+      '/uploads/phone-back.png',
+      '/uploads/phone-front.png'
+    ];
+    const updateRes = await request(app)
+      .put(`/api/admin/products/${createRes.body.id}`)
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({
+        images: updatedAngles
+      });
+
+    expect(updateRes.status).toBe(200);
+    const getUpdated = await request(app).get(`/api/products/${createRes.body.id}`);
+    expect(getUpdated.status).toBe(200);
+    expect(getUpdated.body.image_url).toBe(updatedAngles[0]);
+    expect(getUpdated.body.images).toEqual(updatedAngles);
+  });
+
   it('allows admin to list customer orders with WhatsApp numbers and neighborhoods', async () => {
     const res = await request(app)
       .get('/api/admin/orders')

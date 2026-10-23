@@ -1227,51 +1227,63 @@
           </label>
         </div>
 
-        <div>
-          <label class="block font-bold text-gray-700 mb-1">Photo du produit *</label>
+        <!-- Multi-Images & Angles Section -->
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <div>
+              <label class="block font-bold text-gray-700 text-xs sm:text-sm">
+                <span>Photos &amp; Angles du produit *</span>
+                <span class="text-[11px] text-gray-400 font-normal ml-1">(ajoutez plusieurs angles pour la galerie)</span>
+              </label>
+              <p class="text-[10px] text-gray-500">La 1ère photo sera la couverture principale affichée sur le catalogue.</p>
+            </div>
+            <span id="gallery-count-badge" class="px-2.5 py-0.5 rounded-full bg-emerald-50 text-[#0d7252] border border-emerald-200 text-[10px] font-bold">
+              0 photo
+            </span>
+          </div>
           
-          <!-- File Upload Dropzone -->
+          <!-- Dropzone to add 1 or multiple photos -->
           <div id="image-upload-dropzone" class="border-2 border-dashed border-gray-200 hover:border-[#0d7252] bg-gray-50 hover:bg-[#e6f7f0]/30 rounded-2xl p-4 text-center cursor-pointer transition-all relative">
-            <input type="file" id="prod-image-file" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10"/>
+            <input type="file" id="prod-image-file" accept="image/*" multiple class="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10"/>
             
-            <!-- Default placeholder state -->
             <div id="upload-placeholder" class="flex flex-col items-center justify-center gap-1.5 py-2">
               <div class="w-10 h-10 rounded-full bg-[#e6f7f0] text-[#0d7252] flex items-center justify-center">
                 <span class="material-symbols-outlined text-2xl">add_photo_alternate</span>
               </div>
-              <p class="text-xs font-bold text-gray-800">Cliquez pour téléverser une photo ou glissez-déposez ici</p>
-              <p class="text-[10px] text-gray-400">PNG, JPG, WEBP jusqu'à 25 Mo (depuis PC ou smartphone)</p>
+              <p class="text-xs font-bold text-gray-800">Cliquez pour ajouter des photos ou glissez-les ici</p>
+              <p class="text-[10px] text-gray-400">Sélection multiple acceptée &bull; PNG, JPG, WEBP jusqu'à 25 Mo</p>
             </div>
 
-            <!-- Preview state (when an image is selected) -->
-            <div id="upload-preview-container" class="hidden flex items-center gap-3 bg-white p-2.5 rounded-xl border border-gray-200 text-left">
-              <img id="upload-preview-img" src="" alt="Aperçu" class="w-14 h-14 object-contain rounded-lg bg-gray-50 border border-gray-100 p-1 shrink-0"/>
-              <div class="flex-1 min-w-0">
-                <p id="upload-file-name" class="text-xs font-bold text-gray-800 truncate">photo.jpg</p>
-                <span id="upload-status" class="text-[10px] font-semibold text-[#0d7252] flex items-center gap-1">
-                  <span class="material-symbols-outlined text-[13px]">check_circle</span>
-                  <span>Photo prête</span>
-                </span>
-              </div>
-              <button type="button" id="remove-uploaded-image-btn" class="z-20 p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors">
-                <span class="material-symbols-outlined text-lg">close</span>
-              </button>
+            <!-- Upload progress spinner -->
+            <div id="upload-spinner-container" class="hidden flex items-center justify-center gap-2 py-3">
+              <span class="material-symbols-outlined text-xl text-[#0d7252] animate-spin">sync</span>
+              <span id="upload-spinner-text" class="text-xs font-bold text-[#0d7252]">Téléversement en cours...</span>
             </div>
           </div>
 
-          <!-- Hidden input storing final image URL (upload path or web URL) -->
+          <!-- Visual Gallery Grid (List of uploaded angle photos with primary badge & reordering) -->
+          <div id="prod-gallery-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 pt-1">
+            <!-- Dynamically populated cards -->
+          </div>
+
+          <!-- Hidden storage for primary imageUrl and images json -->
           <input type="hidden" id="prod-image-url" value=""/>
 
-          <!-- Alternative URL Toggle -->
-          <div class="mt-2 flex items-center justify-between">
-            <button type="button" id="toggle-url-input-btn" class="text-[11px] font-semibold text-[#0d7252] hover:underline flex items-center gap-1">
-              <span class="material-symbols-outlined text-xs">link</span>
-              <span>Ou coller une URL d'image web</span>
-            </button>
-          </div>
+          <!-- Alternative URL Adder (Add one or more URLs) -->
+          <div class="pt-1 border-t border-gray-100">
+            <div class="flex items-center justify-between">
+              <button type="button" id="toggle-url-input-btn" class="text-[11px] font-semibold text-[#0d7252] hover:underline flex items-center gap-1 cursor-pointer">
+                <span class="material-symbols-outlined text-xs">add_link</span>
+                <span>Ajouter une image par URL web</span>
+              </button>
+            </div>
 
-          <div id="url-input-container" class="hidden mt-2">
-            <input id="prod-image-url-manual" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-[#0d7252] focus:bg-white" placeholder="https://images.unsplash.com/..." type="url"/>
+            <div id="url-input-container" class="hidden mt-2 flex gap-2">
+              <input id="prod-image-url-manual" class="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-[#0d7252] focus:bg-white" placeholder="https://... ou /images/..." type="url"/>
+              <button type="button" id="add-image-url-btn" class="px-3.5 py-2 rounded-xl bg-emerald-50 text-[#0d7252] border border-emerald-200 hover:bg-emerald-100 text-xs font-bold transition-colors shrink-0 cursor-pointer">
+                + Ajouter
+              </button>
+            </div>
           </div>
         </div>
 
@@ -1904,6 +1916,6 @@
     </div>
   </div>
 
-  <script src="/js/admin.js?v=2.3"></script>
+  <script src="/js/admin.js?v=2.5"></script>
 </body>
 </html>

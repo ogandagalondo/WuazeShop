@@ -2,8 +2,22 @@ import { productRepository } from './product.repository.js';
 
 function formatProduct(p) {
   if (!p) return null;
+  let parsedImages = [];
+  if (p.images) {
+    try {
+      parsedImages = typeof p.images === 'string' ? JSON.parse(p.images) : p.images;
+    } catch {
+      parsedImages = [];
+    }
+  }
+  if (!Array.isArray(parsedImages) || parsedImages.length === 0) {
+    parsedImages = p.image_url ? [p.image_url] : [];
+  }
+
   return {
     ...p,
+    image_url: p.image_url || parsedImages[0] || '',
+    images: parsedImages,
     specs: p.specs ? (typeof p.specs === 'string' ? JSON.parse(p.specs) : p.specs) : [],
     colors: p.colors ? (typeof p.colors === 'string' ? JSON.parse(p.colors) : p.colors) : [],
     in_stock: Boolean(p.in_stock)
