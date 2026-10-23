@@ -474,12 +474,12 @@ async function loadSiteSettings() {
       if (h.imageUrl && document.getElementById('hero-image')) {
         document.getElementById('hero-image').src = h.imageUrl;
       }
-      if (h.prop1Title && document.getElementById('hero-prop1-title')) document.getElementById('hero-prop1-title').textContent = h.prop1Title;
-      if (h.prop1Sub && document.getElementById('hero-prop1-sub')) document.getElementById('hero-prop1-sub').textContent = h.prop1Sub;
-      if (h.prop2Title && document.getElementById('hero-prop2-title')) document.getElementById('hero-prop2-title').textContent = h.prop2Title;
-      if (h.prop2Sub && document.getElementById('hero-prop2-sub')) document.getElementById('hero-prop2-sub').textContent = h.prop2Sub;
-      if (h.prop3Title && document.getElementById('hero-prop3-title')) document.getElementById('hero-prop3-title').textContent = h.prop3Title;
-      if (h.prop3Sub && document.getElementById('hero-prop3-sub')) document.getElementById('hero-prop3-sub').textContent = h.prop3Sub;
+      if (h.prop1Title) document.querySelectorAll('.hero-prop1-title').forEach(el => el.textContent = h.prop1Title);
+      if (h.prop1Sub) document.querySelectorAll('.hero-prop1-sub').forEach(el => el.textContent = h.prop1Sub);
+      if (h.prop2Title) document.querySelectorAll('.hero-prop2-title').forEach(el => el.textContent = h.prop2Title);
+      if (h.prop2Sub) document.querySelectorAll('.hero-prop2-sub').forEach(el => el.textContent = h.prop2Sub);
+      if (h.prop3Title) document.querySelectorAll('.hero-prop3-title').forEach(el => el.textContent = h.prop3Title);
+      if (h.prop3Sub) document.querySelectorAll('.hero-prop3-sub').forEach(el => el.textContent = h.prop3Sub);
     }
 
     // 2. Special Offer Promo Banner

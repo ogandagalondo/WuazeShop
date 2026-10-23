@@ -4,7 +4,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
   <title>WuazeShop | La technologie à portée de main</title>
-  <link rel="stylesheet" href="/css/style.css"/>
+  <link rel="stylesheet" href="/css/style.css?v=2.3"/>
   <script src="https://cdn.tailwindcss.com"></script>
   <script id="tailwind-config">
     tailwind.config = {
@@ -146,44 +146,111 @@
               </a>
             </div>
 
-            <!-- Value Props Under CTA (Responsive Scrollable on Mobile) -->
-            <div class="flex items-center gap-2.5 overflow-x-auto no-scrollbar sm:grid sm:grid-cols-3 sm:gap-3 pt-6 border-t border-gray-200/60 max-w-lg">
-              <div class="flex items-center gap-2 shrink-0 min-w-[130px] sm:min-w-0 p-2 sm:p-0 rounded-xl bg-white/70 sm:bg-transparent border border-gray-100 sm:border-0">
-                <div class="w-8 h-8 rounded-full bg-[#e6f7f0] text-[#0d7252] flex items-center justify-center shrink-0">
-                  <span class="material-symbols-outlined text-base">local_shipping</span>
-                </div>
-                <div class="text-[11px] leading-tight">
-                  <p id="hero-prop1-title" class="font-bold text-gray-900">Livraison rapide</p>
-                  <p id="hero-prop1-sub" class="text-gray-500">en 24/48h</p>
+            <!-- Value Props Under CTA (Continuous Scrolling Ribbon / Ruban Défilant) -->
+            <div class="pt-6 border-t border-gray-200/60 max-w-xl overflow-hidden">
+              <div class="marquee-container py-1">
+                <div class="marquee-track">
+                  
+                  <!-- Set A -->
+                  <div class="flex items-center gap-2.5 sm:gap-3 shrink-0 pr-2.5 sm:pr-3">
+                    
+                    <!-- Capsule 1: Livraison rapide -->
+                    <div class="flex items-center gap-2.5 shrink-0 px-3.5 py-2 rounded-2xl bg-white border border-gray-200/80 shadow-2xs hover:border-emerald-300 transition-all select-none">
+                      <div class="w-8 h-8 rounded-full bg-[#e6f7f0] text-[#0d7252] flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-base">local_shipping</span>
+                      </div>
+                      <div class="text-[11px] leading-tight">
+                        <p class="hero-prop1-title font-bold text-gray-900" id="hero-prop1-title">Livraison rapide</p>
+                        <p class="hero-prop1-sub text-gray-500" id="hero-prop1-sub">en 24/48h</p>
+                      </div>
+                    </div>
+
+                    <!-- Capsule 2: Paiement sécurisé -->
+                    <div class="flex items-center gap-2.5 shrink-0 px-3.5 py-2 rounded-2xl bg-white border border-gray-200/80 shadow-2xs hover:border-emerald-300 transition-all select-none">
+                      <div class="w-8 h-8 rounded-full bg-[#e6f7f0] text-[#0d7252] flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-base">verified_user</span>
+                      </div>
+                      <div class="text-[11px] leading-tight">
+                        <p class="hero-prop2-title font-bold text-gray-900" id="hero-prop2-title">Paiement sécurisé</p>
+                        <p class="hero-prop2-sub text-gray-500" id="hero-prop2-sub">100% fiable</p>
+                      </div>
+                    </div>
+
+                    <!-- Capsule 3: Service client -->
+                    <div class="flex items-center gap-2.5 shrink-0 px-3.5 py-2 rounded-2xl bg-white border border-gray-200/80 shadow-2xs hover:border-emerald-300 transition-all select-none">
+                      <div class="w-8 h-8 rounded-full bg-[#e6f7f0] text-[#0d7252] flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-base">support_agent</span>
+                      </div>
+                      <div class="text-[11px] leading-tight">
+                        <p class="hero-prop3-title font-bold text-gray-900" id="hero-prop3-title">Service client</p>
+                        <p class="hero-prop3-sub text-gray-500" id="hero-prop3-sub">dédié 7j/7</p>
+                      </div>
+                    </div>
+
+                    <!-- Capsule 4: Garantie constructeur certifiée -->
+                    <div class="flex items-center gap-2.5 shrink-0 px-3.5 py-2 rounded-2xl bg-white border border-gray-200/80 shadow-2xs hover:border-emerald-300 transition-all select-none">
+                      <div class="w-8 h-8 rounded-full bg-[#e6f7f0] text-[#0d7252] flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-base">verified</span>
+                      </div>
+                      <div class="text-[11px] leading-tight">
+                        <p class="font-bold text-gray-900">100% Original</p>
+                        <p class="text-gray-500">Garantie certifiée</p>
+                      </div>
+                    </div>
+
+                  </div>
+
+                  <!-- Set B (Identical clone for seamless infinite loop) -->
+                  <div class="flex items-center gap-2.5 sm:gap-3 shrink-0 pr-2.5 sm:pr-3" aria-hidden="true">
+                    
+                    <!-- Capsule 1: Livraison rapide -->
+                    <div class="flex items-center gap-2.5 shrink-0 px-3.5 py-2 rounded-2xl bg-white border border-gray-200/80 shadow-2xs hover:border-emerald-300 transition-all select-none">
+                      <div class="w-8 h-8 rounded-full bg-[#e6f7f0] text-[#0d7252] flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-base">local_shipping</span>
+                      </div>
+                      <div class="text-[11px] leading-tight">
+                        <p class="hero-prop1-title font-bold text-gray-900">Livraison rapide</p>
+                        <p class="hero-prop1-sub text-gray-500">en 24/48h</p>
+                      </div>
+                    </div>
+
+                    <!-- Capsule 2: Paiement sécurisé -->
+                    <div class="flex items-center gap-2.5 shrink-0 px-3.5 py-2 rounded-2xl bg-white border border-gray-200/80 shadow-2xs hover:border-emerald-300 transition-all select-none">
+                      <div class="w-8 h-8 rounded-full bg-[#e6f7f0] text-[#0d7252] flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-base">verified_user</span>
+                      </div>
+                      <div class="text-[11px] leading-tight">
+                        <p class="hero-prop2-title font-bold text-gray-900">Paiement sécurisé</p>
+                        <p class="hero-prop2-sub text-gray-500">100% fiable</p>
+                      </div>
+                    </div>
+
+                    <!-- Capsule 3: Service client -->
+                    <div class="flex items-center gap-2.5 shrink-0 px-3.5 py-2 rounded-2xl bg-white border border-gray-200/80 shadow-2xs hover:border-emerald-300 transition-all select-none">
+                      <div class="w-8 h-8 rounded-full bg-[#e6f7f0] text-[#0d7252] flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-base">support_agent</span>
+                      </div>
+                      <div class="text-[11px] leading-tight">
+                        <p class="hero-prop3-title font-bold text-gray-900">Service client</p>
+                        <p class="hero-prop3-sub text-gray-500">dédié 7j/7</p>
+                      </div>
+                    </div>
+
+                    <!-- Capsule 4: Garantie constructeur certifiée -->
+                    <div class="flex items-center gap-2.5 shrink-0 px-3.5 py-2 rounded-2xl bg-white border border-gray-200/80 shadow-2xs hover:border-emerald-300 transition-all select-none">
+                      <div class="w-8 h-8 rounded-full bg-[#e6f7f0] text-[#0d7252] flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-base">verified</span>
+                      </div>
+                      <div class="text-[11px] leading-tight">
+                        <p class="font-bold text-gray-900">100% Original</p>
+                        <p class="text-gray-500">Garantie certifiée</p>
+                      </div>
+                    </div>
+
+                  </div>
+
                 </div>
               </div>
-
-              <div class="flex items-center gap-2 shrink-0 min-w-[130px] sm:min-w-0 p-2 sm:p-0 rounded-xl bg-white/70 sm:bg-transparent border border-gray-100 sm:border-0">
-                <div class="w-8 h-8 rounded-full bg-[#e6f7f0] text-[#0d7252] flex items-center justify-center shrink-0">
-                  <span class="material-symbols-outlined text-base">verified_user</span>
-                </div>
-                <div class="text-[11px] leading-tight">
-                  <p id="hero-prop2-title" class="font-bold text-gray-900">Paiement sécurisé</p>
-                  <p id="hero-prop2-sub" class="text-gray-500">100% fiable</p>
-                </div>
-              </div>
-
-              <div class="flex items-center gap-2 shrink-0 min-w-[130px] sm:min-w-0 p-2 sm:p-0 rounded-xl bg-white/70 sm:bg-transparent border border-gray-100 sm:border-0">
-                <div class="w-8 h-8 rounded-full bg-[#e6f7f0] text-[#0d7252] flex items-center justify-center shrink-0">
-                  <span class="material-symbols-outlined text-base">support_agent</span>
-                </div>
-                <div class="text-[11px] leading-tight">
-                  <p id="hero-prop3-title" class="font-bold text-gray-900">Service client</p>
-                  <p id="hero-prop3-sub" class="text-gray-500">dédié 7j/7</p>
-                </div>
-              </div>
-            </div>
-
-            <!-- Slider Dots -->
-            <div class="flex items-center gap-2 pt-2">
-              <span class="w-6 h-2 rounded-full bg-[#0d7252]"></span>
-              <span class="w-2 h-2 rounded-full bg-gray-300"></span>
-              <span class="w-2 h-2 rounded-full bg-gray-300"></span>
             </div>
 
           </div>
@@ -907,6 +974,6 @@
     </a>
   </nav>
 
-  <script src="/js/store.js?v=2.2"></script>
+  <script src="/js/store.js?v=2.3"></script>
 </body>
 </html>
