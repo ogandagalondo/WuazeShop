@@ -147,7 +147,7 @@ function showGalleryImage(index, animate = true) {
     const dots = dotsContainer.querySelectorAll('.gallery-dot span');
     dots.forEach((dotSpan, idx) => {
       if (idx === activeGalleryIndex) {
-        dotSpan.className = 'w-5 h-1.5 rounded-full bg-[#0d7252] transition-all duration-300 inline-block';
+        dotSpan.className = 'w-5 h-1.5 rounded-full bg-[#0d7252] shadow-xs transition-all duration-300 inline-block';
       } else {
         dotSpan.className = 'w-2 h-2 rounded-full bg-gray-300 hover:bg-gray-400 transition-all duration-300 inline-block';
       }
@@ -166,9 +166,9 @@ function renderGalleryState() {
           type="button" 
           aria-label="Angle ${idx + 1}"
           onclick="event.stopPropagation(); showGalleryImage(${idx})"
-          class="gallery-dot p-1 flex items-center justify-center cursor-pointer transition-all"
+          class="gallery-dot p-1.5 flex items-center justify-center cursor-pointer transition-all border-0 bg-transparent outline-none focus:outline-none focus:ring-0 active:outline-none"
         >
-          <span class="${idx === activeGalleryIndex ? 'w-5 h-1.5 rounded-full bg-[#0d7252]' : 'w-2 h-2 rounded-full bg-gray-300 hover:bg-gray-400'} transition-all duration-300 inline-block"></span>
+          <span class="${idx === activeGalleryIndex ? 'w-5 h-1.5 rounded-full bg-[#0d7252] shadow-xs' : 'w-2 h-2 rounded-full bg-gray-300 hover:bg-gray-400'} transition-all duration-300 inline-block"></span>
         </button>
       `).join('');
       dotsContainer.classList.remove('hidden');
