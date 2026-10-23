@@ -28,15 +28,52 @@
 </head>
 <body class="bg-[#fbfcfd] text-gray-900 min-h-screen flex flex-col font-sans antialiased selection:bg-[#0d7252] selection:text-white pb-28 sm:pb-8">
 
-  <!-- ==================== TOP ANNOUNCEMENT TICKER (HUEL INSPIRED) ==================== -->
-  <div class="bg-[#fafbfb] border-b border-gray-100 py-2 px-4 text-xs font-semibold text-gray-700">
-    <div class="max-w-7xl mx-auto flex items-center justify-between">
-      <span class="text-gray-400 select-none text-xs">←</span>
-      <div class="flex items-center gap-2 text-[11px] sm:text-xs font-semibold text-gray-800 text-center">
-        <span class="material-symbols-outlined text-[#0d7252] text-sm">local_shipping</span>
-        <span>Fret aérien cargo express Gabon inclus &bull; Import direct Chine &bull; Paiement sécurisé Mobile Money</span>
+  <!-- ==================== TOP ANNOUNCEMENT BAR (MARQUEE RIBBON) ==================== -->
+  <div id="top-announcement-bar" class="top-announcement-bar text-[11px] sm:text-xs py-2 select-none">
+    <div class="top-announcement-container">
+      <div class="top-announcement-track flex items-center whitespace-nowrap">
+        
+        <!-- Set A -->
+        <div class="top-announcement-group flex items-center shrink-0">
+          <div class="flex items-center gap-2 px-6 sm:px-8">
+            <span class="inline-block w-2 h-2 rounded-full bg-[#10b981] animate-pulse shrink-0"></span>
+            <span class="top-announcement-text-1 font-medium text-emerald-100">🇨🇳 Import direct usine Shenzhen &rarr; 🇬🇦 Gabon | Fret cargo aérien inclus | Paiement sécurisé Mobile Money</span>
+          </div>
+          <div class="flex items-center gap-2 px-6 sm:px-8">
+            <span class="inline-block w-2 h-2 rounded-full bg-[#10b981] animate-pulse shrink-0"></span>
+            <span class="top-announcement-text-2 font-medium text-emerald-100">🇨🇳 Import direct usine Shenzhen &rarr; 🇬🇦 Gabon | Fret cargo aérien inclus | Paiement sécurisé Mobile Money</span>
+          </div>
+          <div class="flex items-center gap-2 px-6 sm:px-8">
+            <span class="inline-block w-2 h-2 rounded-full bg-[#10b981] animate-pulse shrink-0"></span>
+            <span class="top-announcement-text-1 font-medium text-emerald-100">🇨🇳 Import direct usine Shenzhen &rarr; 🇬🇦 Gabon | Fret cargo aérien inclus | Paiement sécurisé Mobile Money</span>
+          </div>
+          <div class="flex items-center gap-2 px-6 sm:px-8">
+            <span class="inline-block w-2 h-2 rounded-full bg-[#10b981] animate-pulse shrink-0"></span>
+            <span class="top-announcement-text-2 font-medium text-emerald-100">🇨🇳 Import direct usine Shenzhen &rarr; 🇬🇦 Gabon | Fret cargo aérien inclus | Paiement sécurisé Mobile Money</span>
+          </div>
+        </div>
+
+        <!-- Set B (Identical clone for seamless infinite loop) -->
+        <div class="top-announcement-group flex items-center shrink-0" aria-hidden="true">
+          <div class="flex items-center gap-2 px-6 sm:px-8">
+            <span class="inline-block w-2 h-2 rounded-full bg-[#10b981] animate-pulse shrink-0"></span>
+            <span class="top-announcement-text-1 font-medium text-emerald-100">🇨🇳 Import direct usine Shenzhen &rarr; 🇬🇦 Gabon | Fret cargo aérien inclus | Paiement sécurisé Mobile Money</span>
+          </div>
+          <div class="flex items-center gap-2 px-6 sm:px-8">
+            <span class="inline-block w-2 h-2 rounded-full bg-[#10b981] animate-pulse shrink-0"></span>
+            <span class="top-announcement-text-2 font-medium text-emerald-100">🇨🇳 Import direct usine Shenzhen &rarr; 🇬🇦 Gabon | Fret cargo aérien inclus | Paiement sécurisé Mobile Money</span>
+          </div>
+          <div class="flex items-center gap-2 px-6 sm:px-8">
+            <span class="inline-block w-2 h-2 rounded-full bg-[#10b981] animate-pulse shrink-0"></span>
+            <span class="top-announcement-text-1 font-medium text-emerald-100">🇨🇳 Import direct usine Shenzhen &rarr; 🇬🇦 Gabon | Fret cargo aérien inclus | Paiement sécurisé Mobile Money</span>
+          </div>
+          <div class="flex items-center gap-2 px-6 sm:px-8">
+            <span class="inline-block w-2 h-2 rounded-full bg-[#10b981] animate-pulse shrink-0"></span>
+            <span class="top-announcement-text-2 font-medium text-emerald-100">🇨🇳 Import direct usine Shenzhen &rarr; 🇬🇦 Gabon | Fret cargo aérien inclus | Paiement sécurisé Mobile Money</span>
+          </div>
+        </div>
+
       </div>
-      <span class="text-gray-400 select-none text-xs">→</span>
     </div>
   </div>
 

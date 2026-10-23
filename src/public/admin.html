@@ -348,6 +348,56 @@
           </div>
         </div>
 
+        <!-- 0. TOP ANNOUNCEMENT TICKER CARD (RUBAN DÉFILANT SUPÉRIEUR) -->
+        <div class="bg-white rounded-3xl p-5 sm:p-6 border border-gray-100 shadow-sm space-y-5">
+          <div class="flex items-center justify-between pb-3 border-b border-gray-100">
+            <div class="flex items-center gap-2.5">
+              <span class="w-8 h-8 rounded-xl bg-emerald-50 text-[#0d7252] flex items-center justify-center font-bold text-sm">
+                <span class="material-symbols-outlined text-base">view_carousel</span>
+              </span>
+              <div>
+                <h4 class="font-extrabold text-sm sm:text-base text-gray-900">Bandeau Défilant Supérieur (Ruban d'Annonce)</h4>
+                <p class="text-[11px] text-gray-400">Ruban sombre défilant en boucle continue tout en haut du site sur toutes les pages.</p>
+              </div>
+            </div>
+            <span id="cms-announcement-saved" class="hidden text-xs font-bold text-green-700 bg-green-50 px-3 py-1 rounded-full border border-green-200 flex items-center gap-1">
+              <span class="material-symbols-outlined text-sm">check_circle</span>
+              <span>Enregistré !</span>
+            </span>
+          </div>
+
+          <!-- Active toggle -->
+          <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-2xl border border-gray-200">
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input id="cms-announcement-enabled" type="checkbox" checked class="sr-only peer">
+              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#0d7252]"></div>
+            </label>
+            <div>
+              <span class="text-xs font-bold text-gray-800">Activer le ruban défilant</span>
+              <p class="text-[10px] text-gray-500">Si décoché, le bandeau supérieur sera masqué sur l'ensemble du site.</p>
+            </div>
+          </div>
+
+          <div class="space-y-3">
+            <div>
+              <label class="block font-bold text-xs text-gray-700 mb-1">Message principal (défilement continu)</label>
+              <input id="cms-announcement-text" type="text" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-[#0d7252]" placeholder="🇨🇳 Import direct usine Shenzhen → 🇬🇦 Gabon | Fret cargo aérien inclus | Paiement sécurisé Mobile Money"/>
+            </div>
+
+            <div>
+              <label class="block font-bold text-xs text-gray-700 mb-1">Message secondaire / point fort (facultatif)</label>
+              <input id="cms-announcement-subtext" type="text" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-[#0d7252]" placeholder="Laissez vide pour répéter uniquement le message principal"/>
+            </div>
+          </div>
+
+          <div class="pt-2 flex justify-end">
+            <button id="save-cms-announcement-btn" type="button" class="py-2.5 px-6 rounded-full bg-[#0d7252] hover:bg-[#08553d] text-white text-xs font-bold flex items-center gap-1.5 shadow-md transition-all">
+              <span class="material-symbols-outlined text-sm">save</span>
+              <span>Enregistrer le Ruban Défilant</span>
+            </button>
+          </div>
+        </div>
+
         <!-- 1. HERO SECTION CARD -->
         <div class="bg-white rounded-3xl p-5 sm:p-6 border border-gray-100 shadow-sm space-y-5">
           <div class="flex items-center justify-between pb-3 border-b border-gray-100">

@@ -1624,6 +1624,20 @@ async function loadAdminSettings() {
     if (!res.ok) return;
     currentCmsSettings = await res.json();
 
+    // 0. Announcement Bar (Ruban Défilant)
+    if (currentCmsSettings.announcement_bar) {
+      const ab = currentCmsSettings.announcement_bar;
+      if (document.getElementById('cms-announcement-enabled')) {
+        document.getElementById('cms-announcement-enabled').checked = ab.enabled !== false;
+      }
+      if (document.getElementById('cms-announcement-text')) {
+        document.getElementById('cms-announcement-text').value = ab.text || '';
+      }
+      if (document.getElementById('cms-announcement-subtext')) {
+        document.getElementById('cms-announcement-subtext').value = ab.secondaryText || '';
+      }
+    }
+
     // 1. Hero
     if (currentCmsSettings.hero_section) {
       const h = currentCmsSettings.hero_section;
@@ -1820,6 +1834,15 @@ setupCmsImageUpload('cms-hero-file-input', 'cms-hero-preview-img', 'cms-hero-img
 setupCmsImageUpload('cms-promo-file-input', 'cms-promo-preview-img', 'cms-promo-img-url', null);
 
 // Wire CMS Save Buttons
+document.getElementById('save-cms-announcement-btn')?.addEventListener('click', () => {
+  const payload = {
+    enabled: document.getElementById('cms-announcement-enabled') ? document.getElementById('cms-announcement-enabled').checked : true,
+    text: document.getElementById('cms-announcement-text')?.value.trim() || '🇨🇳 Import direct usine Shenzhen → 🇬🇦 Gabon | Fret cargo aérien inclus | Paiement sécurisé Mobile Money',
+    secondaryText: document.getElementById('cms-announcement-subtext')?.value.trim() || ''
+  };
+  saveCmsSection('announcement_bar', payload, 'cms-announcement-saved');
+});
+
 document.getElementById('save-cms-hero-btn')?.addEventListener('click', () => {
   const payload = {
     badge: document.getElementById('cms-hero-badge')?.value.trim() || '✦ Nouveauté',

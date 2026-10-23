@@ -134,3 +134,49 @@ h1, h2, h3, h4, h5, .font-heading {
     animation-duration: 16s;
   }
 }
+
+/* Top Announcement Bar Continuous Marquee Ribbon */
+@keyframes top-announcement-scroll {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.top-announcement-bar {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  background-color: #04281c;
+  color: #d1fae5;
+  border-bottom: 1px solid rgba(6, 78, 59, 0.5);
+}
+
+.top-announcement-container {
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+  mask-image: linear-gradient(to right, transparent 0%, black 1.5%, black 98.5%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 1.5%, black 98.5%, transparent 100%);
+}
+
+.top-announcement-track {
+  display: flex;
+  width: max-content;
+  animation: top-announcement-scroll 28s linear infinite;
+  will-change: transform;
+}
+
+.top-announcement-track:hover,
+.top-announcement-track:active {
+  animation-play-state: paused;
+}
+
+@media (max-width: 640px) {
+  .top-announcement-track {
+    animation-duration: 20s;
+  }
+}
+

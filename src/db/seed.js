@@ -188,6 +188,14 @@ export function seedData(db) {
   // 4. Seed default Site Settings (CMS Sections)
   const defaultSettings = [
     {
+      key: 'announcement_bar',
+      value: JSON.stringify({
+        enabled: true,
+        text: '🇨🇳 Import direct usine Shenzhen → 🇬🇦 Gabon | Fret cargo aérien inclus | Paiement sécurisé Mobile Money',
+        secondaryText: ''
+      })
+    },
+    {
       key: 'hero_section',
       value: JSON.stringify({
         badge: '✦ Nouveauté',

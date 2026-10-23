@@ -877,6 +877,21 @@ async function syncWhatsAppLinks() {
           document.querySelectorAll('a[href*="wa.me"]').forEach(a => a.href = `https://wa.me/${clean}`);
         }
       }
+      if (settings.announcement_bar) {
+        const ab = settings.announcement_bar;
+        const bar = document.getElementById('top-announcement-bar');
+        if (bar) {
+          if (ab.enabled === false) {
+            bar.classList.add('hidden');
+          } else {
+            bar.classList.remove('hidden');
+            const t1 = ab.text || '🇨🇳 Import direct usine Shenzhen → 🇬🇦 Gabon | Fret cargo aérien inclus | Paiement sécurisé Mobile Money';
+            const t2 = ab.secondaryText || t1;
+            document.querySelectorAll('.top-announcement-text-1').forEach(el => el.textContent = t1);
+            document.querySelectorAll('.top-announcement-text-2').forEach(el => el.textContent = t2);
+          }
+        }
+      }
     }
   } catch (_) {}
 }
