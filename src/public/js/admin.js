@@ -356,7 +356,6 @@ if (mobileTabTeamBtn) mobileTabTeamBtn.addEventListener('click', () => switchTab
 async function loadDashboardData() {
   await Promise.all([loadOrders(), loadAdminProducts(), loadAdminCategories(), loadAdminSettings(), loadCollaborators()]);
 }
-}
 
 async function loadOrders() {
   try {
@@ -1736,16 +1735,6 @@ document.getElementById('save-cms-legal-btn')?.addEventListener('click', () => {
 
 // FAQ Management Logic in Admin
 let adminFaqItems = [];
-
-function escapeHtml(str) {
-  if (!str) return '';
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
-}
 
 function syncFaqFromInputs() {
   const container = document.getElementById('admin-faq-list');
