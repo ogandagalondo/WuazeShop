@@ -105,8 +105,8 @@ function renderProducts(products) {
         </div>
 
         <!-- Product Image Container (Clickable to detail page) -->
-        <a href="/product/${product.slug || product.id}" class="aspect-square w-full rounded-xl overflow-hidden flex items-center justify-center p-2 sm:p-3 mb-2 sm:mb-3 bg-[#fafbfb] group-hover:bg-white transition-colors cursor-pointer block" title="Voir les détails de ${product.title}">
-          <img class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" src="${product.image_url}" alt="${product.title}"/>
+        <a href="/product/${product.slug || product.id}" class="aspect-square w-full rounded-xl overflow-hidden flex items-center justify-center mb-2 sm:mb-3 bg-gray-50 group-hover:bg-gray-100 transition-colors cursor-pointer block relative" title="Voir les détails de ${product.title}">
+          <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" src="${product.image_url}" alt="${product.title}"/>
         </a>
 
         <!-- Product Details -->

@@ -130,11 +130,11 @@ function showGalleryImage(index, animate = true) {
   if (detailImg) {
     if (animate) {
       detailImg.style.opacity = '0.3';
-      detailImg.style.transform = 'scale(0.97)';
+      detailImg.style.transform = 'scale(0.98)';
       setTimeout(() => {
         detailImg.src = currentGalleryImages[activeGalleryIndex];
         detailImg.style.opacity = '1';
-        detailImg.style.transform = 'scale(1)';
+        detailImg.style.transform = '';
       }, 120);
     } else {
       detailImg.src = currentGalleryImages[activeGalleryIndex];
@@ -147,7 +147,7 @@ function showGalleryImage(index, animate = true) {
     const dots = dotsContainer.querySelectorAll('.gallery-dot span');
     dots.forEach((dotSpan, idx) => {
       if (idx === activeGalleryIndex) {
-        dotSpan.className = 'w-5 h-1.5 rounded-full bg-[#0d7252] shadow-xs transition-all duration-300 inline-block';
+        dotSpan.className = 'w-5 h-1.5 rounded-full bg-[#0d7252] shadow-2xs transition-all duration-300 inline-block';
       } else {
         dotSpan.className = 'w-2 h-2 rounded-full bg-gray-300 hover:bg-gray-400 transition-all duration-300 inline-block';
       }
@@ -161,16 +161,20 @@ function renderGalleryState() {
 
   if (dotsContainer) {
     if (hasMultiple) {
-      dotsContainer.innerHTML = currentGalleryImages.map((_, idx) => `
-        <button 
-          type="button" 
-          aria-label="Angle ${idx + 1}"
-          onclick="event.stopPropagation(); showGalleryImage(${idx})"
-          class="gallery-dot p-1.5 flex items-center justify-center cursor-pointer transition-all border-0 bg-transparent outline-none focus:outline-none focus:ring-0 active:outline-none"
-        >
-          <span class="${idx === activeGalleryIndex ? 'w-5 h-1.5 rounded-full bg-[#0d7252] shadow-xs' : 'w-2 h-2 rounded-full bg-gray-300 hover:bg-gray-400'} transition-all duration-300 inline-block"></span>
-        </button>
-      `).join('');
+      dotsContainer.innerHTML = `
+        <div class="inline-flex items-center gap-1 bg-white/85 backdrop-blur-md px-2.5 py-1 rounded-full shadow-xs border border-white/80">
+          ${currentGalleryImages.map((_, idx) => `
+            <button 
+              type="button" 
+              aria-label="Angle ${idx + 1}"
+              onclick="event.stopPropagation(); showGalleryImage(${idx})"
+              class="gallery-dot p-1 flex items-center justify-center cursor-pointer transition-all border-0 bg-transparent outline-none focus:outline-none focus:ring-0 active:outline-none"
+            >
+              <span class="${idx === activeGalleryIndex ? 'w-5 h-1.5 rounded-full bg-[#0d7252] shadow-2xs' : 'w-2 h-2 rounded-full bg-gray-300 hover:bg-gray-400'} transition-all duration-300 inline-block"></span>
+            </button>
+          `).join('')}
+        </div>
+      `;
       dotsContainer.classList.remove('hidden');
     } else {
       dotsContainer.innerHTML = '';
@@ -453,13 +457,13 @@ async function loadRelatedProducts(category, currentId) {
       const discount = calculateDiscountPercent(p.price, p.original_price);
       return `
         <article class="group bg-white rounded-2xl sm:rounded-3xl overflow-hidden shadow-xs hover:shadow-xl hover:border-emerald-200/70 transition-all duration-300 flex flex-col justify-between border border-gray-150 p-3 sm:p-4 relative">
-          <a href="/product/${p.slug || p.id}" class="aspect-square w-full rounded-xl sm:rounded-2xl overflow-hidden flex items-center justify-center p-3 mb-2.5 bg-[#fafbfb] group-hover:bg-white transition-colors relative block">
+          <a href="/product/${p.slug || p.id}" class="aspect-square w-full rounded-xl sm:rounded-2xl overflow-hidden flex items-center justify-center mb-2.5 bg-gray-50 group-hover:bg-gray-100 transition-colors relative block">
             ${discount ? `
               <span class="absolute top-2 left-2 z-10 bg-[#10b981] text-white text-[9px] font-black px-2 py-0.5 rounded-full shadow-xs">
                 ${discount}
               </span>
             ` : ''}
-            <img class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" src="${p.image_url}" alt="${p.title}" loading="lazy"/>
+            <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" src="${p.image_url}" alt="${p.title}" loading="lazy"/>
           </a>
           <div class="space-y-1.5 flex-1 flex flex-col justify-between">
             <div>

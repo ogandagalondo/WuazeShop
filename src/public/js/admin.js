@@ -813,8 +813,8 @@ function renderProductGallery() {
     const isPrimary = idx === 0;
     return `
       <div class="relative group rounded-2xl border ${isPrimary ? 'border-[#0d7252] ring-2 ring-[#0d7252]/20 bg-emerald-50/20' : 'border-gray-200 bg-white'} p-2 flex flex-col gap-1.5 shadow-2xs transition-all">
-        <div class="w-full aspect-square bg-gray-50 rounded-xl overflow-hidden flex items-center justify-center p-1 relative border border-gray-100">
-          <img src="${escapeHtml(url)}" alt="Angle ${idx + 1}" class="w-full h-full object-contain"/>
+        <div class="w-full aspect-square bg-gray-50 rounded-xl overflow-hidden relative border border-gray-100">
+          <img src="${escapeHtml(url)}" alt="Angle ${idx + 1}" class="w-full h-full object-cover"/>
           
           <!-- Primary badge vs angle index -->
           ${isPrimary ? `
