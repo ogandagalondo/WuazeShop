@@ -34,6 +34,15 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public/index.html'));
 });
 
+// Subdomain support: admin.wuazeshop.com (or admin.localhost) serves admin portal directly at root
+app.use((req, res, next) => {
+  const host = (req.hostname || req.headers.host || '').toLowerCase();
+  if (host.startsWith('admin.') && (req.path === '/' || req.path === '')) {
+    return res.sendFile(path.join(__dirname, 'public/admin.html'));
+  }
+  next();
+});
+
 // Shopify-style Admin portal route: /admin directly serves admin.html
 app.get(['/admin', '/admin/'], (req, res) => {
   res.sendFile(path.join(__dirname, 'public/admin.html'));
