@@ -233,7 +233,7 @@ export function seedData(db) {
         subtitle: 'Notre équipe au Gabon et notre acheteur en Chine vous conseillent en temps réel et peuvent vous envoyer des vidéos réelles des articles avant commande.',
         whatsappNumber: '241074001122',
         whatsappDisplay: '(+241) 074 00 11 22',
-        buttonText: 'Écrire sur WhatsApp (+241) 074 00 11 22'
+        buttonText: 'Écrivez-nous sur WhatsApp'
       })
     },
     {

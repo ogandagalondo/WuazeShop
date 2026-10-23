@@ -1866,7 +1866,7 @@ document.getElementById('save-cms-contact-btn')?.addEventListener('click', () =>
     subtitle: document.getElementById('cms-contact-desc')?.value.trim() || '',
     whatsappNumber: phone,
     whatsappDisplay: '(+241) 074 00 11 22',
-    buttonText: document.getElementById('cms-contact-btn-text')?.value.trim() || 'Écrire sur WhatsApp'
+    buttonText: document.getElementById('cms-contact-btn-text')?.value.trim() || 'Écrivez-nous sur WhatsApp'
   };
   saveCmsSection('contact_section', payload, 'cms-contact-saved');
 });

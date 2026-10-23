@@ -865,7 +865,24 @@ function setupHamburgerMenu() {
   });
 }
 
+// Sync dynamic WhatsApp number from CMS settings
+async function syncWhatsAppLinks() {
+  try {
+    const res = await fetch('/api/settings');
+    if (res.ok) {
+      const settings = await res.json();
+      if (settings.contact_section?.whatsappNumber) {
+        const clean = String(settings.contact_section.whatsappNumber).replace(/[^0-9]/g, '');
+        if (clean) {
+          document.querySelectorAll('a[href*="wa.me"]').forEach(a => a.href = `https://wa.me/${clean}`);
+        }
+      }
+    }
+  } catch (_) {}
+}
+
 // Initial Boot
 updateCartUi();
 loadProductDetails();
 setupHamburgerMenu();
+syncWhatsAppLinks();

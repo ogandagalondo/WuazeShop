@@ -521,8 +521,15 @@ async function loadSiteSettings() {
       if (c.badge && document.getElementById('contact-badge')) document.getElementById('contact-badge').textContent = c.badge;
       if (c.title && document.getElementById('contact-title')) document.getElementById('contact-title').textContent = c.title;
       if (c.subtitle && document.getElementById('contact-desc')) document.getElementById('contact-desc').textContent = c.subtitle;
-      if (c.whatsappNumber && document.getElementById('contact-whatsapp-btn')) {
-        document.getElementById('contact-whatsapp-btn').setAttribute('href', `https://wa.me/${c.whatsappNumber}`);
+      if (c.whatsappNumber) {
+        const cleanNumber = String(c.whatsappNumber).replace(/[^0-9]/g, '');
+        const waUrl = `https://wa.me/${cleanNumber}`;
+        if (document.getElementById('contact-whatsapp-btn')) {
+          document.getElementById('contact-whatsapp-btn').setAttribute('href', waUrl);
+        }
+        document.querySelectorAll('a[href*="wa.me"]').forEach(a => {
+          a.setAttribute('href', waUrl);
+        });
       }
       if (c.buttonText && document.getElementById('contact-whatsapp-text')) {
         document.getElementById('contact-whatsapp-text').textContent = c.buttonText;
