@@ -237,12 +237,12 @@
             <!-- Populated dynamically from product.specs -->
           </div>
 
-          <!-- Pricing Row: Old Price + Selling Price + Discount / Saving Pill -->
-          <div class="flex flex-wrap items-baseline gap-3 py-1">
-            <span id="detail-strike-price" class="text-base sm:text-lg text-gray-400 line-through font-semibold">
+          <!-- Pricing Row: Selling Price + Old Price (strikethrough) + Discount / Saving Pill -->
+          <div class="flex flex-wrap items-baseline gap-2.5 sm:gap-3 py-1">
+            <span id="detail-price" class="text-2xl sm:text-3xl lg:text-4xl font-black text-gray-900 tracking-tight">
               0 FCFA
             </span>
-            <span id="detail-price" class="text-2xl sm:text-3xl lg:text-4xl font-black text-gray-900 tracking-tight">
+            <span id="detail-strike-price" class="text-base sm:text-lg text-gray-400 line-through font-semibold">
               0 FCFA
             </span>
             <span id="detail-saving-pill" class="text-xs font-bold text-[#0d7252] bg-emerald-50 border border-emerald-200/60 px-2.5 py-0.5 rounded-full">
@@ -830,6 +830,6 @@
   </nav>
 
   <!-- Script for Product Page Logic -->
-  <script src="/js/product.js?v=2.5"></script>
+  <script src="/js/product.js?v=2.6"></script>
 </body>
 </html>
