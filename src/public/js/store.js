@@ -57,7 +57,7 @@ async function loadProducts(category = 'all') {
 }
 
 function formatFCFA(amount) {
-  return new Intl.NumberFormat('fr-FR').format(amount) + ' FCFA';
+  return new Intl.NumberFormat('fr-FR').format(amount) + '\u00A0FCFA';
 }
 
 function calculateDiscountPercent(price, originalPrice) {
@@ -83,12 +83,8 @@ function renderProducts(products) {
   productsGrid.innerHTML = products.map((product) => {
     const discountBadgeText = calculateDiscountPercent(product.price, product.original_price);
     
-    const badgeHtml = discountBadgeText
-      ? `<span class="bg-[#10b981] text-white text-[11px] font-extrabold px-2.5 py-0.5 rounded-full shadow-sm">${discountBadgeText}</span>`
-      : `<span class="bg-[#e6f7f0] text-[#0d7252] text-[11px] font-extrabold px-2.5 py-0.5 rounded-full">Neuf</span>`;
-
-    const strikePriceHtml = product.original_price
-      ? `<span class="text-xs text-gray-400 line-through">${formatFCFA(product.original_price)}</span>`
+    const strikePriceHtml = product.original_price && product.original_price > product.price
+      ? `<span class="text-[10px] sm:text-xs text-gray-400 line-through whitespace-nowrap shrink-0">${new Intl.NumberFormat('fr-FR').format(product.original_price)}<span class="hidden sm:inline">&nbsp;FCFA</span></span>`
       : '';
 
     const whatsappUrl = `https://wa.me/241074001122?text=${encodeURIComponent(`Bonjour, je souhaite avoir des conseils et des photos réelles sur l'article : ${product.title} (${formatFCFA(product.price)}) vu sur WuazeShop.`)}`;
@@ -96,12 +92,13 @@ function renderProducts(products) {
     return `
       <article class="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between border border-gray-100 p-2.5 sm:p-4 relative">
         
-        <!-- Top Card Row (Discount Pill & Wishlist Heart) -->
-        <div class="flex items-center justify-between mb-1.5 sm:mb-2">
-          ${badgeHtml}
-          <button onclick="this.classList.toggle('text-red-500');" class="w-7 h-7 sm:w-8 sm:h-8 rounded-full text-gray-300 hover:text-red-500 flex items-center justify-center transition-colors">
-            <span class="material-symbols-outlined text-base sm:text-lg">favorite</span>
-          </button>
+        <!-- Top Card Row (Discount Pill if applicable) -->
+        <div class="flex items-center justify-start mb-1.5 sm:mb-2 min-h-[1.25rem]">
+          ${discountBadgeText ? `
+            <span class="bg-[#10b981] text-white text-[10px] sm:text-[11px] font-black px-2.5 py-0.5 rounded-full shadow-2xs">
+              ${discountBadgeText}
+            </span>
+          ` : ''}
         </div>
 
         <!-- Product Image Container (Clickable to detail page) -->
@@ -123,8 +120,8 @@ function renderProducts(products) {
 
           <!-- Price & Add to Cart -->
           <div class="pt-2 border-t border-gray-100">
-            <div class="flex items-baseline gap-1.5 sm:gap-2 mb-2 sm:mb-2.5">
-              <span class="text-xs sm:text-base font-extrabold text-[#0d7252]">${formatFCFA(product.price)}</span>
+            <div class="flex items-baseline gap-1.5 mb-2 sm:mb-2.5 whitespace-nowrap overflow-hidden">
+              <span class="text-xs sm:text-sm font-black text-[#0d7252] whitespace-nowrap shrink-0">${formatFCFA(product.price)}</span>
               ${strikePriceHtml}
             </div>
 

@@ -60,7 +60,7 @@ const closeMobileNavBtn = document.getElementById('close-mobile-nav-btn');
 
 // 1. Helpers
 function formatFCFA(amount) {
-  return new Intl.NumberFormat('fr-FR').format(amount) + ' FCFA';
+  return new Intl.NumberFormat('fr-FR').format(amount) + '\u00A0FCFA';
 }
 
 function calculateDiscountPercent(price, originalPrice) {

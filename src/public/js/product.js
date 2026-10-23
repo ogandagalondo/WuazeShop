@@ -34,7 +34,7 @@ function resolveColorName(colorStr) {
 }
 
 function formatFCFA(amount) {
-  return new Intl.NumberFormat('fr-FR').format(amount) + ' FCFA';
+  return new Intl.NumberFormat('fr-FR').format(amount) + '\u00A0FCFA';
 }
 
 function calculateDiscountPercent(price, originalPrice) {
