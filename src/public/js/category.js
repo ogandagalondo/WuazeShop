@@ -230,22 +230,13 @@ function renderProducts(products) {
     return `
       <div class="product-card-hover group bg-white rounded-3xl p-3.5 sm:p-5 border border-gray-100 shadow-sm flex flex-col justify-between transition-all relative">
         
-        <!-- Top Badges -->
-        <div class="flex items-center justify-between gap-1 mb-2.5">
-          <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-wide uppercase bg-[#e6f7f0] text-[#0d7252] border border-emerald-200/60">
-            <span class="w-1.5 h-1.5 rounded-full bg-[#10b981]"></span>
-            <span>Neuf Chine</span>
-          </span>
-
+        <!-- Product Image (Click goes to product page) -->
+        <a href="/product/${escapeHtml(product.slug)}" class="block w-full aspect-square rounded-2xl bg-gray-50 overflow-hidden relative mb-3 cursor-pointer">
           ${discount ? `
-            <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-red-50 text-red-600 border border-red-200">
+            <span class="absolute top-2 left-2 z-10 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-red-500 text-white shadow-xs">
               ${discount}
             </span>
           ` : ''}
-        </div>
-
-        <!-- Product Image (Click goes to product page) -->
-        <a href="/product/${escapeHtml(product.slug)}" class="block w-full aspect-square rounded-2xl bg-gray-50 overflow-hidden relative mb-3 cursor-pointer">
           <img 
             src="${escapeHtml(product.image_url)}" 
             alt="${escapeHtml(product.title)}" 
