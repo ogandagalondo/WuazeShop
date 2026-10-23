@@ -421,5 +421,95 @@ describe('Admin CMS API', () => {
       expect(p.original_price).toBeNull();
     }
   });
+
+  // ==================== COLLABORATOR MANAGEMENT TESTS ====================
+  let newCollaboratorId;
+
+  it('allows authenticated admin to list team collaborators', async () => {
+    const res = await request(app)
+      .get('/api/admin/collaborators')
+      .set('Authorization', `Bearer ${authToken}`);
+
+    expect(res.status).toBe(200);
+    expect(Array.isArray(res.body)).toBe(true);
+    expect(res.body.length).toBeGreaterThanOrEqual(1);
+    expect(res.body[0]).toHaveProperty('role');
+    expect(res.body[0]).not.toHaveProperty('password_hash');
+  });
+
+  it('allows authenticated admin to create a new collaborator with specific role', async () => {
+    const res = await request(app)
+      .post('/api/admin/collaborators')
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({
+        email: 'collaborateur@wuazeshop.ga',
+        username: 'collab_marc',
+        fullName: 'Marc Ndong',
+        role: 'GESTIONNAIRE',
+        password: 'collabpassword123'
+      });
+
+    expect(res.status).toBe(201);
+    expect(res.body.email).toBe('collaborateur@wuazeshop.ga');
+    expect(res.body.role).toBe('GESTIONNAIRE');
+    expect(res.body.full_name).toBe('Marc Ndong');
+    newCollaboratorId = res.body.id;
+  });
+
+  it('allows new collaborator to log in with their own credentials', async () => {
+    const res = await request(app)
+      .post('/api/admin/login')
+      .send({
+        email: 'collaborateur@wuazeshop.ga',
+        password: 'collabpassword123'
+      });
+
+    expect(res.status).toBe(200);
+    expect(res.body.token).toBeDefined();
+    expect(res.body.role).toBe('GESTIONNAIRE');
+    expect(res.body.fullName).toBe('Marc Ndong');
+  });
+
+  it('allows admin to update collaborator role and status', async () => {
+    const res = await request(app)
+      .put(`/api/admin/collaborators/${newCollaboratorId}`)
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({
+        role: 'AGENT',
+        isActive: false
+      });
+
+    expect(res.status).toBe(200);
+    expect(res.body.role).toBe('AGENT');
+    expect(res.body.is_active).toBe(0);
+  });
+
+  it('blocks login for deactivated collaborator', async () => {
+    const res = await request(app)
+      .post('/api/admin/login')
+      .send({
+        email: 'collaborateur@wuazeshop.ga',
+        password: 'collabpassword123'
+      });
+
+    expect(res.status).toBe(401);
+    expect(res.body.error).toContain('désactivé');
+  });
+
+  it('allows admin to delete a collaborator safely', async () => {
+    const res = await request(app)
+      .delete(`/api/admin/collaborators/${newCollaboratorId}`)
+      .set('Authorization', `Bearer ${authToken}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+
+    const checkList = await request(app)
+      .get('/api/admin/collaborators')
+      .set('Authorization', `Bearer ${authToken}`);
+
+    expect(checkList.body.some(c => c.id === newCollaboratorId)).toBe(false);
+  });
 });
+
 

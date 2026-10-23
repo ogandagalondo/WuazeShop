@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import bcrypt from 'bcryptjs';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -545,3 +546,145 @@ adminRouter.put('/admin/settings', (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+// ==================== COLLABORATORS MANAGEMENT ====================
+
+// GET /api/admin/collaborators - Lister tous les collaborateurs de l'équipe
+adminRouter.get('/admin/collaborators', (req, res) => {
+  try {
+    const db = getDb();
+    const collaborators = db.prepare(`
+      SELECT id, email, username, full_name, role, is_active, created_at, last_login_at
+      FROM admin_users
+      ORDER BY id ASC
+    `).all();
+    res.json(collaborators);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /api/admin/collaborators - Créer un nouveau collaborateur
+adminRouter.post('/admin/collaborators', (req, res) => {
+  try {
+    const { email, username, fullName, role, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Adresse e-mail et mot de passe requis' });
+    }
+
+    const cleanUsername = username && username.trim() ? username.trim() : email.split('@')[0].replace(/[^a-zA-Z0-9_-]/g, '');
+    const cleanRole = ['SUPER_ADMIN', 'GESTIONNAIRE', 'AGENT'].includes(role) ? role : 'GESTIONNAIRE';
+    const cleanFullName = fullName && fullName.trim() ? fullName.trim() : cleanUsername;
+
+    const db = getDb();
+    const existing = db.prepare(`SELECT id FROM admin_users WHERE email = ? OR username = ?`).get(email, cleanUsername);
+    if (existing) {
+      return res.status(400).json({ error: 'Un collaborateur avec cette adresse email ou cet identifiant existe déjà' });
+    }
+
+    const salt = bcrypt.genSaltSync(10);
+    const passwordHash = bcrypt.hashSync(password, salt);
+
+    const result = db.prepare(`
+      INSERT INTO admin_users (email, username, full_name, role, password_hash, is_active)
+      VALUES (?, ?, ?, ?, ?, 1)
+    `).run(email, cleanUsername, cleanFullName, cleanRole, passwordHash);
+
+    const newCollaborator = db.prepare(`
+      SELECT id, email, username, full_name, role, is_active, created_at, last_login_at
+      FROM admin_users
+      WHERE id = ?
+    `).get(result.lastInsertRowid);
+
+    res.status(201).json(newCollaborator);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// PUT /api/admin/collaborators/:id - Mettre à jour un collaborateur
+adminRouter.put('/admin/collaborators/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    const { email, username, fullName, role, isActive, password } = req.body;
+    const db = getDb();
+
+    const existing = db.prepare(`SELECT * FROM admin_users WHERE id = ?`).get(id);
+    if (!existing) {
+      return res.status(404).json({ error: 'Collaborateur introuvable' });
+    }
+
+    // Protection : on ne peut pas rétrograder le dernier SUPER_ADMIN
+    if (existing.role === 'SUPER_ADMIN' && role && role !== 'SUPER_ADMIN') {
+      const superAdminCount = db.prepare(`SELECT COUNT(*) as count FROM admin_users WHERE role = 'SUPER_ADMIN' AND is_active = 1`).get().count;
+      if (superAdminCount <= 1) {
+        return res.status(400).json({ error: 'Impossible de changer le rôle du dernier Super Administrateur actif' });
+      }
+    }
+
+    // Protection : on ne peut pas désactiver le compte avec lequel on est connecté
+    if (req.admin && req.admin.userId === Number(id) && isActive === false) {
+      return res.status(400).json({ error: 'Vous ne pouvez pas désactiver votre propre compte' });
+    }
+
+    let passwordHash = existing.password_hash;
+    if (password && password.trim().length > 0) {
+      const salt = bcrypt.genSaltSync(10);
+      passwordHash = bcrypt.hashSync(password, salt);
+    }
+
+    const updatedEmail = email !== undefined ? email : existing.email;
+    const updatedUsername = username !== undefined ? username : existing.username;
+    const updatedFullName = fullName !== undefined ? fullName : existing.full_name;
+    const updatedRole = role !== undefined ? role : existing.role;
+    const updatedIsActive = isActive !== undefined ? (isActive ? 1 : 0) : existing.is_active;
+
+    db.prepare(`
+      UPDATE admin_users
+      SET email = ?, username = ?, full_name = ?, role = ?, is_active = ?, password_hash = ?
+      WHERE id = ?
+    `).run(updatedEmail, updatedUsername, updatedFullName, updatedRole, updatedIsActive, passwordHash, id);
+
+    const updated = db.prepare(`
+      SELECT id, email, username, full_name, role, is_active, created_at, last_login_at
+      FROM admin_users
+      WHERE id = ?
+    `).get(id);
+
+    res.json(updated);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// DELETE /api/admin/collaborators/:id - Supprimer un collaborateur
+adminRouter.delete('/admin/collaborators/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    const db = getDb();
+
+    // Prevent self-deletion
+    if (req.admin && req.admin.userId === Number(id)) {
+      return res.status(400).json({ error: 'Vous ne pouvez pas supprimer votre propre compte' });
+    }
+
+    const target = db.prepare(`SELECT * FROM admin_users WHERE id = ?`).get(id);
+    if (!target) {
+      return res.status(404).json({ error: 'Collaborateur introuvable' });
+    }
+
+    // Prevent deleting last SUPER_ADMIN
+    if (target.role === 'SUPER_ADMIN') {
+      const superAdminCount = db.prepare(`SELECT COUNT(*) as count FROM admin_users WHERE role = 'SUPER_ADMIN'`).get().count;
+      if (superAdminCount <= 1) {
+        return res.status(400).json({ error: 'Impossible de supprimer le dernier Super Administrateur' });
+      }
+    }
+
+    db.prepare(`DELETE FROM admin_users WHERE id = ?`).run(id);
+    res.json({ success: true, message: 'Collaborateur supprimé avec succès' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+

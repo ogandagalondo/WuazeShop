@@ -59,8 +59,12 @@ CREATE TABLE IF NOT EXISTS admin_users (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   email TEXT UNIQUE,
   username TEXT NOT NULL UNIQUE,
+  full_name TEXT,
+  role TEXT NOT NULL DEFAULT 'SUPER_ADMIN',
   password_hash TEXT NOT NULL,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  is_active INTEGER NOT NULL DEFAULT 1,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  last_login_at DATETIME
 );
 
 CREATE TABLE IF NOT EXISTS site_settings (
@@ -117,12 +121,23 @@ export function initDb(dbPath = resolveDbPath()) {
   }
   db.exec(schemaSql);
 
-  // Migration: Ensure email column exists on admin_users
+  // Migration: Ensure email, full_name, role, is_active, last_login_at exist on admin_users
   try {
     const tableInfo = db.prepare(`PRAGMA table_info(admin_users)`).all();
-    const hasEmail = tableInfo.some(col => col.name === 'email');
-    if (!hasEmail) {
+    if (!tableInfo.some(col => col.name === 'email')) {
       db.exec(`ALTER TABLE admin_users ADD COLUMN email TEXT;`);
+    }
+    if (!tableInfo.some(col => col.name === 'full_name')) {
+      db.exec(`ALTER TABLE admin_users ADD COLUMN full_name TEXT;`);
+    }
+    if (!tableInfo.some(col => col.name === 'role')) {
+      db.exec(`ALTER TABLE admin_users ADD COLUMN role TEXT DEFAULT 'SUPER_ADMIN';`);
+    }
+    if (!tableInfo.some(col => col.name === 'is_active')) {
+      db.exec(`ALTER TABLE admin_users ADD COLUMN is_active INTEGER DEFAULT 1;`);
+    }
+    if (!tableInfo.some(col => col.name === 'last_login_at')) {
+      db.exec(`ALTER TABLE admin_users ADD COLUMN last_login_at DATETIME;`);
     }
   } catch (err) {
     // Column may already exist or table not ready

@@ -46,13 +46,17 @@ CREATE TABLE IF NOT EXISTS orders (
   FOREIGN KEY (product_id) REFERENCES products (id)
 );
 
--- Admin users table
+-- Admin users table (Team & Collaborators)
 CREATE TABLE IF NOT EXISTS admin_users (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   email TEXT UNIQUE,
   username TEXT NOT NULL UNIQUE,
+  full_name TEXT,
+  role TEXT NOT NULL DEFAULT 'SUPER_ADMIN',
   password_hash TEXT NOT NULL,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  is_active INTEGER NOT NULL DEFAULT 1,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  last_login_at DATETIME
 );
 
 -- Site settings / CMS showcase configuration table

@@ -64,6 +64,15 @@
           <span class="material-symbols-outlined text-base">storefront</span>
           <span>Voir la boutique</span>
         </a>
+        <!-- Connected Collaborator Profile Pill -->
+        <div id="admin-user-pill" class="flex items-center gap-2 px-2.5 py-1 bg-gray-50 hover:bg-gray-100/80 border border-gray-200/80 rounded-full transition-colors cursor-default" title="Compte connecté">
+          <div id="admin-user-avatar" class="w-7 h-7 rounded-full bg-purple-100 text-purple-700 font-black text-xs flex items-center justify-center uppercase shadow-2xs">A</div>
+          <div class="hidden sm:flex flex-col text-left leading-tight">
+            <span id="admin-user-name" class="text-xs font-bold text-gray-900 max-w-[130px] truncate">Admin</span>
+            <span id="admin-user-role" class="text-[9px] font-black uppercase text-purple-700">SUPER_ADMIN</span>
+          </div>
+        </div>
+
         <button id="admin-logout-btn" class="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-full text-xs font-bold bg-red-50 text-red-700 hover:bg-red-100 transition-colors">
           <span class="material-symbols-outlined text-base">logout</span>
           <span class="hidden sm:inline">Déconnexion</span>
@@ -197,6 +206,12 @@
           <button id="tab-cms-btn" class="admin-tab-btn px-3 sm:px-5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 text-gray-500 hover:text-gray-900 transition-all">
             <span class="material-symbols-outlined text-lg">web</span>
             <span>Vitrine / CMS</span>
+          </button>
+
+          <button id="tab-team-btn" class="admin-tab-btn px-3 sm:px-5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 text-gray-500 hover:text-gray-900 transition-all">
+            <span class="material-symbols-outlined text-lg">group</span>
+            <span>Équipe &amp; Accès</span>
+            <span id="tab-team-badge" class="bg-purple-100 text-purple-700 text-[10px] px-2 py-0.5 rounded-full font-bold ml-1">0</span>
           </button>
         </div>
 
@@ -912,6 +927,118 @@
 
       </div>
 
+      <!-- TAB 5: ÉQUIPE & GESTION COLLABORATEURS -->
+      <div id="tab-team-content" class="hidden space-y-6">
+        
+        <!-- Header & Action Row -->
+        <div class="bg-gradient-to-r from-purple-900 via-indigo-900 to-slate-900 rounded-3xl p-5 sm:p-7 text-white shadow-xl relative overflow-hidden">
+          <div class="absolute -right-12 -top-12 w-48 h-48 bg-purple-500/10 rounded-full blur-2xl pointer-events-none"></div>
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
+            <div>
+              <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-white/10 text-purple-200 border border-white/10 mb-2">
+                <span class="material-symbols-outlined text-xs">shield_person</span>
+                <span>Rôles &amp; Sécurité Multi-Comptes</span>
+              </div>
+              <h2 class="text-xl sm:text-2xl font-black tracking-tight">Gestion des Collaborateurs</h2>
+              <p class="text-xs text-purple-200/80 max-w-xl mt-1 leading-relaxed">
+                Attribuez des accès individuels sécurisés pour chaque membre de votre équipe avec des permissions ciblées selon leur rôle (Super Admin, Gestionnaire ou Agent).
+              </p>
+            </div>
+
+            <button id="open-add-collaborator-btn" type="button" class="py-3 px-5 rounded-2xl bg-white hover:bg-purple-50 text-purple-900 font-extrabold text-xs shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 active:scale-95 shrink-0 cursor-pointer">
+              <span class="material-symbols-outlined text-base">person_add</span>
+              <span>Nouveau Collaborateur</span>
+            </button>
+          </div>
+
+          <!-- Quick Roles KPI Summary in banner -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4 mt-6 pt-5 border-t border-white/10">
+            <div class="bg-white/5 backdrop-blur-sm rounded-xl p-3 border border-white/10">
+              <span class="text-[10px] font-bold uppercase text-purple-200">Total Équipe</span>
+              <div id="team-stat-total" class="text-lg sm:text-xl font-black mt-0.5">0</div>
+              <span class="text-[9px] text-purple-300/70">Comptes créés</span>
+            </div>
+            <div class="bg-white/5 backdrop-blur-sm rounded-xl p-3 border border-white/10">
+              <span class="text-[10px] font-bold uppercase text-purple-200">Super Admins</span>
+              <div id="team-stat-superadmin" class="text-lg sm:text-xl font-black mt-0.5">0</div>
+              <span class="text-[9px] text-purple-300/70">Accès total</span>
+            </div>
+            <div class="bg-white/5 backdrop-blur-sm rounded-xl p-3 border border-white/10">
+              <span class="text-[10px] font-bold uppercase text-purple-200">Gestionnaires</span>
+              <div id="team-stat-gestionnaires" class="text-lg sm:text-xl font-black mt-0.5">0</div>
+              <span class="text-[9px] text-purple-300/70">Stocks &amp; Prix</span>
+            </div>
+            <div class="bg-white/5 backdrop-blur-sm rounded-xl p-3 border border-white/10">
+              <span class="text-[10px] font-bold uppercase text-purple-200">Agents Logistiques</span>
+              <div id="team-stat-agents" class="text-lg sm:text-xl font-black mt-0.5">0</div>
+              <span class="text-[9px] text-purple-300/70">Commandes &amp; Fret</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filter and Search Row -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
+            <button data-collab-filter="all" class="collab-filter-pill active px-3.5 py-1.5 rounded-full text-xs font-bold bg-[#0d7252] text-white shrink-0">Tous</button>
+            <button data-collab-filter="SUPER_ADMIN" class="collab-filter-pill px-3.5 py-1.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-600 hover:text-gray-900 shrink-0">Super Admins</button>
+            <button data-collab-filter="GESTIONNAIRE" class="collab-filter-pill px-3.5 py-1.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-600 hover:text-gray-900 shrink-0">Gestionnaires</button>
+            <button data-collab-filter="AGENT" class="collab-filter-pill px-3.5 py-1.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-600 hover:text-gray-900 shrink-0">Agents</button>
+          </div>
+
+          <div class="relative w-full sm:w-72">
+            <div class="flex items-center bg-white rounded-full px-3.5 py-2 border border-gray-200 text-xs focus-within:ring-2 focus-within:ring-[#0d7252]">
+              <span class="material-symbols-outlined text-gray-400 text-base mr-1.5">search</span>
+              <input id="team-search-input" class="w-full bg-transparent focus:outline-none text-gray-900 placeholder:text-gray-400" placeholder="Rechercher nom, email, pseudo..." type="text"/>
+            </div>
+          </div>
+        </div>
+
+        <!-- Collaborators Cards Grid -->
+        <div id="admin-collaborators-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- Rendered dynamically by admin.js -->
+        </div>
+
+        <!-- Role Permissions Guide Card -->
+        <div class="bg-white rounded-2xl border border-gray-200/80 p-5 shadow-sm space-y-4">
+          <div class="flex items-center gap-2 text-gray-900 font-bold text-sm">
+            <span class="material-symbols-outlined text-[#0d7252]">verified_user</span>
+            <span>Guide des rôles et niveaux d'accès WuazeShop</span>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5 text-xs">
+            <div class="p-3.5 rounded-xl bg-purple-50/60 border border-purple-200/70 space-y-1.5">
+              <div class="flex items-center gap-1.5 text-purple-800 font-extrabold">
+                <span class="material-symbols-outlined text-base">military_tech</span>
+                <span>Super Admin</span>
+              </div>
+              <p class="text-[11px] text-purple-900/80 leading-relaxed">
+                Accès sans restriction : gestion totale des collaborateurs et permissions, édition du CMS vitrine, consultation des finances, gestion catalogue et commandes.
+              </p>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-emerald-50/60 border border-emerald-200/70 space-y-1.5">
+              <div class="flex items-center gap-1.5 text-[#0d7252] font-extrabold">
+                <span class="material-symbols-outlined text-base">store</span>
+                <span>Gestionnaire</span>
+              </div>
+              <p class="text-[11px] text-emerald-900/80 leading-relaxed">
+                Gestion quotidienne du magasin : création et modification des produits, ajustement des prix et remises, gestion des stocks et traitement des commandes.
+              </p>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-blue-50/60 border border-blue-200/70 space-y-1.5">
+              <div class="flex items-center gap-1.5 text-blue-700 font-extrabold">
+                <span class="material-symbols-outlined text-base">local_shipping</span>
+                <span>Agent Opérationnel</span>
+              </div>
+              <p class="text-[11px] text-blue-900/80 leading-relaxed">
+                Logistique et suivi client : consultation des commandes, mise à jour des statuts d'expédition Chine - Gabon et prise de contact WhatsApp.
+              </p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
     </section>
 
   </main>
@@ -933,6 +1060,10 @@
     <button id="mobile-tab-cms-btn" class="flex flex-col items-center gap-0.5 text-gray-400 text-[10px] font-medium">
       <span class="material-symbols-outlined text-xl">web</span>
       <span>Vitrine</span>
+    </button>
+    <button id="mobile-tab-team-btn" class="flex flex-col items-center gap-0.5 text-gray-400 text-[10px] font-medium">
+      <span class="material-symbols-outlined text-xl">group</span>
+      <span>Équipe</span>
     </button>
     <button id="mobile-add-product-btn" class="flex flex-col items-center gap-0.5 text-[#10b981] text-[10px] font-bold">
       <span class="material-symbols-outlined text-xl">add_circle</span>
@@ -1520,6 +1651,96 @@
         </div>
       </div>
 
+    </div>
+  </div>
+
+  <!-- ==================== ADD / EDIT COLLABORATOR MODAL ==================== -->
+  <div id="collaborator-modal-overlay" class="modal-overlay hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white rounded-t-3xl sm:rounded-3xl w-full max-w-lg max-h-[90vh] flex flex-col shadow-2xl border border-gray-100 overflow-hidden">
+      
+      <!-- Modal Header -->
+      <div class="p-5 border-b border-gray-100 flex items-center justify-between shrink-0 bg-gray-50/50">
+        <div class="flex items-center gap-2.5">
+          <div class="w-10 h-10 rounded-2xl bg-purple-100 flex items-center justify-center text-purple-700">
+            <span class="material-symbols-outlined text-2xl">person_add</span>
+          </div>
+          <div>
+            <h3 id="collaborator-modal-title" class="font-extrabold text-base sm:text-lg text-gray-900">Nouveau Collaborateur</h3>
+            <p class="text-[11px] text-gray-400">Définissez ses accès et identifiants de connexion</p>
+          </div>
+        </div>
+        <button id="close-collaborator-modal-btn" type="button" class="w-8 h-8 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center hover:bg-gray-200 transition-colors cursor-pointer">
+          <span class="material-symbols-outlined text-lg">close</span>
+        </button>
+      </div>
+
+      <!-- Modal Form Body -->
+      <form id="collaborator-form" class="p-5 sm:p-6 overflow-y-auto space-y-4 text-xs sm:text-sm">
+        <input type="hidden" id="collaborator-edit-id" value=""/>
+
+        <div id="collaborator-modal-error" class="hidden p-3 rounded-xl bg-red-50 text-red-700 text-xs font-semibold border border-red-200"></div>
+
+        <div>
+          <label class="block font-bold text-gray-700 mb-1">Nom complet *</label>
+          <input id="collab-fullname" required class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:border-[#0d7252] focus:bg-white" placeholder="Ex: Marc Ndong" type="text"/>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <div>
+            <label class="block font-bold text-gray-700 mb-1">Adresse e-mail (Login) *</label>
+            <input id="collab-email" required class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:border-[#0d7252] focus:bg-white" placeholder="ex: marc@wuazeshop.ga" type="email"/>
+          </div>
+          <div>
+            <label class="block font-bold text-gray-700 mb-1">Identifiant unique (Optionnel)</label>
+            <input id="collab-username" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:border-[#0d7252] focus:bg-white" placeholder="ex: marc_ndong" type="text"/>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-gray-700 mb-1">Rôle et Niveau d'accès *</label>
+          <select id="collab-role" required class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:border-[#0d7252] focus:bg-white">
+            <option value="GESTIONNAIRE">Gestionnaire (Catalogue, Prix &amp; Commandes)</option>
+            <option value="AGENT">Agent Opérationnel (Suivi Logistique &amp; Expéditions)</option>
+            <option value="SUPER_ADMIN">Super Administrateur (Accès Total &amp; Équipe)</option>
+          </select>
+          <p class="text-[10px] text-gray-400 mt-1">Le rôle détermine les modules et fonctionnalités accessibles par ce collaborateur.</p>
+        </div>
+
+        <div>
+          <label class="block font-bold text-gray-700 mb-1">
+            Mot de passe <span id="collab-password-required-label">*</span>
+          </label>
+          <div class="relative">
+            <input id="collab-password" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:border-[#0d7252] focus:bg-white pr-10" placeholder="Minimum 6 caractères" type="password" minlength="6"/>
+            <button type="button" id="toggle-collab-password-btn" class="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600 cursor-pointer">
+              <span class="material-symbols-outlined text-lg">visibility</span>
+            </button>
+          </div>
+          <p id="collab-password-hint" class="text-[10px] text-gray-400 mt-1 hidden">Laissez vide si vous ne souhaitez pas modifier le mot de passe actuel.</p>
+        </div>
+
+        <div class="pt-2">
+          <label class="flex items-center gap-2.5 p-3 rounded-xl bg-gray-50 border border-gray-200 cursor-pointer hover:bg-gray-100/70 transition-colors">
+            <input id="collab-is-active" type="checkbox" checked class="w-4 h-4 rounded text-[#0d7252] focus:ring-[#0d7252] cursor-pointer"/>
+            <div class="flex flex-col">
+              <span class="text-xs font-bold text-gray-800">Compte Actif</span>
+              <span class="text-[10px] text-gray-500">Si décoché, le collaborateur sera immédiatement bloqué lors de la tentative de connexion.</span>
+            </div>
+          </label>
+        </div>
+
+        <!-- Modal Footer Actions -->
+        <div class="pt-4 border-t border-gray-100 flex items-center justify-end gap-2.5">
+          <button id="cancel-collaborator-modal-btn" type="button" class="py-2.5 px-4 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs transition-colors cursor-pointer">
+            Annuler
+          </button>
+          <button id="save-collaborator-btn" type="submit" class="py-2.5 px-6 rounded-full bg-[#0d7252] hover:bg-[#08553d] text-white font-bold text-xs shadow-md transition-all flex items-center gap-1.5 cursor-pointer">
+            <span class="material-symbols-outlined text-sm">save</span>
+            <span>Enregistrer le collaborateur</span>
+          </button>
+        </div>
+
+      </form>
     </div>
   </div>
 

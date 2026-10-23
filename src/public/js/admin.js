@@ -3,15 +3,24 @@ let adminToken = sessionStorage.getItem('wuazeshop_admin_token') || null;
 let currentOrders = [];
 let currentAdminProducts = [];
 let currentCategories = [];
+let currentCollaborators = [];
 let activeOrderFilter = 'all';
 let activeCatFilter = 'all';
+let activeCollabFilter = 'all';
 let selectedOrderForStatus = null;
+let currentAdminUser = null;
 
 // DOM Elements
 const loginSection = document.getElementById('login-section');
 const dashboardSection = document.getElementById('dashboard-section');
 const adminHeaderActions = document.getElementById('admin-header-actions');
 const adminMobileNav = document.getElementById('admin-mobile-nav');
+
+// Header Profile Pill
+const adminUserPill = document.getElementById('admin-user-pill');
+const adminUserAvatar = document.getElementById('admin-user-avatar');
+const adminUserName = document.getElementById('admin-user-name');
+const adminUserRole = document.getElementById('admin-user-role');
 
 // Forms & Modals
 const loginForm = document.getElementById('login-form');
@@ -23,16 +32,45 @@ const tabOrdersBtn = document.getElementById('tab-orders-btn');
 const tabProductsBtn = document.getElementById('tab-products-btn');
 const tabCategoriesBtn = document.getElementById('tab-categories-btn');
 const tabCmsBtn = document.getElementById('tab-cms-btn');
+const tabTeamBtn = document.getElementById('tab-team-btn');
 const tabOrdersContent = document.getElementById('tab-orders-content');
 const tabProductsContent = document.getElementById('tab-products-content');
 const tabCategoriesContent = document.getElementById('tab-categories-content');
 const tabCmsContent = document.getElementById('tab-cms-content');
+const tabTeamContent = document.getElementById('tab-team-content');
 const tabCategoriesBadge = document.getElementById('tab-categories-badge');
+const tabTeamBadge = document.getElementById('tab-team-badge');
 const mobileTabOrdersBtn = document.getElementById('mobile-tab-orders-btn');
 const mobileTabProductsBtn = document.getElementById('mobile-tab-products-btn');
 const mobileTabCategoriesBtn = document.getElementById('mobile-tab-categories-btn');
 const mobileTabCmsBtn = document.getElementById('mobile-tab-cms-btn');
+const mobileTabTeamBtn = document.getElementById('mobile-tab-team-btn');
 const mobileAddProductBtn = document.getElementById('mobile-add-product-btn');
+
+// Team & Collaborators Elements
+const openAddCollaboratorBtn = document.getElementById('open-add-collaborator-btn');
+const adminCollaboratorsGrid = document.getElementById('admin-collaborators-grid');
+const collaboratorModalOverlay = document.getElementById('collaborator-modal-overlay');
+const closeCollaboratorModalBtn = document.getElementById('close-collaborator-modal-btn');
+const cancelCollaboratorModalBtn = document.getElementById('cancel-collaborator-modal-btn');
+const collaboratorForm = document.getElementById('collaborator-form');
+const collaboratorModalTitle = document.getElementById('collaborator-modal-title');
+const collaboratorModalError = document.getElementById('collaborator-modal-error');
+const collaboratorEditId = document.getElementById('collaborator-edit-id');
+const collabFullname = document.getElementById('collab-fullname');
+const collabEmail = document.getElementById('collab-email');
+const collabUsername = document.getElementById('collab-username');
+const collabRole = document.getElementById('collab-role');
+const collabPassword = document.getElementById('collab-password');
+const collabPasswordRequiredLabel = document.getElementById('collab-password-required-label');
+const collabPasswordHint = document.getElementById('collab-password-hint');
+const collabIsActive = document.getElementById('collab-is-active');
+const toggleCollabPasswordBtn = document.getElementById('toggle-collab-password-btn');
+const teamSearchInput = document.getElementById('team-search-input');
+const teamStatTotal = document.getElementById('team-stat-total');
+const teamStatSuperadmin = document.getElementById('team-stat-superadmin');
+const teamStatGestionnaires = document.getElementById('team-stat-gestionnaires');
+const teamStatAgents = document.getElementById('team-stat-agents');
 
 // Category Management Elements
 const openAddCategoryBtn = document.getElementById('open-add-category-btn');
@@ -151,11 +189,15 @@ async function checkAuth() {
       headers: { 'Authorization': `Bearer ${adminToken}` }
     });
     if (res.ok) {
+      const authData = await res.json();
+      currentAdminUser = authData.user || null;
+      renderAdminUserProfile();
       showDashboard();
       await loadDashboardData();
     } else {
       sessionStorage.removeItem('wuazeshop_admin_token');
       adminToken = null;
+      currentAdminUser = null;
       showLogin();
     }
   } catch (err) {
@@ -202,7 +244,15 @@ loginForm.addEventListener('submit', async (e) => {
     }
 
     adminToken = data.token;
+    currentAdminUser = data.user || {
+      id: data.userId || null,
+      email: data.email || identifier,
+      fullName: data.fullName || data.full_name || 'Admin',
+      role: data.role || 'SUPER_ADMIN',
+      username: data.username || identifier
+    };
     sessionStorage.setItem('wuazeshop_admin_token', adminToken);
+    renderAdminUserProfile();
     showDashboard();
     await loadDashboardData();
   } catch (err) {
@@ -215,12 +265,13 @@ loginForm.addEventListener('submit', async (e) => {
 adminLogoutBtn.addEventListener('click', () => {
   sessionStorage.removeItem('wuazeshop_admin_token');
   adminToken = null;
+  currentAdminUser = null;
   showLogin();
 });
 
 // 3. Tab Switching
 function switchTab(tab) {
-  const allBtns = [tabOrdersBtn, tabProductsBtn, tabCategoriesBtn, tabCmsBtn].filter(Boolean);
+  const allBtns = [tabOrdersBtn, tabProductsBtn, tabCategoriesBtn, tabCmsBtn, tabTeamBtn].filter(Boolean);
   allBtns.forEach(btn => {
     btn.classList.remove('active', 'bg-[#0d7252]', 'text-white');
     btn.classList.add('text-gray-500');
@@ -230,8 +281,9 @@ function switchTab(tab) {
   if (tabProductsContent) tabProductsContent.classList.add('hidden');
   if (tabCategoriesContent) tabCategoriesContent.classList.add('hidden');
   if (tabCmsContent) tabCmsContent.classList.add('hidden');
+  if (tabTeamContent) tabTeamContent.classList.add('hidden');
 
-  const allMobileBtns = [mobileTabOrdersBtn, mobileTabProductsBtn, mobileTabCategoriesBtn, mobileTabCmsBtn].filter(Boolean);
+  const allMobileBtns = [mobileTabOrdersBtn, mobileTabProductsBtn, mobileTabCategoriesBtn, mobileTabCmsBtn, mobileTabTeamBtn].filter(Boolean);
   allMobileBtns.forEach(btn => {
     btn.classList.remove('text-[#0d7252]', 'font-bold');
     btn.classList.add('text-gray-400');
@@ -275,6 +327,17 @@ function switchTab(tab) {
       mobileTabCmsBtn.classList.remove('text-gray-400');
     }
     loadAdminSettings();
+  } else if (tab === 'team') {
+    if (tabTeamBtn) {
+      tabTeamBtn.classList.add('active', 'bg-[#0d7252]', 'text-white');
+      tabTeamBtn.classList.remove('text-gray-500');
+    }
+    if (tabTeamContent) tabTeamContent.classList.remove('hidden');
+    if (mobileTabTeamBtn) {
+      mobileTabTeamBtn.classList.add('text-[#0d7252]', 'font-bold');
+      mobileTabTeamBtn.classList.remove('text-gray-400');
+    }
+    loadCollaborators();
   }
 }
 
@@ -282,14 +345,17 @@ tabOrdersBtn.addEventListener('click', () => switchTab('orders'));
 tabProductsBtn.addEventListener('click', () => switchTab('products'));
 if (tabCategoriesBtn) tabCategoriesBtn.addEventListener('click', () => switchTab('categories'));
 if (tabCmsBtn) tabCmsBtn.addEventListener('click', () => switchTab('cms'));
+if (tabTeamBtn) tabTeamBtn.addEventListener('click', () => switchTab('team'));
 mobileTabOrdersBtn.addEventListener('click', () => switchTab('orders'));
 mobileTabProductsBtn.addEventListener('click', () => switchTab('products'));
 if (mobileTabCategoriesBtn) mobileTabCategoriesBtn.addEventListener('click', () => switchTab('categories'));
 if (mobileTabCmsBtn) mobileTabCmsBtn.addEventListener('click', () => switchTab('cms'));
+if (mobileTabTeamBtn) mobileTabTeamBtn.addEventListener('click', () => switchTab('team'));
 
 // 4. Load Data
 async function loadDashboardData() {
-  await Promise.all([loadOrders(), loadAdminProducts(), loadAdminCategories(), loadAdminSettings()]);
+  await Promise.all([loadOrders(), loadAdminProducts(), loadAdminCategories(), loadAdminSettings(), loadCollaborators()]);
+}
 }
 
 async function loadOrders() {
@@ -2056,6 +2122,448 @@ if (batchDiscountRemoveAllBtn) {
     }
   });
 }
+
+// ==================== COLLABORATOR MANAGEMENT ====================
+
+function renderAdminUserProfile() {
+  if (!currentAdminUser) return;
+  const name = currentAdminUser.fullName || currentAdminUser.full_name || currentAdminUser.username || currentAdminUser.email || 'Admin';
+  const role = currentAdminUser.role || 'SUPER_ADMIN';
+
+  if (adminUserName) adminUserName.textContent = name;
+  if (adminUserRole) {
+    adminUserRole.textContent = role;
+    if (role === 'SUPER_ADMIN') {
+      adminUserRole.className = 'text-[9px] font-black uppercase text-purple-700';
+    } else if (role === 'GESTIONNAIRE') {
+      adminUserRole.className = 'text-[9px] font-black uppercase text-[#0d7252]';
+    } else {
+      adminUserRole.className = 'text-[9px] font-black uppercase text-blue-700';
+    }
+  }
+  if (adminUserAvatar) {
+    const initial = (name.trim()[0] || 'A').toUpperCase();
+    adminUserAvatar.textContent = initial;
+    if (role === 'SUPER_ADMIN') {
+      adminUserAvatar.className = 'w-7 h-7 rounded-full bg-purple-100 text-purple-700 font-black text-xs flex items-center justify-center uppercase shadow-2xs';
+    } else if (role === 'GESTIONNAIRE') {
+      adminUserAvatar.className = 'w-7 h-7 rounded-full bg-emerald-100 text-[#0d7252] font-black text-xs flex items-center justify-center uppercase shadow-2xs';
+    } else {
+      adminUserAvatar.className = 'w-7 h-7 rounded-full bg-blue-100 text-blue-700 font-black text-xs flex items-center justify-center uppercase shadow-2xs';
+    }
+  }
+}
+
+async function loadCollaborators() {
+  if (!adminToken) return;
+  try {
+    const res = await fetch('/api/admin/collaborators', {
+      headers: { 'Authorization': `Bearer ${adminToken}` }
+    });
+    if (res.ok) {
+      currentCollaborators = await res.json();
+      updateTeamStats();
+      renderCollaborators();
+    } else if (res.status === 401) {
+      sessionStorage.removeItem('wuazeshop_admin_token');
+      adminToken = null;
+      currentAdminUser = null;
+      showLogin();
+    }
+  } catch (err) {
+    console.error('Erreur chargement collaborateurs:', err);
+  }
+}
+
+function updateTeamStats() {
+  const total = currentCollaborators.length;
+  const superadmins = currentCollaborators.filter(c => c.role === 'SUPER_ADMIN').length;
+  const gestionnaires = currentCollaborators.filter(c => c.role === 'GESTIONNAIRE').length;
+  const agents = currentCollaborators.filter(c => c.role === 'AGENT').length;
+
+  if (tabTeamBadge) tabTeamBadge.textContent = total;
+  if (teamStatTotal) teamStatTotal.textContent = total;
+  if (teamStatSuperadmin) teamStatSuperadmin.textContent = superadmins;
+  if (teamStatGestionnaires) teamStatGestionnaires.textContent = gestionnaires;
+  if (teamStatAgents) teamStatAgents.textContent = agents;
+}
+
+function renderCollaborators() {
+  if (!adminCollaboratorsGrid) return;
+
+  const query = (teamSearchInput?.value || '').trim().toLowerCase();
+
+  const filtered = currentCollaborators.filter(collab => {
+    // Role filter
+    if (activeCollabFilter !== 'all' && collab.role !== activeCollabFilter) {
+      return false;
+    }
+    // Search query
+    if (query) {
+      const name = (collab.full_name || '').toLowerCase();
+      const email = (collab.email || '').toLowerCase();
+      const user = (collab.username || '').toLowerCase();
+      return name.includes(query) || email.includes(query) || user.includes(query);
+    }
+    return true;
+  });
+
+  if (filtered.length === 0) {
+    adminCollaboratorsGrid.innerHTML = `
+      <div class="col-span-full py-12 text-center bg-white rounded-3xl border border-gray-100 p-8 shadow-sm space-y-3">
+        <div class="w-14 h-14 rounded-2xl bg-purple-50 text-purple-700 flex items-center justify-center mx-auto">
+          <span class="material-symbols-outlined text-3xl">group_off</span>
+        </div>
+        <h4 class="font-bold text-gray-800 text-sm">Aucun collaborateur trouvé</h4>
+        <p class="text-xs text-gray-500 max-w-sm mx-auto">
+          Aucun membre de l'équipe ne correspond aux critères sélectionnés. Vous pouvez ajouter un nouveau collaborateur avec le bouton ci-dessus.
+        </p>
+      </div>
+    `;
+    return;
+  }
+
+  adminCollaboratorsGrid.innerHTML = filtered.map(collab => {
+    const isCurrent = currentAdminUser && (currentAdminUser.id === collab.id || currentAdminUser.userId === collab.id);
+    const roleConfig = {
+      SUPER_ADMIN: {
+        label: 'Super Admin',
+        badgeClass: 'bg-purple-100 text-purple-800 border-purple-200',
+        avatarClass: 'bg-purple-100 text-purple-700',
+        icon: 'military_tech'
+      },
+      GESTIONNAIRE: {
+        label: 'Gestionnaire',
+        badgeClass: 'bg-emerald-100 text-[#0d7252] border-emerald-200',
+        avatarClass: 'bg-emerald-100 text-[#0d7252]',
+        icon: 'store'
+      },
+      AGENT: {
+        label: 'Agent Logistique',
+        badgeClass: 'bg-blue-100 text-blue-700 border-blue-200',
+        avatarClass: 'bg-blue-100 text-blue-700',
+        icon: 'local_shipping'
+      }
+    }[collab.role] || {
+      label: collab.role,
+      badgeClass: 'bg-gray-100 text-gray-700 border-gray-200',
+      avatarClass: 'bg-gray-100 text-gray-700',
+      icon: 'person'
+    };
+
+    const initial = (collab.full_name || collab.username || collab.email || 'A')[0].toUpperCase();
+    const isActive = Boolean(collab.is_active);
+    const formattedLastLogin = collab.last_login_at 
+      ? new Date(collab.last_login_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
+      : 'Jamais connecté';
+    const formattedCreated = collab.created_at
+      ? new Date(collab.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })
+      : 'Récemment';
+
+    return `
+      <div class="bg-white rounded-3xl p-5 border border-gray-100/90 shadow-sm hover:shadow-md transition-all flex flex-col justify-between relative group">
+        <div>
+          <!-- Top Row: Avatar + Role Badge + Current User Pill -->
+          <div class="flex items-start justify-between gap-3 mb-3.5">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-2xl ${roleConfig.avatarClass} font-black text-lg flex items-center justify-center uppercase shadow-2xs shrink-0">
+                ${initial}
+              </div>
+              <div class="flex flex-col">
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  <h4 class="font-extrabold text-gray-900 text-sm leading-tight">${escapeHtml(collab.full_name || collab.username)}</h4>
+                  ${isCurrent ? `<span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-gray-900 text-white">Vous</span>` : ''}
+                </div>
+                <span class="text-[11px] text-gray-400 font-medium">@${escapeHtml(collab.username || 'user')}</span>
+              </div>
+            </div>
+
+            <!-- Role Badge -->
+            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-extrabold border ${roleConfig.badgeClass} shrink-0">
+              <span class="material-symbols-outlined text-xs">${roleConfig.icon}</span>
+              <span>${roleConfig.label}</span>
+            </span>
+          </div>
+
+          <!-- Contact & Timestamps Details -->
+          <div class="space-y-2 py-2.5 border-y border-gray-100/80 text-xs">
+            <div class="flex items-center gap-2 text-gray-600 truncate">
+              <span class="material-symbols-outlined text-gray-400 text-base shrink-0">mail</span>
+              <span class="truncate font-medium">${escapeHtml(collab.email)}</span>
+            </div>
+            <div class="flex items-center justify-between text-[11px] text-gray-400 pt-0.5">
+              <div class="flex items-center gap-1">
+                <span class="material-symbols-outlined text-xs">history</span>
+                <span>${formattedLastLogin}</span>
+              </div>
+              <div class="flex items-center gap-1">
+                <span class="material-symbols-outlined text-xs">calendar_today</span>
+                <span>${formattedCreated}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom Actions Row: Status Toggle & Buttons -->
+        <div class="mt-4 pt-3 flex items-center justify-between gap-2">
+          <!-- Active Status Badge & Toggle -->
+          <button 
+            type="button" 
+            onclick="toggleCollaboratorStatus(${collab.id}, ${isActive})"
+            ${isCurrent ? 'disabled title="Vous ne pouvez pas modifier votre propre statut"' : 'title="Cliquer pour activer/désactiver le compte"'}
+            class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold border transition-colors ${
+              isActive 
+                ? 'bg-emerald-50 text-emerald-800 border-emerald-200/80 hover:bg-emerald-100' 
+                : 'bg-gray-100 text-gray-500 border-gray-200 hover:bg-gray-200'
+            } ${isCurrent ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}"
+          >
+            <span class="w-2 h-2 rounded-full ${isActive ? 'bg-emerald-500 animate-pulse' : 'bg-gray-400'}"></span>
+            <span>${isActive ? 'Actif' : 'Désactivé'}</span>
+          </button>
+
+          <!-- Edit & Delete Buttons -->
+          <div class="flex items-center gap-1.5">
+            <button 
+              type="button" 
+              onclick="editCollaboratorById(${collab.id})"
+              class="w-8 h-8 rounded-full bg-gray-50 hover:bg-gray-100 text-gray-700 flex items-center justify-center transition-colors cursor-pointer border border-gray-200/60" 
+              title="Modifier les informations ou réinitialiser le mot de passe"
+            >
+              <span class="material-symbols-outlined text-sm">edit</span>
+            </button>
+            <button 
+              type="button" 
+              onclick="deleteCollaborator(${collab.id}, '${escapeHtml(collab.full_name || collab.username)}')"
+              ${isCurrent ? 'disabled title="Vous ne pouvez pas supprimer votre propre compte"' : 'title="Supprimer ce collaborateur"'}
+              class="w-8 h-8 rounded-full ${
+                isCurrent 
+                  ? 'bg-gray-100 text-gray-300 cursor-not-allowed' 
+                  : 'bg-red-50 hover:bg-red-100 text-red-600 cursor-pointer border border-red-100'
+              } flex items-center justify-center transition-colors"
+            >
+              <span class="material-symbols-outlined text-sm">delete</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    `;
+  }).join('');
+}
+
+function openCollaboratorModal(collab = null) {
+  if (!collaboratorModalOverlay) return;
+  if (collaboratorModalError) collaboratorModalError.classList.add('hidden');
+
+  if (collab) {
+    if (collaboratorModalTitle) collaboratorModalTitle.textContent = 'Modifier le Collaborateur';
+    if (collaboratorEditId) collaboratorEditId.value = collab.id;
+    if (collabFullname) collabFullname.value = collab.full_name || '';
+    if (collabEmail) collabEmail.value = collab.email || '';
+    if (collabUsername) collabUsername.value = collab.username || '';
+    if (collabRole) collabRole.value = collab.role || 'GESTIONNAIRE';
+    if (collabPassword) {
+      collabPassword.value = '';
+      collabPassword.required = false;
+    }
+    if (collabPasswordRequiredLabel) collabPasswordRequiredLabel.classList.add('hidden');
+    if (collabPasswordHint) collabPasswordHint.classList.remove('hidden');
+    if (collabIsActive) collabIsActive.checked = Boolean(collab.is_active);
+  } else {
+    if (collaboratorModalTitle) collaboratorModalTitle.textContent = 'Nouveau Collaborateur';
+    if (collaboratorEditId) collaboratorEditId.value = '';
+    if (collabFullname) collabFullname.value = '';
+    if (collabEmail) collabEmail.value = '';
+    if (collabUsername) collabUsername.value = '';
+    if (collabRole) collabRole.value = 'GESTIONNAIRE';
+    if (collabPassword) {
+      collabPassword.value = '';
+      collabPassword.required = true;
+    }
+    if (collabPasswordRequiredLabel) collabPasswordRequiredLabel.classList.remove('hidden');
+    if (collabPasswordHint) collabPasswordHint.classList.add('hidden');
+    if (collabIsActive) collabIsActive.checked = true;
+  }
+
+  collaboratorModalOverlay.classList.remove('hidden');
+}
+
+function closeCollaboratorModal() {
+  if (!collaboratorModalOverlay) return;
+  collaboratorModalOverlay.classList.add('hidden');
+  if (collaboratorModalError) collaboratorModalError.classList.add('hidden');
+}
+
+window.editCollaboratorById = function(id) {
+  const collab = currentCollaborators.find(c => c.id === id);
+  if (collab) {
+    openCollaboratorModal(collab);
+  }
+};
+
+window.toggleCollaboratorStatus = async function(id, currentStatus) {
+  if (!adminToken) return;
+  const isCurrent = currentAdminUser && (currentAdminUser.id === id || currentAdminUser.userId === id);
+  if (isCurrent && currentStatus) {
+    alert('Vous ne pouvez pas désactiver votre propre compte.');
+    return;
+  }
+
+  try {
+    const res = await fetch(`/api/admin/collaborators/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${adminToken}`
+      },
+      body: JSON.stringify({ isActive: !currentStatus })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      await loadCollaborators();
+    } else {
+      alert(data.error || 'Erreur lors du changement de statut');
+    }
+  } catch (err) {
+    console.error('Erreur toggle statut:', err);
+    alert('Erreur réseau');
+  }
+};
+
+window.deleteCollaborator = async function(id, name) {
+  if (!adminToken) return;
+  const isCurrent = currentAdminUser && (currentAdminUser.id === id || currentAdminUser.userId === id);
+  if (isCurrent) {
+    alert('Vous ne pouvez pas supprimer votre propre compte.');
+    return;
+  }
+
+  if (!confirm(`Confirmez-vous la suppression définitive du compte de "${name}" ?`)) {
+    return;
+  }
+
+  try {
+    const res = await fetch(`/api/admin/collaborators/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${adminToken}`
+      }
+    });
+    const data = await res.json();
+    if (res.ok) {
+      await loadCollaborators();
+    } else {
+      alert(data.error || 'Erreur lors de la suppression');
+    }
+  } catch (err) {
+    console.error('Erreur suppression collaborateur:', err);
+    alert('Erreur réseau');
+  }
+};
+
+if (collaboratorForm) {
+  collaboratorForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (collaboratorModalError) collaboratorModalError.classList.add('hidden');
+
+    const editId = collaboratorEditId?.value;
+    const fullName = collabFullname?.value.trim();
+    const email = collabEmail?.value.trim();
+    const username = collabUsername?.value.trim() || undefined;
+    const role = collabRole?.value || 'GESTIONNAIRE';
+    const password = collabPassword?.value;
+    const isActive = collabIsActive ? collabIsActive.checked : true;
+
+    if (!fullName || !email) {
+      if (collaboratorModalError) {
+        collaboratorModalError.textContent = 'Nom complet et email sont requis';
+        collaboratorModalError.classList.remove('hidden');
+      }
+      return;
+    }
+
+    if (!editId && (!password || password.length < 6)) {
+      if (collaboratorModalError) {
+        collaboratorModalError.textContent = 'Le mot de passe doit comporter au moins 6 caractères';
+        collaboratorModalError.classList.remove('hidden');
+      }
+      return;
+    }
+
+    const payload = {
+      fullName,
+      email,
+      username,
+      role,
+      isActive,
+      password: password && password.length >= 6 ? password : undefined
+    };
+
+    try {
+      const url = editId ? `/api/admin/collaborators/${editId}` : '/api/admin/collaborators';
+      const method = editId ? 'PUT' : 'POST';
+
+      const res = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${adminToken}`
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        if (collaboratorModalError) {
+          collaboratorModalError.textContent = data.error || 'Erreur lors de l\'enregistrement';
+          collaboratorModalError.classList.remove('hidden');
+        }
+        return;
+      }
+
+      closeCollaboratorModal();
+      await loadCollaborators();
+    } catch (err) {
+      if (collaboratorModalError) {
+        collaboratorModalError.textContent = 'Erreur réseau lors de l\'enregistrement';
+        collaboratorModalError.classList.remove('hidden');
+      }
+    }
+  });
+}
+
+if (openAddCollaboratorBtn) {
+  openAddCollaboratorBtn.addEventListener('click', () => openCollaboratorModal(null));
+}
+if (closeCollaboratorModalBtn) {
+  closeCollaboratorModalBtn.addEventListener('click', closeCollaboratorModal);
+}
+if (cancelCollaboratorModalBtn) {
+  cancelCollaboratorModalBtn.addEventListener('click', closeCollaboratorModal);
+}
+if (toggleCollabPasswordBtn && collabPassword) {
+  toggleCollabPasswordBtn.addEventListener('click', () => {
+    const isPass = collabPassword.type === 'password';
+    collabPassword.type = isPass ? 'text' : 'password';
+    toggleCollabPasswordBtn.innerHTML = `<span class="material-symbols-outlined text-lg">${isPass ? 'visibility_off' : 'visibility'}</span>`;
+  });
+}
+if (teamSearchInput) {
+  teamSearchInput.addEventListener('input', () => renderCollaborators());
+}
+const collabFilterPills = document.querySelectorAll('.collab-filter-pill');
+collabFilterPills.forEach(pill => {
+  pill.addEventListener('click', () => {
+    collabFilterPills.forEach(p => {
+      p.classList.remove('active', 'bg-[#0d7252]', 'text-white');
+      p.classList.add('bg-gray-100', 'text-gray-600');
+    });
+    pill.classList.add('active', 'bg-[#0d7252]', 'text-white');
+    pill.classList.remove('bg-gray-100', 'text-gray-600');
+    activeCollabFilter = pill.getAttribute('data-collab-filter') || 'all';
+    renderCollaborators();
+  });
+});
 
 // Initialize on Load
 document.addEventListener('DOMContentLoaded', () => {

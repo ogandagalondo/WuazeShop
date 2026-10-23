@@ -136,14 +136,24 @@ export function seedData(db) {
     insertProduct.run(p.title, p.slug, p.category, p.price, p.original_price, p.image_url, p.specs, p.colors, p.in_stock);
   }
 
-  // 3. Seed default Admin User (Shopify-style email login supported)
-  const adminCheck = db.prepare(`SELECT id, email FROM admin_users WHERE username = ? OR email = ?`).get('admin', 'admin@wuazeshop.ga');
+  // 3. Seed default Admin User (Super Admin Founder)
+  const adminCheck = db.prepare(`SELECT id, email, role, full_name FROM admin_users WHERE username = ? OR email = ?`).get('admin', 'admin@wuazeshop.ga');
   if (!adminCheck) {
     const salt = bcrypt.genSaltSync(10);
     const hash = bcrypt.hashSync('adminpassword123', salt);
-    db.prepare(`INSERT INTO admin_users (username, email, password_hash) VALUES (?, ?, ?)`).run('admin', 'admin@wuazeshop.ga', hash);
-  } else if (!adminCheck.email) {
-    db.prepare(`UPDATE admin_users SET email = 'admin@wuazeshop.ga' WHERE id = ?`).run(adminCheck.id);
+    db.prepare(`
+      INSERT INTO admin_users (username, email, full_name, role, password_hash, is_active) 
+      VALUES (?, ?, ?, ?, ?, 1)
+    `).run('admin', 'admin@wuazeshop.ga', 'Fondateur WuazeShop', 'SUPER_ADMIN', hash);
+  } else {
+    db.prepare(`
+      UPDATE admin_users 
+      SET email = COALESCE(email, 'admin@wuazeshop.ga'),
+          full_name = COALESCE(full_name, 'Fondateur WuazeShop'),
+          role = COALESCE(role, 'SUPER_ADMIN'),
+          is_active = COALESCE(is_active, 1)
+      WHERE id = ?
+    `).run(adminCheck.id);
   }
 
   // 4. Seed default Site Settings (CMS Sections)

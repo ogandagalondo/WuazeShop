@@ -14,15 +14,25 @@ export const authService = {
       throw new Error('Identifiants incorrects');
     }
 
+    if (user.is_active === 0) {
+      throw new Error('Ce compte collaborateur a été désactivé. Veuillez contacter un administrateur.');
+    }
+
     const isValid = bcrypt.compareSync(password, user.password_hash);
     if (!isValid) {
       throw new Error('Identifiants incorrects');
     }
 
+    try {
+      db.prepare(`UPDATE admin_users SET last_login_at = CURRENT_TIMESTAMP WHERE id = ?`).run(user.id);
+    } catch {}
+
     const sessionPayload = {
       userId: user.id,
       username: user.username,
       email: user.email,
+      fullName: user.full_name || user.username,
+      role: user.role || 'SUPER_ADMIN',
       createdAt: Date.now()
     };
 
@@ -32,7 +42,13 @@ export const authService = {
 
     activeSessions.set(token, sessionPayload);
 
-    return { token, username: user.username, email: user.email };
+    return { 
+      token, 
+      username: user.username, 
+      email: user.email,
+      fullName: user.full_name || user.username,
+      role: user.role || 'SUPER_ADMIN'
+    };
   },
 
   verifyToken(token) {
