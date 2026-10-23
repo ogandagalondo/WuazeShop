@@ -480,6 +480,8 @@ async function loadSiteSettings() {
       if (h.prop2Sub) document.querySelectorAll('.hero-prop2-sub').forEach(el => el.textContent = h.prop2Sub);
       if (h.prop3Title) document.querySelectorAll('.hero-prop3-title').forEach(el => el.textContent = h.prop3Title);
       if (h.prop3Sub) document.querySelectorAll('.hero-prop3-sub').forEach(el => el.textContent = h.prop3Sub);
+      if (h.prop4Title) document.querySelectorAll('.hero-prop4-title').forEach(el => el.textContent = h.prop4Title);
+      if (h.prop4Sub) document.querySelectorAll('.hero-prop4-sub').forEach(el => el.textContent = h.prop4Sub);
     }
 
     // 2. Special Offer Promo Banner

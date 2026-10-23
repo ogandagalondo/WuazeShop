@@ -201,7 +201,9 @@ export function seedData(db) {
         prop2Title: 'Paiement sécurisé',
         prop2Sub: '100% fiable',
         prop3Title: 'Service client',
-        prop3Sub: 'dédié 7j/7'
+        prop3Sub: 'dédié 7j/7',
+        prop4Title: '100% Original',
+        prop4Sub: 'Garantie certifiée'
       })
     },
     {

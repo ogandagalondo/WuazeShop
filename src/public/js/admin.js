@@ -1640,6 +1640,8 @@ async function loadAdminSettings() {
       if (document.getElementById('cms-hero-prop2-sub')) document.getElementById('cms-hero-prop2-sub').value = h.prop2Sub || '';
       if (document.getElementById('cms-hero-prop3-title')) document.getElementById('cms-hero-prop3-title').value = h.prop3Title || '';
       if (document.getElementById('cms-hero-prop3-sub')) document.getElementById('cms-hero-prop3-sub').value = h.prop3Sub || '';
+      if (document.getElementById('cms-hero-prop4-title')) document.getElementById('cms-hero-prop4-title').value = h.prop4Title || '';
+      if (document.getElementById('cms-hero-prop4-sub')) document.getElementById('cms-hero-prop4-sub').value = h.prop4Sub || '';
     }
 
     // 2. Promo
@@ -1831,7 +1833,9 @@ document.getElementById('save-cms-hero-btn')?.addEventListener('click', () => {
     prop2Title: document.getElementById('cms-hero-prop2-title')?.value.trim() || 'Paiement sécurisé',
     prop2Sub: document.getElementById('cms-hero-prop2-sub')?.value.trim() || '100% fiable',
     prop3Title: document.getElementById('cms-hero-prop3-title')?.value.trim() || 'Service client',
-    prop3Sub: document.getElementById('cms-hero-prop3-sub')?.value.trim() || 'dédié 7j/7'
+    prop3Sub: document.getElementById('cms-hero-prop3-sub')?.value.trim() || 'dédié 7j/7',
+    prop4Title: document.getElementById('cms-hero-prop4-title')?.value.trim() || '100% Original',
+    prop4Sub: document.getElementById('cms-hero-prop4-sub')?.value.trim() || 'Garantie certifiée'
   };
   saveCmsSection('hero_section', payload, 'cms-hero-saved');
 });
