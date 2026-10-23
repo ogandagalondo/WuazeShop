@@ -170,51 +170,12 @@
       <!-- Top Section: Showcase Card (Left) & Product Details & Actions (Right) -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-start">
         
-        <!-- Left Column: Showcase & Badges with Multi-Angle Gallery Slider -->
-        <div class="lg:col-span-6 w-full space-y-3">
+        <!-- Left Column: Showcase & Badges with Clean Minimalist Multi-Angle Slider -->
+        <div class="lg:col-span-6 w-full">
           <div class="flex items-stretch gap-2.5 sm:gap-4 w-full">
             
-            <!-- 1. Product Showcase Card -->
-            <div id="gallery-card" class="flex-1 min-w-0 bg-[#fafbfb] rounded-3xl sm:rounded-[36px] border border-gray-200/80 p-3.5 sm:p-6 flex flex-col justify-between aspect-square relative group shadow-xs overflow-hidden select-none touch-pan-y">
-              
-              <!-- Top Row: Badges & Counter -->
-              <div class="flex items-center justify-between w-full z-10">
-                <div class="flex flex-col gap-1.5 items-start">
-                  <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white text-gray-900 border border-gray-200/90 text-[10px] sm:text-xs font-extrabold shadow-2xs">
-                    <span class="text-amber-500">🔥</span>
-                    <span>Bestseller</span>
-                  </span>
-                  <span id="detail-discount-badge" class="hidden inline-flex items-center px-2 py-0.5 rounded-full bg-[#10b981] text-white text-[9px] sm:text-[10px] font-black uppercase tracking-wider shadow-2xs">
-                    -15% OFF
-                  </span>
-                </div>
-
-                <!-- Gallery Angle Counter Pill (e.g., "1 / 4") -->
-                <div id="gallery-counter-pill" class="hidden inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/95 text-gray-700 border border-gray-200 text-[10px] sm:text-[11px] font-extrabold shadow-2xs backdrop-blur-xs">
-                  <span class="material-symbols-outlined text-[13px] text-[#0d7252]">photo_library</span>
-                  <span id="gallery-counter-text">1 / 1</span>
-                </div>
-              </div>
-
-              <!-- Navigation Arrow Left -->
-              <button 
-                id="gallery-prev-btn" 
-                type="button" 
-                aria-label="Angle précédent"
-                class="hidden absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white/95 hover:bg-white text-gray-800 shadow-md flex items-center justify-center hover:scale-105 active:scale-95 transition-all z-20 cursor-pointer border border-gray-200/70"
-              >
-                <span class="material-symbols-outlined text-xl sm:text-2xl">chevron_left</span>
-              </button>
-
-              <!-- Navigation Arrow Right -->
-              <button 
-                id="gallery-next-btn" 
-                type="button" 
-                aria-label="Angle suivant"
-                class="hidden absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white/95 hover:bg-white text-gray-800 shadow-md flex items-center justify-center hover:scale-105 active:scale-95 transition-all z-20 cursor-pointer border border-gray-200/70"
-              >
-                <span class="material-symbols-outlined text-xl sm:text-2xl">chevron_right</span>
-              </button>
+            <!-- 1. Product Showcase Card (Ultra-clean, centered image with pagination dots) -->
+            <div id="gallery-card" class="flex-1 min-w-0 bg-[#fafbfb] rounded-3xl sm:rounded-[36px] border border-gray-200/80 p-4 sm:p-7 flex flex-col justify-between aspect-square relative group shadow-xs overflow-hidden select-none touch-pan-y cursor-pointer" title="Cliquer ou faire glisser pour changer d'angle">
 
               <!-- Centered Product Image Container -->
               <div class="flex-1 flex items-center justify-center p-2 w-full min-h-0 relative">
@@ -226,8 +187,8 @@
                 />
               </div>
 
-              <!-- Bottom Pagination Dots Indicator -->
-              <div id="gallery-dots-container" class="flex items-center justify-center gap-1.5 pt-1 z-10 min-h-[16px]">
+              <!-- Bottom Pagination Dots Indicator (Clickable angles) -->
+              <div id="gallery-dots-container" class="flex items-center justify-center gap-2 pt-2 z-10 min-h-[18px]">
                 <!-- Dynamically populated dots -->
               </div>
 
@@ -249,13 +210,6 @@
               </div>
             </div>
 
-          </div>
-
-          <!-- 3. Thumbnails Strip (Scrollable row of angle preview cards) -->
-          <div id="detail-thumbnails-wrapper" class="hidden">
-            <div id="detail-thumbnails-list" class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
-              <!-- Dynamically populated thumbnail cards -->
-            </div>
           </div>
         </div>
 
@@ -876,6 +830,6 @@
   </nav>
 
   <!-- Script for Product Page Logic -->
-  <script src="/js/product.js?v=2.2"></script>
+  <script src="/js/product.js?v=2.3"></script>
 </body>
 </html>

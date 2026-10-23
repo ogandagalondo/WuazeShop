@@ -134,14 +134,14 @@ describe('Products API', () => {
     expect(iphone.image_url).toBe(iphone.images[0]);
   });
 
-  it('GET /product/:slug includes multi-angle gallery HTML controls', async () => {
+  it('GET /product/:slug includes clean multi-angle gallery card and dots container', async () => {
     const res = await request(app).get('/product/iphone-15-pro-max-256gb');
     expect(res.status).toBe(200);
     expect(res.text).toContain('gallery-card');
-    expect(res.text).toContain('gallery-prev-btn');
-    expect(res.text).toContain('gallery-next-btn');
     expect(res.text).toContain('gallery-dots-container');
-    expect(res.text).toContain('gallery-counter-pill');
-    expect(res.text).toContain('detail-thumbnails-wrapper');
+    expect(res.text).not.toContain('gallery-prev-btn');
+    expect(res.text).not.toContain('gallery-next-btn');
+    expect(res.text).not.toContain('gallery-counter-pill');
+    expect(res.text).not.toContain('detail-thumbnails-wrapper');
   });
 });

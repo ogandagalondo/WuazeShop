@@ -141,99 +141,40 @@ function showGalleryImage(index, animate = true) {
     }
   }
 
-  // Update Counter Pill
-  const counterPill = document.getElementById('gallery-counter-pill');
-  const counterText = document.getElementById('gallery-counter-text');
-  if (counterPill && counterText) {
-    if (currentGalleryImages.length > 1) {
-      counterPill.classList.remove('hidden');
-      counterText.textContent = `${activeGalleryIndex + 1} / ${currentGalleryImages.length}`;
-    } else {
-      counterPill.classList.add('hidden');
-    }
-  }
-
   // Update Dots
   const dotsContainer = document.getElementById('gallery-dots-container');
   if (dotsContainer) {
-    const dots = dotsContainer.querySelectorAll('.gallery-dot');
-    dots.forEach((dot, idx) => {
+    const dots = dotsContainer.querySelectorAll('.gallery-dot span');
+    dots.forEach((dotSpan, idx) => {
       if (idx === activeGalleryIndex) {
-        dot.className = 'gallery-dot w-5 h-1.5 rounded-full bg-[#0d7252] transition-all duration-300';
+        dotSpan.className = 'w-5 h-1.5 rounded-full bg-[#0d7252] transition-all duration-300 inline-block';
       } else {
-        dot.className = 'gallery-dot w-1.5 h-1.5 rounded-full bg-gray-300 hover:bg-gray-400 transition-all duration-300 cursor-pointer';
-      }
-    });
-  }
-
-  // Update Thumbnails
-  const thumbWrapper = document.getElementById('detail-thumbnails-wrapper');
-  if (thumbWrapper) {
-    const thumbBtns = thumbWrapper.querySelectorAll('.gallery-thumb-btn');
-    thumbBtns.forEach((btn, idx) => {
-      if (idx === activeGalleryIndex) {
-        btn.classList.add('border-[#0d7252]', 'ring-2', 'ring-[#0d7252]/20', 'shadow-xs');
-        btn.classList.remove('border-gray-200', 'opacity-60');
-        btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-      } else {
-        btn.classList.remove('border-[#0d7252]', 'ring-2', 'ring-[#0d7252]/20', 'shadow-xs');
-        btn.classList.add('border-gray-200', 'opacity-60');
+        dotSpan.className = 'w-2 h-2 rounded-full bg-gray-300 hover:bg-gray-400 transition-all duration-300 inline-block';
       }
     });
   }
 }
 
 function renderGalleryState() {
-  const prevBtn = document.getElementById('gallery-prev-btn');
-  const nextBtn = document.getElementById('gallery-next-btn');
   const dotsContainer = document.getElementById('gallery-dots-container');
-  const thumbWrapper = document.getElementById('detail-thumbnails-wrapper');
-  const thumbList = document.getElementById('detail-thumbnails-list');
-
   const hasMultiple = currentGalleryImages.length > 1;
-
-  if (prevBtn) {
-    if (hasMultiple) prevBtn.classList.remove('hidden');
-    else prevBtn.classList.add('hidden');
-  }
-  if (nextBtn) {
-    if (hasMultiple) nextBtn.classList.remove('hidden');
-    else nextBtn.classList.add('hidden');
-  }
 
   if (dotsContainer) {
     if (hasMultiple) {
       dotsContainer.innerHTML = currentGalleryImages.map((_, idx) => `
         <button 
           type="button" 
-          aria-label="Voir angle ${idx + 1}"
-          onclick="showGalleryImage(${idx})"
-          class="gallery-dot ${idx === activeGalleryIndex ? 'w-5 h-1.5 rounded-full bg-[#0d7252]' : 'w-1.5 h-1.5 rounded-full bg-gray-300 hover:bg-gray-400'} transition-all duration-300 cursor-pointer"
-        ></button>
+          aria-label="Angle ${idx + 1}"
+          onclick="event.stopPropagation(); showGalleryImage(${idx})"
+          class="gallery-dot p-1 flex items-center justify-center cursor-pointer transition-all"
+        >
+          <span class="${idx === activeGalleryIndex ? 'w-5 h-1.5 rounded-full bg-[#0d7252]' : 'w-2 h-2 rounded-full bg-gray-300 hover:bg-gray-400'} transition-all duration-300 inline-block"></span>
+        </button>
       `).join('');
       dotsContainer.classList.remove('hidden');
     } else {
       dotsContainer.innerHTML = '';
       dotsContainer.classList.add('hidden');
-    }
-  }
-
-  if (thumbWrapper && thumbList) {
-    if (hasMultiple) {
-      thumbList.innerHTML = currentGalleryImages.map((url, idx) => `
-        <button
-          type="button"
-          onclick="showGalleryImage(${idx})"
-          aria-label="Angle ${idx + 1}"
-          class="gallery-thumb-btn w-14 h-14 sm:w-16 sm:h-16 rounded-2xl p-1 bg-white border ${idx === activeGalleryIndex ? 'border-[#0d7252] ring-2 ring-[#0d7252]/20 shadow-xs' : 'border-gray-200 opacity-60'} hover:opacity-100 transition-all shrink-0 cursor-pointer flex items-center justify-center overflow-hidden"
-        >
-          <img src="${url}" alt="Angle ${idx + 1}" class="w-full h-full object-contain pointer-events-none"/>
-        </button>
-      `).join('');
-      thumbWrapper.classList.remove('hidden');
-    } else {
-      thumbList.innerHTML = '';
-      thumbWrapper.classList.add('hidden');
     }
   }
 
@@ -249,22 +190,7 @@ function initGalleryEventListeners() {
   if (galleryEventsInitialized) return;
   galleryEventsInitialized = true;
 
-  const prevBtn = document.getElementById('gallery-prev-btn');
-  const nextBtn = document.getElementById('gallery-next-btn');
   const galleryCard = document.getElementById('gallery-card');
-
-  if (prevBtn) {
-    prevBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      window.prevGalleryImage();
-    });
-  }
-  if (nextBtn) {
-    nextBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      window.nextGalleryImage();
-    });
-  }
 
   window.addEventListener('keydown', (e) => {
     if (currentGalleryImages.length <= 1) return;
@@ -297,6 +223,13 @@ function initGalleryEventListeners() {
         }
       }
     }, { passive: true });
+
+    // Click on card to advance image if multiple exist and click was not on a dot
+    galleryCard.addEventListener('click', (e) => {
+      if (currentGalleryImages.length <= 1) return;
+      if (e.target.closest('#gallery-dots-container')) return;
+      window.nextGalleryImage();
+    });
   }
 }
 
