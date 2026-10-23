@@ -2540,11 +2540,15 @@ function openCollaboratorModal(collab = null) {
   collaboratorModalOverlay.classList.remove('hidden');
 }
 
+window.openCollaboratorModal = openCollaboratorModal;
+
 function closeCollaboratorModal() {
   if (!collaboratorModalOverlay) return;
   collaboratorModalOverlay.classList.add('hidden');
   if (collaboratorModalError) collaboratorModalError.classList.add('hidden');
 }
+
+window.closeCollaboratorModal = closeCollaboratorModal;
 
 function showInviteModal(invitation, collabName, collabRole) {
   if (!collaboratorInviteModal || !invitation) return;

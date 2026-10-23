@@ -945,7 +945,7 @@
               </p>
             </div>
 
-            <button id="open-add-collaborator-btn" type="button" class="py-3 px-5 rounded-2xl bg-white hover:bg-purple-50 text-purple-900 font-extrabold text-xs shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 active:scale-95 shrink-0 cursor-pointer">
+            <button id="open-add-collaborator-btn" onclick="openCollaboratorModal()" type="button" class="py-3 px-5 rounded-2xl bg-white hover:bg-purple-50 text-purple-900 font-extrabold text-xs shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 active:scale-95 shrink-0 cursor-pointer">
               <span class="material-symbols-outlined text-base">person_add</span>
               <span>Nouveau Collaborateur</span>
             </button>
@@ -1482,6 +1482,8 @@
         Appliquer les modifications
       </button>
     </div>
+  </div>
+
   <!-- ==================== QUICK DISCOUNT MODAL (REMISE RAPIDE PRODUIT) ==================== -->
   <div id="quick-discount-modal-overlay" class="modal-overlay hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl border border-gray-100 overflow-hidden flex flex-col max-h-[90vh]">
@@ -1896,6 +1898,6 @@
     </div>
   </div>
 
-  <script src="/js/admin.js"></script>
+  <script src="/js/admin.js?v=2.2"></script>
 </body>
 </html>
