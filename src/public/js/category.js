@@ -239,7 +239,7 @@ function renderProducts(products) {
       <div class="product-card-hover group bg-white rounded-3xl p-3.5 sm:p-5 border border-gray-100 shadow-sm flex flex-col justify-between transition-all relative">
         
         <!-- Product Image (Click goes to product page) -->
-        <a href="/product/${escapeHtml(product.slug)}" class="block w-full aspect-square rounded-2xl bg-gray-50 overflow-hidden relative mb-3 cursor-pointer">
+        <a href="/product/${escapeHtml(product.slug || product.id)}" class="block w-full aspect-square rounded-2xl bg-gray-50 overflow-hidden relative mb-3 cursor-pointer">
           ${discount ? `
             <span class="absolute top-2 left-2 z-10 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-red-500 text-white shadow-xs">
               ${discount}
@@ -257,7 +257,7 @@ function renderProducts(products) {
         <div class="flex-1 flex flex-col justify-between space-y-2">
           <div>
             <span class="text-[10px] font-bold uppercase tracking-wider text-gray-400 block">${escapeHtml(product.category)}</span>
-            <a href="/product/${escapeHtml(product.slug)}" class="block hover:text-[#0d7252] transition-colors">
+            <a href="/product/${escapeHtml(product.slug || product.id)}" class="block hover:text-[#0d7252] transition-colors">
               <h3 class="font-extrabold text-xs sm:text-sm text-gray-900 line-clamp-2 leading-snug">
                 ${escapeHtml(product.title)}
               </h3>
@@ -306,7 +306,7 @@ function renderProducts(products) {
               </button>
 
               <a 
-                href="/product/${escapeHtml(product.slug)}" 
+                href="/product/${escapeHtml(product.slug || product.id)}" 
                 class="p-2 sm:p-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 flex items-center justify-center transition-colors"
                 title="Voir le produit et ses options"
               >

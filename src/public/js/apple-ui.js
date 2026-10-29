@@ -4,10 +4,12 @@
 function appleRubberband(overshoot, dimension, constant = 0.55) {
   return (overshoot * dimension * constant) / (dimension + constant * Math.abs(overshoot));
 }
+window.appleRubberband = appleRubberband;
 
 function appleProjectMomentum(velocity, decelerationRate = 0.998) {
   return (velocity / 1000) * decelerationRate / (1 - decelerationRate);
 }
+window.appleProjectMomentum = appleProjectMomentum;
 
 // 2. Apple Dynamic Island / Floating Toast System
 window.showAppleToast = function(message, type = 'info', duration = 3200) {

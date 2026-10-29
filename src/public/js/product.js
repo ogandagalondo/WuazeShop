@@ -111,15 +111,14 @@ function showError() {
 let currentGalleryImages = [];
 let activeGalleryIndex = 0;
 
-// Apple WWDC Fluid Interface: Rubberband formula for soft boundaries
-function appleRubberband(overshoot, dimension, constant = 0.55) {
+// Apple WWDC Fluid Interface: Formulas (shared from apple-ui.js with safe fallback)
+const appleRubberband = window.appleRubberband || function(overshoot, dimension, constant = 0.55) {
   return (overshoot * dimension * constant) / (dimension + constant * Math.abs(overshoot));
-}
+};
 
-// Apple WWDC Fluid Interface: Exponential decay momentum projection
-function appleProjectMomentum(initialVelocity, decelerationRate = 0.998) {
+const appleProjectMomentum = window.appleProjectMomentum || function(initialVelocity, decelerationRate = 0.998) {
   return (initialVelocity / 1000) * decelerationRate / (1 - decelerationRate);
-}
+};
 
 function setupProductGallery(product) {
   let images = [];
