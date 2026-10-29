@@ -50,6 +50,16 @@ function formatFCFA(amount) {
   return new Intl.NumberFormat('fr-FR').format(amount) + '\u00A0FCFA';
 }
 
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 function calculateDiscountPercent(price, originalPrice) {
   if (!originalPrice || originalPrice <= price) return null;
   const percent = Math.round(((originalPrice - price) / originalPrice) * 100);
@@ -468,7 +478,7 @@ function renderProductPage(product) {
       quickSpecsEl.innerHTML = topSpecs.map(spec => `
         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gray-100/90 border border-gray-200/60 text-gray-700 text-[11px] sm:text-xs font-semibold">
           <span class="material-symbols-outlined text-[13px] text-[#0d7252]">bolt</span>
-          <span>${spec}</span>
+          <span>${escapeHtml(spec)}</span>
         </span>
       `).join('');
       quickSpecsEl.classList.remove('hidden');

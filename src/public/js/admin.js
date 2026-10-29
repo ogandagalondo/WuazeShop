@@ -555,18 +555,18 @@ function renderOrders() {
           <div class="space-y-1">
             <div class="flex items-center gap-1.5 font-bold text-on-surface">
               <span class="material-symbols-outlined text-outline text-[16px]">person</span>
-              <span>${clientName}</span>
+              <span>${escapeHtml(clientName)}</span>
             </div>
             <div class="flex items-center gap-1.5 text-on-surface-variant">
               <span class="material-symbols-outlined text-outline text-[16px]">location_on</span>
-              <span>Quartier : <strong>${neighborhood}</strong></span>
+              <span>Quartier : <strong>${escapeHtml(neighborhood)}</strong></span>
             </div>
           </div>
 
           <div class="flex flex-col sm:items-end justify-between gap-1.5">
             <div class="flex items-center gap-2">
               <span class="text-outline text-[11px]">Contact :</span>
-              <a href="tel:${clientPhone}" class="font-bold text-on-surface hover:text-primary">${clientPhone}</a>
+              <a href="tel:${escapeHtml(clientPhone)}" class="font-bold text-on-surface hover:text-primary">${escapeHtml(clientPhone)}</a>
             </div>
             <a href="${waUrl}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#25D366] hover:bg-[#20ba5a] text-white text-[11px] font-bold shadow-sm transition-all w-fit">
               <span class="material-symbols-outlined text-[15px]">chat</span>

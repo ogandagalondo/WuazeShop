@@ -1,12 +1,19 @@
 import { Router } from 'express';
 import { getPaymentGateway } from './payment.factory.js';
 import { getDb } from '../../db/database.js';
+import { config } from '../../config/env.js';
 
 export const paymentRouter = Router();
 
-// Endpoint pour déclencher la confirmation dans le simulateur
+// Endpoint pour déclencher la confirmation dans le simulateur (désactivé en production sans drapeau explicite)
 paymentRouter.post('/payments/simulator/confirm', async (req, res) => {
   try {
+    if (!config.enableSimulator) {
+      return res.status(403).json({ 
+        error: 'Accès interdit : Le simulateur de paiement est désactivé en environnement de production.' 
+      });
+    }
+
     const { transactionReference } = req.body;
     if (!transactionReference) {
       return res.status(400).json({ error: 'transactionReference requis' });

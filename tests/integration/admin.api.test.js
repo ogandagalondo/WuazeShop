@@ -120,6 +120,20 @@ describe('Admin CMS API', () => {
     expect(uploadRes.body.imageUrl).toMatch(/^\/uploads\/\d+-smartphone-test\.png$/);
   });
 
+  it('rejects image upload if MIME format is unauthorized or binary signature is invalid', async () => {
+    const maliciousPayload = 'data:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg==';
+    const uploadRes = await request(app)
+      .post('/api/admin/upload')
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({
+        image: maliciousPayload,
+        filename: 'exploit.html'
+      });
+
+    expect(uploadRes.status).toBe(400);
+    expect(uploadRes.body.error).toContain('non autorisé');
+  });
+
   it('allows authenticated admin to add a product with a custom description and uploaded image', async () => {
     const res = await request(app)
       .post('/api/admin/products')

@@ -60,6 +60,16 @@ function formatFCFA(amount) {
   return new Intl.NumberFormat('fr-FR').format(amount) + '\u00A0FCFA';
 }
 
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 function calculateDiscountPercent(price, originalPrice) {
   if (!originalPrice || originalPrice <= price) return null;
   const percent = Math.round(((originalPrice - price) / originalPrice) * 100);
@@ -102,20 +112,20 @@ function renderProducts(products) {
         </div>
 
         <!-- Product Image Container (Clickable to detail page) -->
-        <a href="/product/${product.slug || product.id}" class="aspect-square w-full rounded-xl overflow-hidden flex items-center justify-center mb-2 sm:mb-3 bg-gray-50 group-hover:bg-gray-100 transition-colors cursor-pointer block relative" title="Voir les détails de ${product.title}">
-          <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" src="${product.image_url}" alt="${product.title}"/>
+        <a href="/product/${escapeHtml(product.slug || String(product.id))}" class="aspect-square w-full rounded-xl overflow-hidden flex items-center justify-center mb-2 sm:mb-3 bg-gray-50 group-hover:bg-gray-100 transition-colors cursor-pointer block relative" title="Voir les détails de ${escapeHtml(product.title)}">
+          <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" src="${escapeHtml(product.image_url)}" alt="${escapeHtml(product.title)}"/>
         </a>
 
         <!-- Product Details -->
         <div class="flex flex-col flex-1 justify-between space-y-2 sm:space-y-3">
           <div>
-            <span class="text-[9px] sm:text-[10px] uppercase font-bold text-gray-400 tracking-wider block mb-0.5">${product.category}</span>
-            <a href="/product/${product.slug || product.id}" class="block group-hover:text-[#0d7252] transition-colors" title="Voir les caractéristiques et couleurs">
+            <span class="text-[9px] sm:text-[10px] uppercase font-bold text-gray-400 tracking-wider block mb-0.5">${escapeHtml(product.category)}</span>
+            <a href="/product/${escapeHtml(product.slug || String(product.id))}" class="block group-hover:text-[#0d7252] transition-colors" title="Voir les caractéristiques et couleurs">
               <h3 class="text-xs sm:text-sm font-extrabold text-gray-900 line-clamp-2 leading-snug">
-                ${product.title}
+                ${escapeHtml(product.title)}
               </h3>
             </a>
-            ${product.description ? `<p class="text-[10px] text-gray-500 line-clamp-1 mt-0.5">${product.description}</p>` : ''}
+            ${product.description ? `<p class="text-[10px] text-gray-500 line-clamp-1 mt-0.5">${escapeHtml(product.description)}</p>` : ''}
           </div>
 
           <!-- Price, Cargo Weight & Add to Cart -->

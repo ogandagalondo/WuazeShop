@@ -69,12 +69,14 @@ _WuazeShop Libreville_`;
       console.warn('[InviteService] Log invitation DB deferred:', err.message);
     }
 
-    // Affichage dans la console serveur pour traçabilité immédiate
+    // Affichage dans la console serveur pour traçabilité locale (masqué en production pour prévenir CWE-532)
+    const isProd = process.env.NODE_ENV === 'production';
+    const logPassword = isProd ? '•••••••• [MASQUÉ EN PRODUCTION]' : password;
     console.log(`\n================== [INVITATION COLLABORATEUR ENVOYÉE] ==================`);
     console.log(`Destinataire : ${collaborator.full_name} (${collaborator.email})`);
     console.log(`Poste / Rôle : ${roleName}`);
     console.log(`Lien d'accès : ${loginUrl}`);
-    console.log(`Mot de passe : ${password}`);
+    console.log(`Mot de passe : ${logPassword}`);
     console.log(`========================================================================\n`);
 
     return {

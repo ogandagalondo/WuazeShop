@@ -67,7 +67,30 @@ adminRouter.get('/admin/me', (req, res) => {
   res.json({ authenticated: true, user: req.admin });
 });
 
-// POST /api/admin/upload - Téléverser une image produit (Base64)
+// Whitelist stricte des types MIME d'images autorisés
+const ALLOWED_IMAGE_MIMES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+const MAX_UPLOAD_SIZE_BYTES = 5 * 1024 * 1024; // 5 Mo
+
+function isValidImageMagicBytes(buffer, mimeType) {
+  if (!buffer || buffer.length < 4) return false;
+  // PNG : 89 50 4E 47
+  if (mimeType.includes('png')) {
+    return buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4e && buffer[3] === 0x47;
+  }
+  // JPEG : FF D8 FF
+  if (mimeType.includes('jpeg') || mimeType.includes('jpg')) {
+    return buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff;
+  }
+  // WebP : RIFF .... WEBP
+  if (mimeType.includes('webp')) {
+    return buffer.length >= 12 &&
+      buffer.toString('ascii', 0, 4) === 'RIFF' &&
+      buffer.toString('ascii', 8, 12) === 'WEBP';
+  }
+  return false;
+}
+
+// POST /api/admin/upload - Téléverser une image produit (Base64 sécurisé)
 adminRouter.post('/admin/upload', (req, res) => {
   try {
     const { image, dataUrl, filename } = req.body;
@@ -76,19 +99,36 @@ adminRouter.post('/admin/upload', (req, res) => {
       return res.status(400).json({ error: 'Fichier image (image ou dataUrl) requis' });
     }
 
-    const matches = rawData.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+    const matches = rawData.match(/^data:([A-Za-z0-9\-+\/]+);base64,(.+)$/);
     if (!matches || matches.length !== 3) {
       return res.status(400).json({ error: 'Format d’image invalide' });
     }
 
-    const mimeType = matches[1];
+    const mimeType = matches[1].toLowerCase();
+    if (!ALLOWED_IMAGE_MIMES.includes(mimeType)) {
+      return res.status(400).json({ 
+        error: 'Format d’image non autorisé. Formats acceptés : JPEG, PNG, WebP.' 
+      });
+    }
+
     const base64Data = matches[2];
     const buffer = Buffer.from(base64Data, 'base64');
+
+    if (buffer.length > MAX_UPLOAD_SIZE_BYTES) {
+      return res.status(400).json({ 
+        error: 'Le fichier dépasse la taille maximale autorisée de 5 Mo.' 
+      });
+    }
+
+    if (!isValidImageMagicBytes(buffer, mimeType)) {
+      return res.status(400).json({ 
+        error: 'Fichier corrompu ou signature binaire d’image invalide.' 
+      });
+    }
 
     let ext = '.jpg';
     if (mimeType.includes('png')) ext = '.png';
     else if (mimeType.includes('webp')) ext = '.webp';
-    else if (mimeType.includes('gif')) ext = '.gif';
 
     const nameWithoutExt = path.parse(filename || 'product').name;
     const safeBaseName = nameWithoutExt
@@ -107,6 +147,7 @@ adminRouter.post('/admin/upload', (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
 
 // POST /api/admin/products - Créer un produit
 adminRouter.post('/admin/products', (req, res) => {

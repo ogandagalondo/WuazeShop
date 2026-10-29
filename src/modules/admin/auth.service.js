@@ -1,10 +1,11 @@
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { getDb } from '../../db/database.js';
+import { config } from '../../config/env.js';
 
 // Stockage des tokens en mémoire et support stateless HMAC
 const activeSessions = new Map();
-const AUTH_SECRET = process.env.JWT_SECRET || 'wuazeshop-admin-hmac-secret-gabon-2026';
+const AUTH_SECRET = config.jwtSecret;
 
 export const authService = {
   login(identifier, password) {
@@ -73,7 +74,13 @@ export const authService = {
       try {
         const [encoded, signature] = token.split('.');
         const expectedSig = crypto.createHmac('sha256', AUTH_SECRET).update(encoded).digest('base64url');
-        if (signature !== expectedSig) return null;
+
+        // Sécurité : Comparaison temporelle constante (Anti-Timing Attack)
+        const sigBuf = Buffer.from(signature, 'utf8');
+        const expBuf = Buffer.from(expectedSig, 'utf8');
+        if (sigBuf.length !== expBuf.length || !crypto.timingSafeEqual(sigBuf, expBuf)) {
+          return null;
+        }
 
         const payload = JSON.parse(Buffer.from(encoded, 'base64url').toString('utf8'));
         if (Date.now() - payload.createdAt > 24 * 60 * 60 * 1000) {

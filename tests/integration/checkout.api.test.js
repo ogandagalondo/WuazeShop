@@ -93,6 +93,7 @@ describe('Checkout API', () => {
     expect(getRes.body.fulfillmentStatus).toBe('AWAITING_PROCUREMENT');
     expect(getRes.body.productTitle).toBeDefined();
     expect(getRes.body.customerNeighborhood).toBe('Akébé');
+    expect(getRes.body.customerPhone).toBe('+241 •• •• •• 22');
   });
 
   it('returns 404 when tracking a non-existent order reference', async () => {
