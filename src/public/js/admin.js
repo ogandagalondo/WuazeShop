@@ -3103,8 +3103,19 @@ collabFilterPills.forEach(pill => {
   });
 });
 
+// Clic sur le profil en en-tête pour modifier ses identifiants personnels
+if (adminUserPill) {
+  adminUserPill.addEventListener('click', () => {
+    if (!currentAdminUser) return;
+    const myId = currentAdminUser.id || currentAdminUser.userId;
+    const found = currentCollaborators.find(c => c.id === myId) || currentAdminUser;
+    openCollaboratorModal(found);
+  });
+}
+
 // Initialize on Load
 document.addEventListener('DOMContentLoaded', () => {
   checkAuth();
 });
+
 
