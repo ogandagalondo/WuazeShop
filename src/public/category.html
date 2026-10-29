@@ -84,7 +84,7 @@
   </div>
 
   <!-- ==================== NAVBAR ==================== -->
-  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-gray-100 transition-all">
+  <header class="apple-glass sticky top-0 z-40 transition-all border-b border-gray-200/50 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.03)]">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between gap-4">
       
       <!-- Left: Hamburger Button (Mobile/Tablet) & Brand Logo -->
@@ -612,6 +612,7 @@
   <!-- ==================== CART DRAWER ==================== -->
   <div id="cart-drawer-overlay" class="modal-overlay hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm transition-opacity">
     <div class="drawer drawer-closed absolute right-0 top-0 bottom-0 w-full max-w-md bg-white shadow-2xl flex flex-col">
+      <div class="sheet-grab-handle sm:hidden mt-3"></div>
       <div class="p-5 border-b border-gray-100 flex items-center justify-between">
         <div class="flex items-center gap-2">
           <span class="material-symbols-outlined text-[#0d7252] text-2xl">shopping_cart</span>
@@ -831,7 +832,7 @@
   </div>
 
   <!-- ==================== MOBILE BOTTOM NAVIGATION ==================== -->
-  <nav class="sm:hidden fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-gray-200/80 px-4 py-2 z-40 flex items-center justify-around shadow-lg">
+  <nav class="sm:hidden fixed bottom-0 inset-x-0 apple-glass border-t border-gray-200/50 px-4 py-2 z-40 flex items-center justify-around shadow-lg">
     <a href="/" class="flex flex-col items-center gap-0.5 text-gray-500 hover:text-[#0d7252]">
       <span class="material-symbols-outlined text-xl">home</span>
       <span class="text-[10px] font-semibold">Accueil</span>
@@ -855,7 +856,8 @@
     </a>
   </nav>
 
-  <!-- Category Page Logic Script -->
+  <!-- Scripts for Apple Fluid UI & Category Logic -->
+  <script src="/js/apple-ui.js"></script>
   <script src="/js/category.js?v=2.1"></script>
 </body>
 </html>

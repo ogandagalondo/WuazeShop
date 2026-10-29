@@ -339,19 +339,39 @@ window.changeQuantity = function(index, delta) {
   updateCartUi();
 };
 
+let drawerCloseTimeout = null;
+
 function openCartDrawer() {
   if (!cartDrawerOverlay) return;
+  if (drawerCloseTimeout) {
+    clearTimeout(drawerCloseTimeout);
+    drawerCloseTimeout = null;
+  }
   cartDrawerOverlay.classList.remove('hidden');
   const drawer = cartDrawerOverlay.querySelector('.drawer');
-  if (drawer) drawer.classList.remove('drawer-closed');
+  if (drawer) {
+    drawer.style.transform = '';
+    drawer.style.transition = '';
+    void drawer.offsetWidth;
+    drawer.classList.remove('drawer-closed');
+  }
 }
 
 function closeCartDrawer() {
   if (!cartDrawerOverlay) return;
   const drawer = cartDrawerOverlay.querySelector('.drawer');
-  if (drawer) drawer.classList.add('drawer-closed');
-  setTimeout(() => cartDrawerOverlay.classList.add('hidden'), 250);
+  if (drawer) {
+    drawer.style.transform = '';
+    drawer.style.transition = '';
+    drawer.classList.add('drawer-closed');
+  }
+  if (drawerCloseTimeout) clearTimeout(drawerCloseTimeout);
+  drawerCloseTimeout = setTimeout(() => {
+    cartDrawerOverlay.classList.add('hidden');
+    drawerCloseTimeout = null;
+  }, 350);
 }
+window.closeCartDrawer = closeCartDrawer;
 
 const cartToggleBtn = document.getElementById('cart-toggle-btn');
 if (cartToggleBtn) cartToggleBtn.addEventListener('click', openCartDrawer);
@@ -361,6 +381,18 @@ if (mobileCartBtn) mobileCartBtn.addEventListener('click', openCartDrawer);
 
 const closeCartBtn = document.getElementById('close-cart-btn');
 if (closeCartBtn) closeCartBtn.addEventListener('click', closeCartDrawer);
+
+// Set up fluid swipe-to-dismiss gesture for bottom sheet on mobile & backdrop click
+if (cartDrawerOverlay) {
+  const drawer = cartDrawerOverlay.querySelector('.drawer');
+  if (typeof window.setupAppleSheetGestures === 'function' && drawer) {
+    window.setupAppleSheetGestures(cartDrawerOverlay, drawer, closeCartDrawer);
+  } else {
+    cartDrawerOverlay.addEventListener('click', (e) => {
+      if (e.target === cartDrawerOverlay) closeCartDrawer();
+    });
+  }
+}
 
 document.addEventListener('click', (e) => {
   const link = e.target.closest('.continue-shopping-action');
@@ -374,7 +406,11 @@ const openCheckoutModalBtn = document.getElementById('open-checkout-modal-btn');
 if (openCheckoutModalBtn) {
   openCheckoutModalBtn.addEventListener('click', () => {
     if (cart.length === 0) {
-      alert('Votre panier est vide !');
+      if (window.showAppleToast) {
+        window.showAppleToast('Votre panier est vide !', 'error');
+      } else {
+        alert('Votre panier est vide !');
+      }
       return;
     }
     closeCartDrawer();
@@ -386,6 +422,23 @@ const closeCheckoutBtn = document.getElementById('close-checkout-btn');
 if (closeCheckoutBtn) {
   closeCheckoutBtn.addEventListener('click', () => {
     checkoutModalOverlay.classList.add('hidden');
+  });
+}
+
+// Backdrop click dismissal for modals
+if (checkoutModalOverlay) {
+  checkoutModalOverlay.addEventListener('click', (e) => {
+    if (e.target === checkoutModalOverlay) {
+      checkoutModalOverlay.classList.add('hidden');
+    }
+  });
+}
+
+if (simulatorModalOverlay) {
+  simulatorModalOverlay.addEventListener('click', (e) => {
+    if (e.target === simulatorModalOverlay) {
+      simulatorModalOverlay.classList.add('hidden');
+    }
   });
 }
 
@@ -424,12 +477,23 @@ if (checkoutForm) {
     const paymentMethod = paymentRadio ? paymentRadio.value : 'AIRTEL_MONEY';
 
     if (!name || !phone || !neighborhood) {
-      alert('Veuillez renseigner tous les champs obligatoires.');
+      if (!name) window.triggerAppleShake?.(document.getElementById('checkout-name'));
+      if (!phone) window.triggerAppleShake?.(document.getElementById('checkout-phone'));
+      if (!neighborhood) window.triggerAppleShake?.(document.getElementById('checkout-neighborhood'));
+      if (window.showAppleToast) {
+        window.showAppleToast('Veuillez renseigner tous les champs obligatoires.', 'error');
+      } else {
+        alert('Veuillez renseigner tous les champs obligatoires.');
+      }
       return;
     }
 
     if (cart.length === 0) {
-      alert('Votre panier est vide.');
+      if (window.showAppleToast) {
+        window.showAppleToast('Votre panier est vide.', 'error');
+      } else {
+        alert('Votre panier est vide.');
+      }
       return;
     }
 
@@ -452,7 +516,12 @@ if (checkoutForm) {
 
       const orderData = await res.json();
       if (!res.ok) {
-        alert(`Erreur : ${orderData.error || 'Impossible de créer la commande'}`);
+        const errMsg = orderData.error || 'Impossible de créer la commande';
+        if (window.showAppleToast) {
+          window.showAppleToast(`Erreur : ${errMsg}`, 'error');
+        } else {
+          alert(`Erreur : ${errMsg}`);
+        }
         return;
       }
 
@@ -472,7 +541,11 @@ if (checkoutForm) {
       }
       simulatorModalOverlay.classList.remove('hidden');
     } catch (err) {
-      alert('Erreur réseau lors de la commande.');
+      if (window.showAppleToast) {
+        window.showAppleToast('Erreur réseau lors de la commande.', 'error');
+      } else {
+        alert('Erreur réseau lors de la commande.');
+      }
     }
   });
 }
@@ -1051,9 +1124,16 @@ function setupHamburgerMenu() {
   const navOverlay = document.getElementById('mobile-nav-overlay');
   const navLinks = document.querySelectorAll('.mobile-nav-link');
 
+  let navCloseTimer = null;
+
   function openNav() {
     if (navDrawer && navOverlay) {
+      if (navCloseTimer) {
+        clearTimeout(navCloseTimer);
+        navCloseTimer = null;
+      }
       navOverlay.classList.remove('hidden');
+      void navDrawer.offsetWidth;
       navDrawer.classList.remove('nav-drawer-closed');
       document.body.classList.add('overflow-hidden');
     }
@@ -1062,7 +1142,11 @@ function setupHamburgerMenu() {
   function closeNav() {
     if (navDrawer && navOverlay) {
       navDrawer.classList.add('nav-drawer-closed');
-      setTimeout(() => navOverlay.classList.add('hidden'), 250);
+      if (navCloseTimer) clearTimeout(navCloseTimer);
+      navCloseTimer = setTimeout(() => {
+        navOverlay.classList.add('hidden');
+        navCloseTimer = null;
+      }, 350);
       document.body.classList.remove('overflow-hidden');
     }
   }

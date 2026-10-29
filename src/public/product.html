@@ -78,7 +78,7 @@
   </div>
 
   <!-- ==================== NAVBAR ==================== -->
-  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-gray-100 transition-all">
+  <header class="apple-glass sticky top-0 z-40 transition-all border-b border-gray-200/50 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.03)]">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between gap-4">
       
       <!-- Left: Hamburger Button (Mobile/Tablet) & Brand Logo -->
@@ -211,17 +211,19 @@
         <div class="lg:col-span-6 w-full">
           <div class="flex items-stretch gap-2.5 sm:gap-4 w-full">
             
-            <!-- 1. Product Showcase Card (Ultra-clean, centered image filling square uniformly edge-to-edge like Huel) -->
-            <div id="gallery-card" class="flex-1 min-w-0 bg-white rounded-3xl sm:rounded-[36px] border border-gray-200/80 p-0 aspect-square relative group shadow-xs overflow-hidden select-none touch-pan-y cursor-pointer" title="Cliquer ou faire glisser pour changer d'angle">
+            <!-- 1. Product Showcase Card (Fluid 1:1 Direct Manipulation Gallery) -->
+            <div id="gallery-card" class="flex-1 min-w-0 bg-white rounded-3xl sm:rounded-[36px] border border-gray-200/80 p-0 aspect-square relative group shadow-xs overflow-hidden select-none touch-pan-y cursor-grab active:cursor-grabbing" title="Faire glisser pour changer d'angle">
 
-              <!-- Centered Product Image Container (Fills the entire square uniformly edge-to-edge) -->
-              <div class="w-full h-full relative overflow-hidden flex items-center justify-center">
-                <img 
-                  id="detail-image" 
-                  src="" 
-                  alt="Produit WuazeShop"
-                  class="w-full h-full object-cover group-hover:scale-105 transition-all duration-300"
-                />
+              <!-- Track container that holds slides horizontally -->
+              <div id="gallery-track" class="w-full h-full flex items-stretch will-change-transform" style="touch-action: pan-y;">
+                <div class="gallery-slide w-full h-full shrink-0 relative overflow-hidden flex items-center justify-center">
+                  <img 
+                    id="detail-image" 
+                    src="" 
+                    alt="Produit WuazeShop"
+                    class="w-full h-full object-cover pointer-events-none select-none transition-transform duration-300 group-hover:scale-[1.03]"
+                  />
+                </div>
               </div>
 
               <!-- Bottom Pagination Dots Indicator (Overlaid at bottom edge like Huel) -->
@@ -368,53 +370,65 @@
             </div>
           </div>
 
-          <!-- Clean Accordions Section -->
+          <!-- Clean Apple Fluid Accordions Section -->
           <div class="pt-4 border-t border-gray-100 space-y-1">
             <!-- Accordion 1: Fiche Technique / Specs -->
-            <details class="group border-b border-gray-100 py-3.5 transition-all" open>
+            <details class="apple-accordion group border-b border-gray-100 py-3.5 transition-all" open>
               <summary class="flex items-center justify-between font-bold text-xs sm:text-sm text-gray-900 cursor-pointer list-none select-none">
                 <span class="flex items-center gap-2">
                   <span class="material-symbols-outlined text-[#0d7252] text-lg">tune</span>
                   <span>Caractéristiques &amp; Fiche Technique</span>
                 </span>
-                <span class="material-symbols-outlined text-gray-400 group-open:rotate-180 transition-transform">keyboard_arrow_down</span>
+                <span class="material-symbols-outlined text-gray-400 group-open:rotate-180 transition-transform duration-300">keyboard_arrow_down</span>
               </summary>
-              <div class="pt-3 pb-1" id="detail-specs-section">
-                <div id="detail-specs-container" class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                  <!-- Rendered dynamically -->
+              <div class="accordion-wrapper">
+                <div class="accordion-inner">
+                  <div class="pt-3 pb-1" id="detail-specs-section">
+                    <div id="detail-specs-container" class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                      <!-- Rendered dynamically -->
+                    </div>
+                  </div>
                 </div>
               </div>
             </details>
 
             <!-- Accordion 2: Description Détaillée -->
-            <details class="group border-b border-gray-100 py-3.5 transition-all">
+            <details class="apple-accordion group border-b border-gray-100 py-3.5 transition-all">
               <summary class="flex items-center justify-between font-bold text-xs sm:text-sm text-gray-900 cursor-pointer list-none select-none">
                 <span class="flex items-center gap-2">
                   <span class="material-symbols-outlined text-[#0d7252] text-lg">description</span>
                   <span>Description Détaillée</span>
                 </span>
-                <span class="material-symbols-outlined text-gray-400 group-open:rotate-180 transition-transform">keyboard_arrow_down</span>
+                <span class="material-symbols-outlined text-gray-400 group-open:rotate-180 transition-transform duration-300">keyboard_arrow_down</span>
               </summary>
-              <div class="pt-3 pb-1">
-                <p id="detail-description" class="text-xs sm:text-sm text-gray-600 leading-relaxed">
-                  Description complète du produit...
-                </p>
+              <div class="accordion-wrapper">
+                <div class="accordion-inner">
+                  <div class="pt-3 pb-1">
+                    <p id="detail-description" class="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                      Description complète du produit...
+                    </p>
+                  </div>
+                </div>
               </div>
             </details>
 
             <!-- Accordion 3: Expédition & Formalités Gabon -->
-            <details class="group border-b border-gray-100 py-3.5 transition-all">
+            <details class="apple-accordion group border-b border-gray-100 py-3.5 transition-all">
               <summary class="flex items-center justify-between font-bold text-xs sm:text-sm text-gray-900 cursor-pointer list-none select-none">
                 <span class="flex items-center gap-2">
                   <span class="material-symbols-outlined text-[#0d7252] text-lg">local_shipping</span>
                   <span>Expédition &amp; Retrait à Libreville</span>
                 </span>
-                <span class="material-symbols-outlined text-gray-400 group-open:rotate-180 transition-transform">keyboard_arrow_down</span>
+                <span class="material-symbols-outlined text-gray-400 group-open:rotate-180 transition-transform duration-300">keyboard_arrow_down</span>
               </summary>
-              <div class="pt-3 pb-1 text-xs text-gray-600 space-y-2 leading-relaxed">
-                <p>&bull; <strong>Formules de fret aérien :</strong> Colis Rapide en ~1 semaine ou Colis Normal en ~2 semaines depuis notre plateforme de transit à Shenzhen.</p>
-                <p>&bull; <strong>Tarification au poids exact :</strong> 10 000 FCFA/kg (Normal) ou 13 500 FCFA/kg (Rapide). Zéro surcoût douanier à l'arrivée.</p>
-                <p>&bull; <strong>Réception à Libreville :</strong> Remise en main propre dans votre quartier ou retrait direct selon votre convenance.</p>
+              <div class="accordion-wrapper">
+                <div class="accordion-inner">
+                  <div class="pt-3 pb-1 text-xs text-gray-600 space-y-2 leading-relaxed">
+                    <p>&bull; <strong>Formules de fret aérien :</strong> Colis Rapide en ~1 semaine ou Colis Normal en ~2 semaines depuis notre plateforme de transit à Shenzhen.</p>
+                    <p>&bull; <strong>Tarification au poids exact :</strong> 10 000 FCFA/kg (Normal) ou 13 500 FCFA/kg (Rapide). Zéro surcoût douanier à l'arrivée.</p>
+                    <p>&bull; <strong>Réception à Libreville :</strong> Remise en main propre dans votre quartier ou retrait direct selon votre convenance.</p>
+                  </div>
+                </div>
               </div>
             </details>
           </div>
@@ -612,6 +626,7 @@
   <!-- ==================== CART DRAWER ==================== -->
   <div id="cart-drawer-overlay" class="modal-overlay hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm transition-opacity">
     <div class="drawer drawer-closed absolute right-0 top-0 bottom-0 w-full max-w-md bg-white shadow-2xl flex flex-col">
+      <div class="sheet-grab-handle sm:hidden mt-3"></div>
       <div class="p-5 border-b border-gray-100 flex items-center justify-between">
         <div class="flex items-center gap-2">
           <span class="material-symbols-outlined text-[#0d7252] text-2xl">shopping_cart</span>
@@ -936,49 +951,43 @@
     </div>
   </footer>
 
-  <!-- ==================== MOBILE STICKY FLOATING BUY BAR ==================== -->
-  <div id="mobile-sticky-action-bar" class="fixed bottom-14 inset-x-0 z-30 bg-white/95 backdrop-blur-md border-t border-gray-100 p-2.5 px-4 flex sm:hidden items-center justify-between gap-3 shadow-[0_-4px_15px_rgba(0,0,0,0.06)]">
-    <div class="min-w-0">
-      <span class="text-[9px] text-gray-400 block font-medium uppercase tracking-wider">Prix unitaire :</span>
-      <span id="mobile-sticky-price" class="text-xs font-black text-[#0d7252] truncate block">0 FCFA</span>
-    </div>
-    <div class="flex items-center gap-1.5 shrink-0">
-      <a id="mobile-sticky-whatsapp-btn" href="https://wa.me/241074001122" target="_blank" class="w-9 h-9 rounded-full bg-[#25D366] text-white flex items-center justify-center shadow-sm shrink-0" title="Poser une question WhatsApp">
+  <!-- ==================== CONSOLIDATED APPLE MOBILE BOTTOM ACTION & NAV BAR ==================== -->
+  <div id="mobile-sticky-action-bar" class="fixed bottom-0 inset-x-0 z-40 apple-glass border-t border-gray-200/60 py-2.5 px-3 flex sm:hidden items-center justify-between gap-2 shadow-[0_-4px_25px_rgba(0,0,0,0.08)]">
+    <!-- Quick Home Navigation -->
+    <a href="/" class="flex flex-col items-center gap-0.5 text-gray-500 hover:text-[#0d7252] text-[10px] font-medium pr-1" title="Retourner à l'accueil">
+      <span class="material-symbols-outlined text-xl">home</span>
+      <span>Accueil</span>
+    </a>
+
+    <!-- Cart shortcut with live badge -->
+    <button id="mobile-cart-btn" class="relative flex flex-col items-center gap-0.5 text-gray-500 hover:text-[#0d7252] text-[10px] font-medium px-2" title="Voir mon panier">
+      <div class="relative">
+        <span class="material-symbols-outlined text-xl">shopping_cart</span>
+        <span id="mobile-cart-badge" class="absolute -top-1.5 -right-2 bg-[#0d7252] text-white text-[9px] font-extrabold w-4 h-4 rounded-full flex items-center justify-center">0</span>
+      </div>
+      <span>Panier</span>
+    </button>
+
+    <!-- Center/Right: Live Price and High-Impact CTA -->
+    <div class="flex items-center gap-2 flex-1 justify-end min-w-0">
+      <div class="text-right shrink-0">
+        <span id="mobile-sticky-price" class="text-xs font-black text-[#0d7252] block leading-tight">0 FCFA</span>
+        <span class="text-[9px] text-gray-400 block leading-none font-medium">Prix direct</span>
+      </div>
+
+      <a id="mobile-sticky-whatsapp-btn" href="https://wa.me/241074001122" target="_blank" class="w-9 h-9 rounded-full bg-[#25D366] text-white flex items-center justify-center shadow-xs shrink-0 active:scale-95 transition-all" title="Poser une question WhatsApp">
         <span class="material-symbols-outlined text-base">chat</span>
       </a>
-      <button id="mobile-sticky-add-btn" class="py-2.5 px-4 rounded-full bg-[#0d7252] hover:bg-[#08553d] active:scale-95 text-white text-xs font-bold shadow-md flex items-center gap-1.5 transition-all">
-        <span class="material-symbols-outlined text-base">shopping_cart</span>
-        <span>Ajouter</span>
+
+      <button id="mobile-sticky-add-btn" class="py-2.5 px-3.5 rounded-full bg-[#0d7252] hover:bg-[#08553d] active:scale-95 text-white text-xs font-bold shadow-md shadow-[#0d7252]/20 flex items-center gap-1.5 transition-all shrink-0">
+        <span class="material-symbols-outlined text-base">add_shopping_cart</span>
+        <span>Commander</span>
       </button>
     </div>
   </div>
 
-  <!-- ==================== MOBILE BOTTOM STICKY NAVIGATION ==================== -->
-  <nav class="fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-gray-100 py-1.5 px-3 flex sm:hidden items-center justify-around shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
-    <a href="/" class="flex flex-col items-center gap-0.5 text-gray-500 hover:text-[#0d7252] text-[10px] font-medium">
-      <span class="material-symbols-outlined text-xl">home</span>
-      <span>Accueil</span>
-    </a>
-    <a href="/categories" class="flex flex-col items-center gap-0.5 text-gray-500 hover:text-[#0d7252] text-[10px] font-medium">
-      <span class="material-symbols-outlined text-xl">grid_view</span>
-      <span>Catégories</span>
-    </a>
-    <button id="mobile-cart-btn" class="relative flex flex-col items-center gap-0.5 text-gray-500 hover:text-[#0d7252] text-[10px] font-medium">
-      <span class="material-symbols-outlined text-xl">shopping_cart</span>
-      <span id="mobile-cart-badge" class="absolute -top-1 right-2 bg-red-500 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">0</span>
-      <span>Panier</span>
-    </button>
-    <a href="/tracking" class="flex flex-col items-center gap-0.5 text-gray-500 hover:text-[#0d7252] text-[10px] font-medium">
-      <span class="material-symbols-outlined text-xl">local_shipping</span>
-      <span>Suivi</span>
-    </a>
-    <a href="https://wa.me/241074001122" target="_blank" class="flex flex-col items-center gap-0.5 text-[#25D366] text-[10px] font-medium">
-      <span class="material-symbols-outlined text-xl">chat</span>
-      <span>WhatsApp</span>
-    </a>
-  </nav>
-
-  <!-- Script for Product Page Logic -->
+  <!-- Scripts for Apple Fluid UI & Product Page Logic -->
+  <script src="/js/apple-ui.js"></script>
   <script src="/js/product.js?v=2.6"></script>
 </body>
 </html>

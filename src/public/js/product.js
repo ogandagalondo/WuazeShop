@@ -107,9 +107,19 @@ function showError() {
   if (errorEl) errorEl.classList.remove('hidden');
 }
 
-// ==================== MULTI-ANGLE PRODUCT GALLERY CONTROLLER ====================
+// ==================== MULTI-ANGLE PRODUCT GALLERY CONTROLLER (APPLE FLUID SPEC) ====================
 let currentGalleryImages = [];
 let activeGalleryIndex = 0;
+
+// Apple WWDC Fluid Interface: Rubberband formula for soft boundaries
+function appleRubberband(overshoot, dimension, constant = 0.55) {
+  return (overshoot * dimension * constant) / (dimension + constant * Math.abs(overshoot));
+}
+
+// Apple WWDC Fluid Interface: Exponential decay momentum projection
+function appleProjectMomentum(initialVelocity, decelerationRate = 0.998) {
+  return (initialVelocity / 1000) * decelerationRate / (1 - decelerationRate);
+}
 
 function setupProductGallery(product) {
   let images = [];
@@ -134,22 +144,26 @@ function showGalleryImage(index, animate = true) {
   }
   activeGalleryIndex = index;
 
-  const detailImg = document.getElementById('detail-image');
-  if (detailImg) {
-    if (animate) {
-      detailImg.style.opacity = '0.3';
-      detailImg.style.transform = 'scale(0.98)';
-      setTimeout(() => {
-        detailImg.src = currentGalleryImages[activeGalleryIndex];
-        detailImg.style.opacity = '1';
-        detailImg.style.transform = '';
-      }, 120);
+  const track = document.getElementById('gallery-track');
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (track) {
+    if (animate && !prefersReducedMotion) {
+      // Apple fluid spring transition curve
+      track.style.transition = 'transform 0.4s cubic-bezier(0.32, 0.72, 0, 1)';
     } else {
-      detailImg.src = currentGalleryImages[activeGalleryIndex];
+      track.style.transition = 'none';
     }
+    track.style.transform = `translate3d(${-activeGalleryIndex * 100}%, 0, 0)`;
   }
 
-  // Update Dots
+  // Backward compatibility for detail-image source query
+  const detailImg = document.getElementById('detail-image');
+  if (detailImg && currentGalleryImages[activeGalleryIndex]) {
+    detailImg.src = currentGalleryImages[activeGalleryIndex];
+  }
+
+  // Update Dots Indicator
   const dotsContainer = document.getElementById('gallery-dots-container');
   if (dotsContainer) {
     const dots = dotsContainer.querySelectorAll('.gallery-dot span');
@@ -164,13 +178,37 @@ function showGalleryImage(index, animate = true) {
 }
 
 function renderGalleryState() {
+  const track = document.getElementById('gallery-track');
   const dotsContainer = document.getElementById('gallery-dots-container');
   const hasMultiple = currentGalleryImages.length > 1;
+
+  if (track) {
+    if (currentGalleryImages.length > 0) {
+      track.innerHTML = currentGalleryImages.map((src, idx) => `
+        <div class="gallery-slide w-full h-full shrink-0 relative overflow-hidden flex items-center justify-center select-none" data-slide-index="${idx}">
+          <img 
+            ${idx === 0 ? 'id="detail-image"' : ''} 
+            src="${src}" 
+            alt="Angle ${idx + 1}"
+            class="w-full h-full object-cover pointer-events-none select-none transition-transform duration-300 group-hover:scale-[1.03]"
+          />
+        </div>
+      `).join('');
+    } else {
+      track.innerHTML = `
+        <div class="gallery-slide w-full h-full shrink-0 relative overflow-hidden flex items-center justify-center select-none">
+          <img id="detail-image" src="" alt="Produit WuazeShop" class="w-full h-full object-cover pointer-events-none select-none" />
+        </div>
+      `;
+    }
+    track.style.transition = 'none';
+    track.style.transform = 'translate3d(0, 0, 0)';
+  }
 
   if (dotsContainer) {
     if (hasMultiple) {
       dotsContainer.innerHTML = `
-        <div class="inline-flex items-center gap-1 bg-white/85 backdrop-blur-md px-2.5 py-1 rounded-full shadow-xs border border-white/80">
+        <div class="inline-flex items-center gap-1 bg-white/75 backdrop-blur-xl saturate-[180%] px-2.5 py-1 rounded-full shadow-xs border border-white/60">
           ${currentGalleryImages.map((_, idx) => `
             <button 
               type="button" 
@@ -212,36 +250,151 @@ function initGalleryEventListeners() {
   });
 
   if (galleryCard) {
-    let touchStartX = 0;
-    let touchStartY = 0;
-    let touchEndX = 0;
-    let touchEndY = 0;
+    let isDragging = false;
+    let directionLocked = null; // 'horizontal' | null
+    let startX = 0;
+    let startY = 0;
+    let currentDragOffset = 0;
+    let history = []; // [{ x, t }]
+    let activePointerId = null;
 
-    galleryCard.addEventListener('touchstart', (e) => {
-      touchStartX = e.changedTouches[0].screenX;
-      touchStartY = e.changedTouches[0].screenY;
-    }, { passive: true });
-
-    galleryCard.addEventListener('touchend', (e) => {
-      touchEndX = e.changedTouches[0].screenX;
-      touchEndY = e.changedTouches[0].screenY;
-      const diffX = touchEndX - touchStartX;
-      const diffY = touchEndY - touchStartY;
-      if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 35) {
-        if (diffX < 0) {
-          window.nextGalleryImage();
-        } else {
-          window.prevGalleryImage();
-        }
-      }
-    }, { passive: true });
-
-    // Click on card to advance image if multiple exist and click was not on a dot
-    galleryCard.addEventListener('click', (e) => {
+    galleryCard.addEventListener('pointerdown', (e) => {
       if (currentGalleryImages.length <= 1) return;
       if (e.target.closest('#gallery-dots-container')) return;
-      window.nextGalleryImage();
+
+      const track = document.getElementById('gallery-track');
+      if (!track) return;
+
+      // 1. Interruptibility: read live computed transform in case animation is in-flight
+      const computedStyle = window.getComputedStyle(track);
+      const matrix = computedStyle.transform;
+      let currentPixelX = -activeGalleryIndex * galleryCard.clientWidth;
+      if (matrix && matrix !== 'none') {
+        const domMatrix = new DOMMatrixReadOnly(matrix);
+        currentPixelX = domMatrix.m41;
+      }
+
+      track.style.transition = 'none';
+      track.style.transform = `translate3d(${currentPixelX}px, 0, 0)`;
+
+      isDragging = true;
+      directionLocked = null;
+      startX = e.clientX;
+      startY = e.clientY;
+      currentDragOffset = 0;
+      activePointerId = e.pointerId;
+      history = [{ x: e.clientX, t: performance.now() }];
+
+      try {
+        galleryCard.setPointerCapture(e.pointerId);
+      } catch (_) {}
     });
+
+    galleryCard.addEventListener('pointermove', (e) => {
+      if (!isDragging || e.pointerId !== activePointerId) return;
+
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+
+      // Hysteresis detection (~8px threshold before committing)
+      if (directionLocked === null) {
+        if (Math.hypot(dx, dy) > 8) {
+          if (Math.abs(dy) > Math.abs(dx)) {
+            // User intent is vertical page scrolling
+            isDragging = false;
+            try { galleryCard.releasePointerCapture(e.pointerId); } catch (_) {}
+            const track = document.getElementById('gallery-track');
+            if (track) {
+              track.style.transition = 'transform 0.3s cubic-bezier(0.32, 0.72, 0, 1)';
+              track.style.transform = `translate3d(${-activeGalleryIndex * 100}%, 0, 0)`;
+            }
+            return;
+          } else {
+            directionLocked = 'horizontal';
+          }
+        } else {
+          return;
+        }
+      }
+
+      if (directionLocked === 'horizontal') {
+        e.preventDefault();
+        const now = performance.now();
+        history.push({ x: e.clientX, t: now });
+        if (history.length > 8) history.shift();
+
+        const track = document.getElementById('gallery-track');
+        if (!track) return;
+
+        const W = galleryCard.clientWidth;
+        currentDragOffset = dx;
+
+        // Apply Apple Rubberband formula when dragging beyond boundaries
+        let targetPixelX = -activeGalleryIndex * W + dx;
+        if (dx > 0 && activeGalleryIndex === 0) {
+          // Overshoot left edge
+          targetPixelX = appleRubberband(dx, W, 0.55);
+        } else if (dx < 0 && activeGalleryIndex === currentGalleryImages.length - 1) {
+          // Overshoot right edge
+          targetPixelX = -activeGalleryIndex * W + appleRubberband(dx, W, 0.55);
+        }
+
+        track.style.transform = `translate3d(${targetPixelX}px, 0, 0)`;
+      }
+    });
+
+    const finishGesture = (e) => {
+      if (!isDragging || e.pointerId !== activePointerId) return;
+      isDragging = false;
+      try { galleryCard.releasePointerCapture(e.pointerId); } catch (_) {}
+
+      const track = document.getElementById('gallery-track');
+      if (!track) return;
+
+      if (directionLocked !== 'horizontal') {
+        // Tap gesture detection (< 6px movement)
+        if (Math.hypot(e.clientX - startX, e.clientY - startY) < 6) {
+          const rect = galleryCard.getBoundingClientRect();
+          const clickX = e.clientX - rect.left;
+          if (clickX > rect.width * 0.6) {
+            window.nextGalleryImage();
+          } else if (clickX < rect.width * 0.4) {
+            window.prevGalleryImage();
+          }
+        }
+        return;
+      }
+
+      // Calculate release velocity (px/s)
+      const now = performance.now();
+      const recentPoints = history.filter(pt => now - pt.t < 120);
+      let velocity = 0;
+      if (recentPoints.length >= 2) {
+        const first = recentPoints[0];
+        const last = recentPoints[recentPoints.length - 1];
+        const dt = (last.t - first.t) / 1000;
+        if (dt > 0.01) {
+          velocity = (last.x - first.x) / dt;
+        }
+      }
+
+      const W = galleryCard.clientWidth;
+      const momentumDelta = appleProjectMomentum(velocity, 0.998);
+      const projectedTotalDelta = currentDragOffset + momentumDelta;
+
+      let targetIndex = activeGalleryIndex;
+      // High velocity flick or projected displacement past 25% of slide width
+      if (projectedTotalDelta < -W * 0.25 || velocity < -400) {
+        targetIndex = Math.min(currentGalleryImages.length - 1, activeGalleryIndex + 1);
+      } else if (projectedTotalDelta > W * 0.25 || velocity > 400) {
+        targetIndex = Math.max(0, activeGalleryIndex - 1);
+      }
+
+      showGalleryImage(targetIndex, true);
+    };
+
+    galleryCard.addEventListener('pointerup', finishGesture);
+    galleryCard.addEventListener('pointercancel', finishGesture);
   }
 }
 
@@ -506,17 +659,37 @@ const qtyPlusBtn = document.getElementById('qty-plus');
 const qtyDisplay = document.getElementById('qty-display');
 
 if (qtyMinusBtn && qtyPlusBtn && qtyDisplay) {
+  function animateQtyChange(newVal, direction) {
+    qtyDisplay.style.transition = 'transform 0.1s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.1s ease';
+    qtyDisplay.style.transform = direction > 0 ? 'translateY(-3px) scale(1.15)' : 'translateY(3px) scale(0.85)';
+    qtyDisplay.style.opacity = '0.6';
+
+    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+      try { navigator.vibrate(10); } catch (_) {}
+    }
+
+    setTimeout(() => {
+      qtyDisplay.textContent = newVal;
+      qtyDisplay.style.transform = 'translateY(0) scale(1)';
+      qtyDisplay.style.opacity = '1';
+    }, 100);
+  }
+
   qtyMinusBtn.addEventListener('click', () => {
     if (quantity > 1) {
       quantity -= 1;
-      qtyDisplay.textContent = quantity;
+      animateQtyChange(quantity, -1);
+    } else {
+      window.triggerAppleShake?.(qtyMinusBtn);
     }
   });
 
   qtyPlusBtn.addEventListener('click', () => {
     if (quantity < 10) {
       quantity += 1;
-      qtyDisplay.textContent = quantity;
+      animateQtyChange(quantity, 1);
+    } else {
+      window.triggerAppleShake?.(qtyPlusBtn);
     }
   });
 }
@@ -614,20 +787,39 @@ window.changeQuantity = function(index, delta) {
   updateCartUi();
 };
 
-const cartDrawerOverlay = document.getElementById('cart-drawer-overlay');
+let drawerCloseTimeout = null;
+
 function openCartDrawer() {
   if (!cartDrawerOverlay) return;
+  if (drawerCloseTimeout) {
+    clearTimeout(drawerCloseTimeout);
+    drawerCloseTimeout = null;
+  }
   cartDrawerOverlay.classList.remove('hidden');
   const drawer = cartDrawerOverlay.querySelector('.drawer');
-  if (drawer) drawer.classList.remove('drawer-closed');
+  if (drawer) {
+    drawer.style.transform = '';
+    drawer.style.transition = '';
+    void drawer.offsetWidth;
+    drawer.classList.remove('drawer-closed');
+  }
 }
 
 function closeCartDrawer() {
   if (!cartDrawerOverlay) return;
   const drawer = cartDrawerOverlay.querySelector('.drawer');
-  if (drawer) drawer.classList.add('drawer-closed');
-  setTimeout(() => cartDrawerOverlay.classList.add('hidden'), 250);
+  if (drawer) {
+    drawer.style.transform = '';
+    drawer.style.transition = '';
+    drawer.classList.add('drawer-closed');
+  }
+  if (drawerCloseTimeout) clearTimeout(drawerCloseTimeout);
+  drawerCloseTimeout = setTimeout(() => {
+    cartDrawerOverlay.classList.add('hidden');
+    drawerCloseTimeout = null;
+  }, 350);
 }
+window.closeCartDrawer = closeCartDrawer;
 
 const cartToggleBtn = document.getElementById('cart-toggle-btn');
 if (cartToggleBtn) cartToggleBtn.addEventListener('click', openCartDrawer);
@@ -637,6 +829,18 @@ if (mobileCartBtn) mobileCartBtn.addEventListener('click', openCartDrawer);
 
 const closeCartBtn = document.getElementById('close-cart-btn');
 if (closeCartBtn) closeCartBtn.addEventListener('click', closeCartDrawer);
+
+// Set up fluid swipe-to-dismiss gesture for bottom sheet on mobile & backdrop click
+if (cartDrawerOverlay) {
+  const drawer = cartDrawerOverlay.querySelector('.drawer');
+  if (typeof window.setupAppleSheetGestures === 'function' && drawer) {
+    window.setupAppleSheetGestures(cartDrawerOverlay, drawer, closeCartDrawer);
+  } else {
+    cartDrawerOverlay.addEventListener('click', (e) => {
+      if (e.target === cartDrawerOverlay) closeCartDrawer();
+    });
+  }
+}
 
 document.addEventListener('click', (e) => {
   const link = e.target.closest('.continue-shopping-action');
@@ -705,7 +909,11 @@ const openCheckoutModalBtn = document.getElementById('open-checkout-modal-btn');
 if (openCheckoutModalBtn) {
   openCheckoutModalBtn.addEventListener('click', () => {
     if (cart.length === 0) {
-      alert('Votre panier est vide !');
+      if (window.showAppleToast) {
+        window.showAppleToast('Votre panier est vide !', 'error');
+      } else {
+        alert('Votre panier est vide !');
+      }
       return;
     }
     closeCartDrawer();
@@ -716,6 +924,23 @@ if (openCheckoutModalBtn) {
 if (closeCheckoutBtn) {
   closeCheckoutBtn.addEventListener('click', () => {
     if (checkoutModalOverlay) checkoutModalOverlay.classList.add('hidden');
+  });
+}
+
+// Backdrop click dismissal for modals
+if (checkoutModalOverlay) {
+  checkoutModalOverlay.addEventListener('click', (e) => {
+    if (e.target === checkoutModalOverlay) {
+      checkoutModalOverlay.classList.add('hidden');
+    }
+  });
+}
+
+if (simulatorModalOverlay) {
+  simulatorModalOverlay.addEventListener('click', (e) => {
+    if (e.target === simulatorModalOverlay) {
+      simulatorModalOverlay.classList.add('hidden');
+    }
   });
 }
 
@@ -749,7 +974,11 @@ if (checkoutForm) {
     e.preventDefault();
 
     if (cart.length === 0) {
-      alert('Votre panier est vide !');
+      if (window.showAppleToast) {
+        window.showAppleToast('Votre panier est vide !', 'error');
+      } else {
+        alert('Votre panier est vide !');
+      }
       return;
     }
 
@@ -758,20 +987,50 @@ if (checkoutForm) {
     const productTitleWithVariant = `${firstItem.product.title}${colorTag}`;
     const paymentMethod = checkoutForm.querySelector('input[name="paymentMethod"]:checked')?.value || 'AIRTEL_MONEY';
 
+    const nameInput = document.getElementById('checkout-name');
+    const phoneInput = document.getElementById('checkout-phone');
+    const neighborhoodInput = document.getElementById('checkout-neighborhood');
+
+    const customerName = nameInput?.value.trim() || '';
+    const customerPhone = phoneInput?.value.trim() || '';
+    const customerNeighborhood = neighborhoodInput?.value.trim() || '';
+
+    if (!customerName || !customerPhone || !customerNeighborhood) {
+      if (!customerName) window.triggerAppleShake?.(nameInput);
+      if (!customerPhone) window.triggerAppleShake?.(phoneInput);
+      if (!customerNeighborhood) window.triggerAppleShake?.(neighborhoodInput);
+      if (window.showAppleToast) {
+        window.showAppleToast('Veuillez renseigner tous les champs obligatoires.', 'error');
+      } else {
+        alert('Veuillez renseigner tous les champs obligatoires.');
+      }
+      return;
+    }
+
     if (paymentMethod === 'CREDIT_CARD') {
-      const cardNumber = document.getElementById('card-number')?.value.trim();
-      const cardExpiry = document.getElementById('card-expiry')?.value.trim();
-      const cardCvv = document.getElementById('card-cvv')?.value.trim();
+      const cardNumberInput = document.getElementById('card-number');
+      const cardExpiryInput = document.getElementById('card-expiry');
+      const cardCvvInput = document.getElementById('card-cvv');
+      const cardNumber = cardNumberInput?.value.trim();
+      const cardExpiry = cardExpiryInput?.value.trim();
+      const cardCvv = cardCvvInput?.value.trim();
       if (!cardNumber || !cardExpiry || !cardCvv) {
-        alert('Veuillez renseigner toutes les informations de votre Carte Bancaire.');
+        if (!cardNumber) window.triggerAppleShake?.(cardNumberInput);
+        if (!cardExpiry) window.triggerAppleShake?.(cardExpiryInput);
+        if (!cardCvv) window.triggerAppleShake?.(cardCvvInput);
+        if (window.showAppleToast) {
+          window.showAppleToast('Veuillez renseigner toutes les informations de votre Carte Bancaire.', 'error');
+        } else {
+          alert('Veuillez renseigner toutes les informations de votre Carte Bancaire.');
+        }
         return;
       }
     }
 
     const orderData = {
-      customerName: document.getElementById('checkout-name').value,
-      customerPhone: document.getElementById('checkout-phone').value,
-      customerNeighborhood: document.getElementById('checkout-neighborhood').value,
+      customerName,
+      customerPhone,
+      customerNeighborhood,
       productId: firstItem.product.id,
       productTitle: productTitleWithVariant,
       quantity: firstItem.quantity,
@@ -788,7 +1047,12 @@ if (checkoutForm) {
 
       const data = await res.json();
       if (!res.ok) {
-        alert(data.error || 'Erreur lors de la commande.');
+        const errMsg = data.error || 'Erreur lors de la commande.';
+        if (window.showAppleToast) {
+          window.showAppleToast(errMsg, 'error');
+        } else {
+          alert(errMsg);
+        }
         return;
       }
 
@@ -803,7 +1067,11 @@ if (checkoutForm) {
 
     } catch (err) {
       console.error(err);
-      alert('Erreur réseau lors de la commande.');
+      if (window.showAppleToast) {
+        window.showAppleToast('Erreur réseau lors de la commande.', 'error');
+      } else {
+        alert('Erreur réseau lors de la commande.');
+      }
     }
   });
 }
@@ -845,7 +1113,11 @@ if (simConfirmBtn) {
         if (successModalOverlay) successModalOverlay.classList.remove('hidden');
       }
     } catch (err) {
-      alert('Erreur lors de la confirmation simulée.');
+      if (window.showAppleToast) {
+        window.showAppleToast('Erreur lors de la confirmation simulée.', 'error');
+      } else {
+        alert('Erreur lors de la confirmation simulée.');
+      }
     }
   });
 }
@@ -881,9 +1153,16 @@ function setupHamburgerMenu() {
   const navOverlay = document.getElementById('mobile-nav-overlay');
   const navLinks = document.querySelectorAll('.mobile-nav-link');
 
+  let navCloseTimer = null;
+
   function openNav() {
     if (navDrawer && navOverlay) {
+      if (navCloseTimer) {
+        clearTimeout(navCloseTimer);
+        navCloseTimer = null;
+      }
       navOverlay.classList.remove('hidden');
+      void navDrawer.offsetWidth;
       navDrawer.classList.remove('nav-drawer-closed');
       document.body.classList.add('overflow-hidden');
     }
@@ -892,7 +1171,11 @@ function setupHamburgerMenu() {
   function closeNav() {
     if (navDrawer && navOverlay) {
       navDrawer.classList.add('nav-drawer-closed');
-      setTimeout(() => navOverlay.classList.add('hidden'), 250);
+      if (navCloseTimer) clearTimeout(navCloseTimer);
+      navCloseTimer = setTimeout(() => {
+        navOverlay.classList.add('hidden');
+        navCloseTimer = null;
+      }, 350);
       document.body.classList.remove('overflow-hidden');
     }
   }

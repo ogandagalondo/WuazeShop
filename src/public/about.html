@@ -96,7 +96,7 @@
   </div>
 
   <!-- ==================== NAVBAR ==================== -->
-  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-gray-100 transition-all">
+  <header class="apple-glass sticky top-0 z-40 transition-all border-b border-gray-200/50 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.03)]">
     <div class="max-w-7xl mx-auto px-3.5 sm:px-6 h-16 sm:h-20 flex items-center justify-between gap-3 sm:gap-4">
       
       <!-- Left: Hamburger Button (Mobile/Tablet) & Brand Logo -->
@@ -710,6 +710,7 @@
   <!-- ==================== CART SLIDE-OVER DRAWER ==================== -->
   <div id="cart-drawer-overlay" class="modal-overlay hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-end sm:items-stretch justify-end">
     <div class="drawer drawer-closed bg-white w-full max-w-md h-[88vh] sm:h-full rounded-t-3xl sm:rounded-none flex flex-col shadow-2xl p-4 sm:p-6 overflow-hidden">
+      <div class="sheet-grab-handle sm:hidden"></div>
       <div class="flex items-center justify-between pb-4 border-b border-gray-100">
         <div class="flex items-center gap-2">
           <span class="material-symbols-outlined text-[#0d7252] text-2xl">shopping_cart</span>
@@ -740,7 +741,7 @@
   </div>
 
   <!-- ==================== MOBILE BOTTOM NAVIGATION ==================== -->
-  <nav class="fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-gray-100 py-2 px-4 flex md:hidden items-center justify-around shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
+  <nav class="fixed bottom-0 inset-x-0 z-40 apple-glass border-t border-gray-200/50 py-2 px-4 flex md:hidden items-center justify-around shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
     <a href="/" class="flex flex-col items-center gap-0.5 text-gray-500 hover:text-[#0d7252] text-[10px] font-medium">
       <span class="material-symbols-outlined text-xl">home</span>
       <span>Accueil</span>
@@ -766,6 +767,8 @@
     </a>
   </nav>
 
+  <!-- Scripts for Apple Fluid UI & About Page -->
+  <script src="/js/apple-ui.js"></script>
   <script src="/js/about.js"></script>
 </body>
 </html>
