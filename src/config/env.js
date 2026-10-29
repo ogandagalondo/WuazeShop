@@ -13,6 +13,8 @@ export const config = {
   jwtSecret: process.env.JWT_SECRET || 'wuazeshop-dev-secret-key-change-in-production',
   dbPath: process.env.DB_PATH || 'wuazeshop.db',
   adminUsername: process.env.ADMIN_USERNAME || 'admin',
+  adminEmail: process.env.ADMIN_EMAIL || 'admin@wuazeshop.ga',
+  adminFullName: process.env.ADMIN_FULL_NAME || 'Fondateur WuazeShop',
   adminPassword: process.env.ADMIN_PASSWORD || 'adminpassword123',
   isProduction,
   enableSimulator: process.env.ENABLE_PAYMENT_SIMULATOR === 'true' || !isProduction,

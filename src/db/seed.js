@@ -1,4 +1,5 @@
 import bcrypt from 'bcryptjs';
+import { config } from '../config/env.js';
 
 export function seedData(db) {
   // 1. Seed Categories (Full 6 categories matching TechNova storefront & CMS)
@@ -172,24 +173,39 @@ export function seedData(db) {
     db.prepare(`UPDATE products SET weight = ? WHERE slug = ? AND (weight IS NULL OR weight = 0.4 OR weight = 0)`).run(p.weight ?? 0.4, p.slug);
   }
 
-  // 3. Seed default Admin User (Super Admin Founder)
-  const adminCheck = db.prepare(`SELECT id, email, role, full_name FROM admin_users WHERE username = ? OR email = ?`).get('admin', 'admin@wuazeshop.ga');
+  // 3. Seed Super Admin (Fondateur) depuis les variables d'environnement (.env)
+  const targetUsername = config.adminUsername || 'admin';
+  const targetEmail = config.adminEmail || 'admin@wuazeshop.ga';
+  const targetFullName = config.adminFullName || 'Fondateur WuazeShop';
+  const targetPassword = config.adminPassword || 'adminpassword123';
+
+  const adminCheck = db.prepare(`
+    SELECT id, email, username, role, full_name, password_hash 
+    FROM admin_users 
+    WHERE role = 'SUPER_ADMIN' OR username = ? OR email = ?
+    ORDER BY id ASC LIMIT 1
+  `).get(targetUsername, targetEmail);
+
   if (!adminCheck) {
     const salt = bcrypt.genSaltSync(10);
-    const hash = bcrypt.hashSync('adminpassword123', salt);
+    const hash = bcrypt.hashSync(targetPassword, salt);
     db.prepare(`
       INSERT INTO admin_users (username, email, full_name, role, password_hash, is_active) 
-      VALUES (?, ?, ?, ?, ?, 1)
-    `).run('admin', 'admin@wuazeshop.ga', 'Fondateur WuazeShop', 'SUPER_ADMIN', hash);
+      VALUES (?, ?, ?, 'SUPER_ADMIN', ?, 1)
+    `).run(targetUsername, targetEmail, targetFullName, hash);
   } else {
-    db.prepare(`
-      UPDATE admin_users 
-      SET email = COALESCE(email, 'admin@wuazeshop.ga'),
-          full_name = COALESCE(full_name, 'Fondateur WuazeShop'),
-          role = COALESCE(role, 'SUPER_ADMIN'),
-          is_active = COALESCE(is_active, 1)
-      WHERE id = ?
-    `).run(adminCheck.id);
+    const updates = ['username = ?', 'email = ?', 'full_name = ?', "role = 'SUPER_ADMIN'", 'is_active = 1'];
+    const params = [targetUsername, targetEmail, targetFullName];
+
+    if (process.env.ADMIN_PASSWORD && process.env.ADMIN_PASSWORD.trim().length >= 6) {
+      const salt = bcrypt.genSaltSync(10);
+      const hash = bcrypt.hashSync(process.env.ADMIN_PASSWORD.trim(), salt);
+      updates.push('password_hash = ?');
+      params.push(hash);
+    }
+
+    params.push(adminCheck.id);
+    db.prepare(`UPDATE admin_users SET ${updates.join(', ')} WHERE id = ?`).run(...params);
   }
 
   // 4. Seed default Site Settings (CMS Sections)
