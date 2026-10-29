@@ -1,15 +1,13 @@
 // ==================== APPLE FLUID UI ENGINE (WWDC FLUID INTERFACES) ====================
 
 // 1. Apple WWDC Physics Formulas
-function appleRubberband(overshoot, dimension, constant = 0.55) {
+window.appleRubberband = function(overshoot, dimension, constant = 0.55) {
   return (overshoot * dimension * constant) / (dimension + constant * Math.abs(overshoot));
-}
-window.appleRubberband = appleRubberband;
+};
 
-function appleProjectMomentum(velocity, decelerationRate = 0.998) {
+window.appleProjectMomentum = function(velocity, decelerationRate = 0.998) {
   return (velocity / 1000) * decelerationRate / (1 - decelerationRate);
-}
-window.appleProjectMomentum = appleProjectMomentum;
+};
 
 // 2. Apple Dynamic Island / Floating Toast System
 window.showAppleToast = function(message, type = 'info', duration = 3200) {
@@ -132,7 +130,7 @@ window.setupAppleSheetGestures = function(overlayEl, sheetEl, closeCallback) {
 
     if (dy < 0) {
       // Pulling upwards: Apple rubber-band resistance
-      const resisted = appleRubberband(dy, H, 0.4);
+      const resisted = window.appleRubberband ? window.appleRubberband(dy, H, 0.4) : dy * 0.4;
       sheetEl.style.transform = `translateY(${resisted}px)`;
     } else {
       // Pulling downwards: 1:1 direct tracking
@@ -157,7 +155,7 @@ window.setupAppleSheetGestures = function(overlayEl, sheetEl, closeCallback) {
     }
 
     const H = sheetEl.offsetHeight || 400;
-    const momentum = appleProjectMomentum(velocity, 0.998);
+    const momentum = window.appleProjectMomentum ? window.appleProjectMomentum(velocity, 0.998) : 0;
     const projectedDy = currentY + momentum;
 
     sheetEl.style.transition = 'transform 0.35s cubic-bezier(0.32, 0.72, 0, 1)';

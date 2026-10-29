@@ -120,13 +120,17 @@ let currentGalleryImages = [];
 let activeGalleryIndex = 0;
 
 // Apple WWDC Fluid Interface: Formulas (shared from apple-ui.js with safe fallback)
-const appleRubberband = window.appleRubberband || function(overshoot, dimension, constant = 0.55) {
-  return (overshoot * dimension * constant) / (dimension + constant * Math.abs(overshoot));
-};
+if (typeof window.appleRubberband !== 'function') {
+  window.appleRubberband = function(overshoot, dimension, constant = 0.55) {
+    return (overshoot * dimension * constant) / (dimension + constant * Math.abs(overshoot));
+  };
+}
 
-const appleProjectMomentum = window.appleProjectMomentum || function(initialVelocity, decelerationRate = 0.998) {
-  return (initialVelocity / 1000) * decelerationRate / (1 - decelerationRate);
-};
+if (typeof window.appleProjectMomentum !== 'function') {
+  window.appleProjectMomentum = function(initialVelocity, decelerationRate = 0.998) {
+    return (initialVelocity / 1000) * decelerationRate / (1 - decelerationRate);
+  };
+}
 
 function setupProductGallery(product) {
   let images = [];
@@ -340,10 +344,10 @@ function initGalleryEventListeners() {
         let targetPixelX = -activeGalleryIndex * W + dx;
         if (dx > 0 && activeGalleryIndex === 0) {
           // Overshoot left edge
-          targetPixelX = appleRubberband(dx, W, 0.55);
+          targetPixelX = window.appleRubberband ? window.appleRubberband(dx, W, 0.55) : dx * 0.55;
         } else if (dx < 0 && activeGalleryIndex === currentGalleryImages.length - 1) {
           // Overshoot right edge
-          targetPixelX = -activeGalleryIndex * W + appleRubberband(dx, W, 0.55);
+          targetPixelX = -activeGalleryIndex * W + (window.appleRubberband ? window.appleRubberband(dx, W, 0.55) : dx * 0.55);
         }
 
         track.style.transform = `translate3d(${targetPixelX}px, 0, 0)`;
@@ -386,7 +390,7 @@ function initGalleryEventListeners() {
       }
 
       const W = galleryCard.clientWidth;
-      const momentumDelta = appleProjectMomentum(velocity, 0.998);
+      const momentumDelta = window.appleProjectMomentum ? window.appleProjectMomentum(velocity, 0.998) : 0;
       const projectedTotalDelta = currentDragOffset + momentumDelta;
 
       let targetIndex = activeGalleryIndex;
