@@ -215,20 +215,20 @@ export function seedData(db) {
     {
       key: 'hero_section',
       value: JSON.stringify({
-        badge: '✦ Nouveauté',
+        badge: '✦ Arrivage Direct Chine',
         title: 'La technologie\nà portée de main',
-        subtitle: 'Découvrez les derniers smartphones, ordinateurs et accessoires importés directement de Chine au Gabon avec une qualité exceptionnelle et des prix imbattables.',
-        ctaText: 'Découvrir',
+        subtitle: 'Découvrez les derniers smartphones, ordinateurs et accessoires importés directement de Chine au Gabon avec une qualité exceptionnelle et des tarifs cargo transparents.',
+        ctaText: 'Découvrir le catalogue',
         ctaLink: '/categories',
         imageUrl: '/images/hero-devices.jpg',
-        prop1Title: 'Livraison rapide',
-        prop1Sub: 'en 24/48h',
-        prop2Title: 'Paiement sécurisé',
-        prop2Sub: '100% fiable',
-        prop3Title: 'Service client',
-        prop3Sub: 'dédié 7j/7',
-        prop4Title: '100% Original',
-        prop4Sub: 'Garantie certifiée'
+        prop1Title: 'Colis Normal (2 sem)',
+        prop1Sub: '10 000 FCFA / kg',
+        prop2Title: 'Colis Rapide (1 sem)',
+        prop2Sub: '13 500 FCFA / kg',
+        prop3Title: 'Airtel, Moov & CB',
+        prop3Sub: 'Paiement 100% sécurisé',
+        prop4Title: '100% Neuf d\'Usine',
+        prop4Sub: 'Inspection & Garantie'
       })
     },
     {
@@ -384,10 +384,24 @@ WuazeShop s'engage formellement à ne jamais vendre, louer, céder ni diffuser v
 
   // Auto-migrate outdated announcement_bar if it still mentions "fret inclus"
   const announceRow = db.prepare(`SELECT value FROM site_settings WHERE key = 'announcement_bar'`).get();
-  if (announceRow && announceRow.value.includes('inclus')) {
+  if (announceRow && (announceRow.value.includes('inclus') || !announceRow.value.includes('Carte Bancaire'))) {
     const updatedAnnounce = JSON.parse(announceRow.value);
     updatedAnnounce.text = '🇨🇳 Import direct usine Shenzhen → 🇬🇦 Gabon | Fret cargo aérien au poids exact (10 000 FCFA/kg) | Airtel, Moov & Carte Bancaire';
     db.prepare(`UPDATE site_settings SET value = ? WHERE key = 'announcement_bar'`).run(JSON.stringify(updatedAnnounce));
+  }
+
+  // Auto-migrate outdated hero_section if it still mentions "24/48h"
+  const heroRow = db.prepare(`SELECT value FROM site_settings WHERE key = 'hero_section'`).get();
+  if (heroRow && (heroRow.value.includes('24/48h') || heroRow.value.includes('Livraison rapide'))) {
+    const defaultHero = defaultSettings.find(s => s.key === 'hero_section');
+    db.prepare(`UPDATE site_settings SET value = ? WHERE key = 'hero_section'`).run(defaultHero.value);
+  }
+
+  // Auto-migrate outdated trust_pillars if it still mentions old shipping copy
+  const trustRow = db.prepare(`SELECT value FROM site_settings WHERE key = 'trust_pillars'`).get();
+  if (trustRow && (trustRow.value.includes('Partout au Gabon') || !trustRow.value.includes('Fret Cargo'))) {
+    const defaultTrust = defaultSettings.find(s => s.key === 'trust_pillars');
+    db.prepare(`UPDATE site_settings SET value = ? WHERE key = 'trust_pillars'`).run(defaultTrust.value);
   }
 }
 

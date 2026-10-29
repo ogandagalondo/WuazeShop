@@ -7,6 +7,14 @@ let allProducts = [];
 let filteredProducts = [];
 let cart = loadCartFromStorage();
 let currentPendingOrder = null;
+let selectedShippingMethod = 'normal';
+let cargoSettings = {
+  normalRate: 10000,
+  normalDelay: '2 semaines',
+  expressRate: 13500,
+  expressDelay: '1 semaine',
+  minWeight: 0.1
+};
 
 // DOM Elements
 const loadingEl = document.getElementById('category-loading');
@@ -278,6 +286,12 @@ function renderProducts(products) {
                   ${formatFCFA(product.original_price)}
                 </div>
               ` : ''}
+              <div class="mt-1">
+                <span class="inline-flex items-center gap-1 text-[9px] font-bold text-emerald-800 bg-emerald-50/90 px-2 py-0.5 rounded-full border border-emerald-200/60">
+                  <span class="material-symbols-outlined text-[12px] text-emerald-600">flight_takeoff</span>
+                  <span>Fret dès ${formatFCFA(Math.max(1000, Math.round((product.weight || 0.4) * (cargoSettings?.normalRate || 10000))))} (${product.weight || 0.4} kg)</span>
+                </span>
+              </div>
             </div>
 
             <!-- Action Buttons -->
@@ -338,13 +352,32 @@ window.quickAddToCart = function(productId) {
 // 5. Cart Drawer Management
 function updateCartUi() {
   const totalCount = cart.reduce((acc, item) => acc + item.quantity, 0);
-  const totalPrice = cart.reduce((acc, item) => acc + (item.product.price * item.quantity), 0);
+  const subtotal = cart.reduce((acc, item) => acc + (item.product.price * item.quantity), 0);
+  const totalWeight = cart.reduce((acc, item) => acc + (item.product.weight || 0.4) * item.quantity, 0);
+  const roundedWeight = Math.round(totalWeight * 10) / 10;
+
+  const rate = selectedShippingMethod === 'express' ? (cargoSettings.expressRate || 13500) : (cargoSettings.normalRate || 10000);
+  const effectiveWeight = Math.max(cargoSettings.minWeight || 0.1, totalWeight);
+  const shippingFee = cart.length > 0 ? Math.round(effectiveWeight * rate) : 0;
+  const grandTotal = subtotal + shippingFee;
+
+  const cartShippingFeeDisplay = document.getElementById('cart-shipping-fee-display');
+  const cartTotalDisplay = document.getElementById('cart-total-display');
+  const cartTotalWeightBadge = document.getElementById('cart-total-weight-badge');
+  const checkoutShippingSummary = document.getElementById('checkout-shipping-summary');
 
   if (cartBadgeCount) cartBadgeCount.textContent = totalCount;
   if (mobileCartBadge) mobileCartBadge.textContent = totalCount;
-  if (cartBadgeTotal) cartBadgeTotal.textContent = formatFCFA(totalPrice);
-  if (cartSubtotalDisplay) cartSubtotalDisplay.textContent = formatFCFA(totalPrice);
-  if (checkoutTotalDisplay) checkoutTotalDisplay.textContent = formatFCFA(totalPrice);
+  if (cartBadgeTotal) cartBadgeTotal.textContent = formatFCFA(grandTotal);
+  if (cartSubtotalDisplay) cartSubtotalDisplay.textContent = formatFCFA(subtotal);
+  if (cartShippingFeeDisplay) cartShippingFeeDisplay.textContent = formatFCFA(shippingFee);
+  if (cartTotalDisplay) cartTotalDisplay.textContent = formatFCFA(grandTotal);
+  if (cartTotalWeightBadge) cartTotalWeightBadge.textContent = `${roundedWeight} kg`;
+  if (checkoutTotalDisplay) checkoutTotalDisplay.textContent = formatFCFA(grandTotal);
+  if (checkoutShippingSummary) {
+    const isExp = selectedShippingMethod === 'express';
+    checkoutShippingSummary.textContent = `${isExp ? 'Colis Rapide' : 'Colis Normal'} (${isExp ? cargoSettings.expressDelay : cargoSettings.normalDelay} - ${formatFCFA(shippingFee)})`;
+  }
 
   renderCartItems();
 }
@@ -459,11 +492,23 @@ async function handleCheckoutSubmit(e) {
   const paymentMethodInput = document.querySelector('input[name="paymentMethod"]:checked');
   const paymentMethod = paymentMethodInput ? paymentMethodInput.value : 'AIRTEL_MONEY';
 
+  if (paymentMethod === 'CREDIT_CARD') {
+    const cardNumber = document.getElementById('card-number')?.value.trim();
+    const cardExpiry = document.getElementById('card-expiry')?.value.trim();
+    const cardCvv = document.getElementById('card-cvv')?.value.trim();
+    if (!cardNumber || !cardExpiry || !cardCvv) {
+      alert('Veuillez renseigner toutes les informations de votre Carte Bancaire.');
+      return;
+    }
+  }
+
   const orderData = {
     customer_name: name,
     customer_phone: phone,
     delivery_neighborhood: neighborhood,
     payment_method: paymentMethod,
+    shipping_method: selectedShippingMethod,
+    shippingMethod: selectedShippingMethod,
     items: cart.map(item => ({
       product_id: item.product.id,
       quantity: item.quantity,
@@ -631,6 +676,27 @@ function initEventListeners() {
 
   if (checkoutForm) checkoutForm.addEventListener('submit', handleCheckoutSubmit);
 
+  // Wire shipping method radio buttons in cart drawer
+  document.querySelectorAll('input[name="cartShippingMethod"]').forEach(radio => {
+    radio.addEventListener('change', (e) => {
+      selectedShippingMethod = e.target.value;
+      updateCartUi();
+    });
+  });
+
+  // Wire payment method selection to toggle credit card fields
+  document.querySelectorAll('input[name="paymentMethod"]').forEach(radio => {
+    radio.addEventListener('change', (e) => {
+      const cardFields = document.getElementById('credit-card-fields');
+      if (!cardFields) return;
+      if (e.target.value === 'CREDIT_CARD') {
+        cardFields.classList.remove('hidden');
+      } else {
+        cardFields.classList.add('hidden');
+      }
+    });
+  });
+
   if (simConfirmBtn) simConfirmBtn.addEventListener('click', handleSimulatePayment);
   if (simCloseBtn) simCloseBtn.addEventListener('click', closeSimulatorModal);
 
@@ -646,7 +712,7 @@ function initEventListeners() {
   setupHamburgerMenu();
 }
 
-// Sync dynamic WhatsApp number from CMS settings
+// Sync dynamic WhatsApp number and settings from CMS
 async function syncWhatsAppLinks() {
   try {
     const res = await fetch('/api/settings');
@@ -666,12 +732,22 @@ async function syncWhatsAppLinks() {
             bar.classList.add('hidden');
           } else {
             bar.classList.remove('hidden');
-            const t1 = ab.text || '🇨🇳 Import direct usine Shenzhen → 🇬🇦 Gabon | Fret cargo aérien inclus | Paiement sécurisé Mobile Money';
+            const t1 = ab.text || '🇨🇳 Import direct usine Shenzhen → 🇬🇦 Gabon | Fret cargo aérien 10 000 F/kg | Airtel, Moov & Carte Bancaire';
             const t2 = ab.secondaryText || t1;
             document.querySelectorAll('.top-announcement-text-1').forEach(el => el.textContent = t1);
             document.querySelectorAll('.top-announcement-text-2').forEach(el => el.textContent = t2);
           }
         }
+      }
+      if (settings.cargo_settings) {
+        cargoSettings = {
+          normalRate: settings.cargo_settings.normalRate || 10000,
+          normalDelay: settings.cargo_settings.normalDelay || '2 semaines',
+          expressRate: settings.cargo_settings.expressRate || 13500,
+          expressDelay: settings.cargo_settings.expressDelay || '1 semaine',
+          minWeight: settings.cargo_settings.minWeight || 0.1
+        };
+        updateCartUi();
       }
     }
   } catch (_) {}
@@ -682,3 +758,4 @@ initEventListeners();
 updateCartUi();
 loadCategoryPage();
 syncWhatsAppLinks();
+

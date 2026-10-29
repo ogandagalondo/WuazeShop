@@ -6,6 +6,14 @@ let selectedColor = null;
 let quantity = 1;
 let cart = loadCartFromStorage();
 let currentPendingOrder = null;
+let selectedShippingMethod = 'normal';
+let cargoSettings = {
+  normalRate: 10000,
+  normalDelay: '2 semaines',
+  expressRate: 13500,
+  expressDelay: '1 semaine',
+  minWeight: 0.1
+};
 
 // DOM Elements
 const loadingEl = document.getElementById('product-loading');
@@ -312,14 +320,21 @@ function renderProductPage(product) {
   const mobileStickyPrice = document.getElementById('mobile-sticky-price');
   if (mobileStickyPrice) mobileStickyPrice.textContent = formatFCFA(product.price);
 
-  const strikeEl = document.getElementById('detail-strike-price');
-  if (strikeEl) {
-    if (product.original_price) {
-      strikeEl.textContent = formatFCFA(product.original_price);
-      strikeEl.classList.remove('hidden');
-    } else {
-      strikeEl.classList.add('hidden');
-    }
+  // Cargo Shipping Box Estimations
+  const pWeight = product.weight || 0.4;
+  const weightBadge = document.getElementById('detail-product-weight-badge');
+  if (weightBadge) weightBadge.textContent = `Poids: ${pWeight} kg`;
+
+  const normalCargoEl = document.getElementById('detail-cargo-normal-price');
+  if (normalCargoEl) {
+    const normalFee = Math.max(1000, Math.round(pWeight * (cargoSettings.normalRate || 10000)));
+    normalCargoEl.textContent = formatFCFA(normalFee);
+  }
+
+  const expressCargoEl = document.getElementById('detail-cargo-express-price');
+  if (expressCargoEl) {
+    const expressFee = Math.max(1000, Math.round(pWeight * (cargoSettings.expressRate || 13500)));
+    expressCargoEl.textContent = formatFCFA(expressFee);
   }
 
   // Description
@@ -510,19 +525,37 @@ if (qtyMinusBtn && qtyPlusBtn && qtyDisplay) {
 function updateCartUi() {
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
   const subtotal = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+  const totalWeight = cart.reduce((sum, item) => sum + (item.product.weight || 0.4) * item.quantity, 0);
+  const roundedWeight = Math.round(totalWeight * 10) / 10;
+  
+  const rate = selectedShippingMethod === 'express' ? (cargoSettings.expressRate || 13500) : (cargoSettings.normalRate || 10000);
+  const effectiveWeight = Math.max(cargoSettings.minWeight || 0.1, totalWeight);
+  const shippingFee = cart.length > 0 ? Math.round(effectiveWeight * rate) : 0;
+  const grandTotal = subtotal + shippingFee;
 
   const cartBadgeCount = document.getElementById('cart-badge-count');
   const mobileCartBadge = document.getElementById('mobile-cart-badge');
   const cartBadgeTotal = document.getElementById('cart-badge-total');
   const cartSubtotalDisplay = document.getElementById('cart-subtotal-display');
+  const cartShippingFeeDisplay = document.getElementById('cart-shipping-fee-display');
+  const cartTotalDisplay = document.getElementById('cart-total-display');
+  const cartTotalWeightBadge = document.getElementById('cart-total-weight-badge');
   const checkoutTotalDisplay = document.getElementById('checkout-total-display');
+  const checkoutShippingSummary = document.getElementById('checkout-shipping-summary');
   const cartItemsContainer = document.getElementById('cart-items-container');
 
   if (cartBadgeCount) cartBadgeCount.textContent = totalItems;
   if (mobileCartBadge) mobileCartBadge.textContent = totalItems;
-  if (cartBadgeTotal) cartBadgeTotal.textContent = formatFCFA(subtotal);
+  if (cartBadgeTotal) cartBadgeTotal.textContent = formatFCFA(grandTotal);
   if (cartSubtotalDisplay) cartSubtotalDisplay.textContent = formatFCFA(subtotal);
-  if (checkoutTotalDisplay) checkoutTotalDisplay.textContent = formatFCFA(subtotal);
+  if (cartShippingFeeDisplay) cartShippingFeeDisplay.textContent = formatFCFA(shippingFee);
+  if (cartTotalDisplay) cartTotalDisplay.textContent = formatFCFA(grandTotal);
+  if (cartTotalWeightBadge) cartTotalWeightBadge.textContent = `${roundedWeight} kg`;
+  if (checkoutTotalDisplay) checkoutTotalDisplay.textContent = formatFCFA(grandTotal);
+  if (checkoutShippingSummary) {
+    const isExp = selectedShippingMethod === 'express';
+    checkoutShippingSummary.textContent = `${isExp ? 'Colis Rapide' : 'Colis Normal'} (${isExp ? cargoSettings.expressDelay : cargoSettings.normalDelay} - ${formatFCFA(shippingFee)})`;
+  }
 
   const cartFooterContainer = document.getElementById('cart-footer-container');
   const cartSubtotalRow = document.getElementById('cart-subtotal-row');
@@ -686,9 +719,30 @@ if (closeCheckoutBtn) {
   });
 }
 
-// 6. Checkout & Mobile Money Flow
+// 6. Checkout & Payment Flow
 const checkoutForm = document.getElementById('checkout-form');
 const simulatorModalOverlay = document.getElementById('simulator-modal-overlay');
+
+// Wire shipping method radio buttons in cart drawer
+document.querySelectorAll('input[name="cartShippingMethod"]').forEach(radio => {
+  radio.addEventListener('change', (e) => {
+    selectedShippingMethod = e.target.value;
+    updateCartUi();
+  });
+});
+
+// Wire payment method selection to toggle credit card fields
+document.querySelectorAll('input[name="paymentMethod"]').forEach(radio => {
+  radio.addEventListener('change', (e) => {
+    const cardFields = document.getElementById('credit-card-fields');
+    if (!cardFields) return;
+    if (e.target.value === 'CREDIT_CARD') {
+      cardFields.classList.remove('hidden');
+    } else {
+      cardFields.classList.add('hidden');
+    }
+  });
+});
 
 if (checkoutForm) {
   checkoutForm.addEventListener('submit', async (e) => {
@@ -702,6 +756,17 @@ if (checkoutForm) {
     const firstItem = cart[0];
     const colorTag = firstItem.product.selectedColor ? ` [${firstItem.product.selectedColor}]` : '';
     const productTitleWithVariant = `${firstItem.product.title}${colorTag}`;
+    const paymentMethod = checkoutForm.querySelector('input[name="paymentMethod"]:checked')?.value || 'AIRTEL_MONEY';
+
+    if (paymentMethod === 'CREDIT_CARD') {
+      const cardNumber = document.getElementById('card-number')?.value.trim();
+      const cardExpiry = document.getElementById('card-expiry')?.value.trim();
+      const cardCvv = document.getElementById('card-cvv')?.value.trim();
+      if (!cardNumber || !cardExpiry || !cardCvv) {
+        alert('Veuillez renseigner toutes les informations de votre Carte Bancaire.');
+        return;
+      }
+    }
 
     const orderData = {
       customerName: document.getElementById('checkout-name').value,
@@ -710,7 +775,8 @@ if (checkoutForm) {
       productId: firstItem.product.id,
       productTitle: productTitleWithVariant,
       quantity: firstItem.quantity,
-      paymentMethod: checkoutForm.querySelector('input[name="paymentMethod"]:checked').value
+      shippingMethod: selectedShippingMethod,
+      paymentMethod
     };
 
     try {
@@ -770,7 +836,10 @@ if (simConfirmBtn) {
         // Show success modal
         document.getElementById('success-order-num').textContent = currentPendingOrder.orderNumber;
         
-        const whatsappMsg = `Bonjour WuazeShop ! Je viens de régler ${formatFCFA(currentPendingOrder.totalAmount)} par Mobile Money pour la commande ${currentPendingOrder.orderNumber} (${currentPendingOrder.productTitle}). Mon quartier est ${currentPendingOrder.customerNeighborhood}. Merci de me confirmer la prise en compte pour l'achat usine en Chine !`;
+        const isExp = currentPendingOrder.shippingMethod === 'express';
+        const shippingLabel = isExp ? 'Colis Rapide (1 sem)' : 'Colis Normal (2 sem)';
+        const paymentLabel = currentPendingOrder.paymentMethod === 'CREDIT_CARD' ? 'Carte Bancaire' : (currentPendingOrder.paymentMethod === 'MOOV_MONEY' ? 'Moov Money' : 'Airtel Money');
+        const whatsappMsg = `Bonjour WuazeShop ! Je viens de régler ${formatFCFA(currentPendingOrder.totalAmount)} par ${paymentLabel} pour la commande ${currentPendingOrder.orderNumber} (${currentPendingOrder.productTitle} — Fret ${shippingLabel}). Mon quartier est ${currentPendingOrder.customerNeighborhood}. Merci de me confirmer la prise en compte pour l'achat en Chine !`;
         document.getElementById('success-whatsapp-link').href = `https://wa.me/241074001122?text=${encodeURIComponent(whatsappMsg)}`;
 
         if (successModalOverlay) successModalOverlay.classList.remove('hidden');
@@ -877,6 +946,17 @@ async function syncWhatsAppLinks() {
           document.querySelectorAll('a[href*="wa.me"]').forEach(a => a.href = `https://wa.me/${clean}`);
         }
       }
+      if (settings.cargo_settings) {
+        cargoSettings = { ...cargoSettings, ...settings.cargo_settings };
+        if (currentProduct) {
+          const pWeight = currentProduct.weight || 0.4;
+          const normalCargoEl = document.getElementById('detail-cargo-normal-price');
+          if (normalCargoEl) normalCargoEl.textContent = formatFCFA(Math.max(1000, Math.round(pWeight * (cargoSettings.normalRate || 10000))));
+          const expressCargoEl = document.getElementById('detail-cargo-express-price');
+          if (expressCargoEl) expressCargoEl.textContent = formatFCFA(Math.max(1000, Math.round(pWeight * (cargoSettings.expressRate || 13500))));
+        }
+        updateCartUi();
+      }
       if (settings.announcement_bar) {
         const ab = settings.announcement_bar;
         const bar = document.getElementById('top-announcement-bar');
@@ -885,7 +965,7 @@ async function syncWhatsAppLinks() {
             bar.classList.add('hidden');
           } else {
             bar.classList.remove('hidden');
-            const t1 = ab.text || '🇨🇳 Import direct usine Shenzhen → 🇬🇦 Gabon | Fret cargo aérien inclus | Paiement sécurisé Mobile Money';
+            const t1 = ab.text || '🇨🇳 Import direct usine Shenzhen → 🇬🇦 Gabon | Fret cargo aérien au poids exact (10 000 FCFA/kg) | Airtel, Moov & Carte Bancaire';
             const t2 = ab.secondaryText || t1;
             document.querySelectorAll('.top-announcement-text-1').forEach(el => el.textContent = t1);
             document.querySelectorAll('.top-announcement-text-2').forEach(el => el.textContent = t2);

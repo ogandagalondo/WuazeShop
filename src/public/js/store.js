@@ -118,11 +118,19 @@ function renderProducts(products) {
             ${product.description ? `<p class="text-[10px] text-gray-500 line-clamp-1 mt-0.5">${product.description}</p>` : ''}
           </div>
 
-          <!-- Price & Add to Cart -->
+          <!-- Price, Cargo Weight & Add to Cart -->
           <div class="pt-2 border-t border-gray-100">
-            <div class="flex items-baseline gap-1.5 mb-2 sm:mb-2.5 whitespace-nowrap overflow-hidden">
+            <div class="flex items-baseline gap-1.5 mb-1 whitespace-nowrap overflow-hidden">
               <span class="text-xs sm:text-sm font-black text-[#0d7252] whitespace-nowrap shrink-0">${formatFCFA(product.price)}</span>
               ${strikePriceHtml}
+            </div>
+
+            <!-- Transparent Cargo Shipping Tag -->
+            <div class="mb-2">
+              <span class="inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-bold text-emerald-800 bg-emerald-50/90 px-2 py-0.5 rounded-full border border-emerald-200/60">
+                <span class="material-symbols-outlined text-[12px] text-emerald-600">flight_takeoff</span>
+                <span>Fret dès ${formatFCFA(Math.max(1000, Math.round((product.weight || 0.4) * (cargoSettings?.normalRate || 10000))))} (${product.weight || 0.4} kg)</span>
+              </span>
             </div>
 
             <div class="flex items-center gap-1.5 sm:gap-2">
@@ -197,7 +205,34 @@ if (mobileSearch) {
   });
 }
 
-// 4. Shopping Cart State & Drawer
+// 4. Shopping Cart State, Cargo Shipping & Drawer
+let cargoSettings = {
+  normalRate: 10000,
+  normalDelay: '2 semaines',
+  expressRate: 13500,
+  expressDelay: '1 semaine',
+  minWeight: 0.1
+};
+let selectedShippingMethod = 'normal';
+
+function calculateCartShipping(totalWeight, method = selectedShippingMethod) {
+  const rate = method === 'express' ? (cargoSettings.expressRate || 13500) : (cargoSettings.normalRate || 10000);
+  const minWeight = cargoSettings.minWeight || 0.1;
+  const billableWeight = Math.max(totalWeight, minWeight);
+  return Math.round(billableWeight * rate);
+}
+
+function updateCargoUiLabels() {
+  const normalDelayEl = document.getElementById('cart-normal-delay-text');
+  const normalRateEl = document.getElementById('cart-normal-rate-text');
+  const expressDelayEl = document.getElementById('cart-express-delay-text');
+  const expressRateEl = document.getElementById('cart-express-rate-text');
+  if (normalDelayEl) normalDelayEl.textContent = cargoSettings.normalDelay || '2 semaines';
+  if (normalRateEl) normalRateEl.textContent = `${formatFCFA(cargoSettings.normalRate || 10000)}/kg`;
+  if (expressDelayEl) expressDelayEl.textContent = cargoSettings.expressDelay || '1 semaine';
+  if (expressRateEl) expressRateEl.textContent = `${formatFCFA(cargoSettings.expressRate || 13500)}/kg`;
+}
+
 window.addToCart = function(productId) {
   const product = allProducts.find(p => p.id === productId);
   if (!product) return;
@@ -217,12 +252,33 @@ window.addToCart = function(productId) {
 function updateCartUi() {
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
   const subtotal = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+  const totalWeight = Number(cart.reduce((sum, item) => sum + ((item.product.weight || 0.4) * item.quantity), 0).toFixed(2));
+  const shippingFee = cart.length > 0 ? calculateCartShipping(totalWeight, selectedShippingMethod) : 0;
+  const grandTotal = subtotal + shippingFee;
 
   if (cartBadgeCount) cartBadgeCount.textContent = totalItems;
   if (mobileCartBadge) mobileCartBadge.textContent = totalItems;
-  if (cartBadgeTotal) cartBadgeTotal.textContent = formatFCFA(subtotal);
+  if (cartBadgeTotal) cartBadgeTotal.textContent = formatFCFA(grandTotal);
   if (cartSubtotalDisplay) cartSubtotalDisplay.textContent = formatFCFA(subtotal);
-  if (checkoutTotalDisplay) checkoutTotalDisplay.textContent = formatFCFA(subtotal);
+
+  const cartShippingFeeDisplay = document.getElementById('cart-shipping-fee-display');
+  if (cartShippingFeeDisplay) cartShippingFeeDisplay.textContent = formatFCFA(shippingFee);
+
+  const cartTotalDisplay = document.getElementById('cart-total-display');
+  if (cartTotalDisplay) cartTotalDisplay.textContent = formatFCFA(grandTotal);
+
+  const cartTotalWeightBadge = document.getElementById('cart-total-weight-badge');
+  if (cartTotalWeightBadge) cartTotalWeightBadge.textContent = `${totalWeight} kg`;
+
+  if (checkoutTotalDisplay) checkoutTotalDisplay.textContent = formatFCFA(grandTotal);
+
+  const checkoutShippingSummary = document.getElementById('checkout-shipping-summary');
+  if (checkoutShippingSummary) {
+    const methodLabel = selectedShippingMethod === 'express' 
+      ? `Colis Rapide (${cargoSettings.expressDelay || '1 sem'})` 
+      : `Colis Normal (${cargoSettings.normalDelay || '2 sem'})`;
+    checkoutShippingSummary.textContent = `${methodLabel} — ${formatFCFA(shippingFee)}`;
+  }
 
   const cartFooterContainer = document.getElementById('cart-footer-container');
   const cartSubtotalRow = document.getElementById('cart-subtotal-row');
@@ -260,7 +316,10 @@ function updateCartUi() {
       <img src="${item.product.image_url}" class="w-12 h-12 rounded-xl object-contain bg-white p-1 shadow-sm" alt="${item.product.title}"/>
       <div class="flex-1 min-w-0">
         <h4 class="text-xs font-bold text-gray-900 truncate">${item.product.title}</h4>
-        <span class="text-xs font-extrabold text-[#0d7252]">${formatFCFA(item.product.price)}</span>
+        <div class="flex items-center gap-2 mt-0.5">
+          <span class="text-xs font-extrabold text-[#0d7252]">${formatFCFA(item.product.price)}</span>
+          <span class="text-[10px] text-gray-400 font-semibold">• ${(item.product.weight || 0.4)} kg</span>
+        </div>
       </div>
       <div class="flex items-center gap-1.5">
         <button onclick="changeQuantity(${idx}, -1)" class="w-7 h-7 rounded-full bg-white text-gray-700 font-bold flex items-center justify-center border border-gray-200 hover:border-[#0d7252] shadow-sm">-</button>
@@ -330,14 +389,49 @@ if (closeCheckoutBtn) {
   });
 }
 
+// Payment method change listener (shows/hides credit card inputs)
+document.querySelectorAll('input[name="paymentMethod"]').forEach(radio => {
+  radio.addEventListener('change', (e) => {
+    const val = e.target.value;
+    const cardFields = document.getElementById('credit-card-fields');
+    const submitBtn = document.getElementById('checkout-submit-btn');
+    if (val === 'CREDIT_CARD') {
+      if (cardFields) cardFields.classList.remove('hidden');
+      if (submitBtn) submitBtn.textContent = 'Valider et Payer par Carte Bancaire';
+    } else {
+      if (cardFields) cardFields.classList.add('hidden');
+      if (submitBtn) submitBtn.textContent = 'Valider et Payer par Mobile Money';
+    }
+  });
+});
+
+// Shipping method change listener in cart
+document.querySelectorAll('input[name="cartShippingMethod"]').forEach(radio => {
+  radio.addEventListener('change', (e) => {
+    selectedShippingMethod = e.target.value;
+    updateCartUi();
+  });
+});
+
 // 6. Handle Checkout Form Submission
 if (checkoutForm) {
   checkoutForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const name = document.getElementById('checkout-name').value;
-    const phone = document.getElementById('checkout-phone').value;
-    const neighborhood = document.getElementById('checkout-neighborhood').value;
-    const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+    const name = document.getElementById('checkout-name').value.trim();
+    const phone = document.getElementById('checkout-phone').value.trim();
+    const neighborhood = document.getElementById('checkout-neighborhood').value.trim();
+    const paymentRadio = document.querySelector('input[name="paymentMethod"]:checked');
+    const paymentMethod = paymentRadio ? paymentRadio.value : 'AIRTEL_MONEY';
+
+    if (!name || !phone || !neighborhood) {
+      alert('Veuillez renseigner tous les champs obligatoires.');
+      return;
+    }
+
+    if (cart.length === 0) {
+      alert('Votre panier est vide.');
+      return;
+    }
 
     const primaryItem = cart[0];
 
@@ -351,6 +445,7 @@ if (checkoutForm) {
           customerName: name,
           customerPhone: phone,
           customerNeighborhood: neighborhood,
+          shippingMethod: selectedShippingMethod,
           paymentMethod
         })
       });
@@ -364,11 +459,17 @@ if (checkoutForm) {
       currentPendingOrder = orderData;
       checkoutModalOverlay.classList.add('hidden');
 
-      // Open Mobile Money Simulation Modal
+      // Open Payment Simulation Modal
       document.getElementById('sim-order-number').textContent = orderData.orderNumber;
       document.getElementById('sim-amount').textContent = formatFCFA(orderData.totalAmount);
-      document.getElementById('sim-instructions').textContent = 
-        `Une notification USSD push a été envoyée sur votre numéro ${phone} (${paymentMethod === 'AIRTEL_MONEY' ? 'Airtel Money Gabon' : 'Moov Money Gabon'}).`;
+      
+      if (paymentMethod === 'CREDIT_CARD') {
+        document.getElementById('sim-instructions').textContent = 
+          `Autorisation bancaire 3D-Secure en cours pour votre Carte Bancaire. Cliquez sur Valider pour simuler l'accord bancaire immédiat.`;
+      } else {
+        document.getElementById('sim-instructions').textContent = 
+          `Une notification USSD push a été envoyée sur votre numéro ${phone} (${paymentMethod === 'AIRTEL_MONEY' ? 'Airtel Money Gabon' : 'Moov Money Gabon'}).`;
+      }
       simulatorModalOverlay.classList.remove('hidden');
     } catch (err) {
       alert('Erreur réseau lors de la commande.');
@@ -401,7 +502,12 @@ if (simConfirmBtn) {
         // Show success modal with pre-filled WhatsApp confirmation link
         document.getElementById('success-order-num').textContent = currentPendingOrder.orderNumber;
         
-        const whatsappMsg = `Bonjour WuazeShop ! Je viens d'effectuer mon règlement Mobile Money de ${formatFCFA(currentPendingOrder.totalAmount)} pour la commande ${currentPendingOrder.orderNumber} (${currentPendingOrder.productTitle}). Mon quartier de livraison est ${currentPendingOrder.customerNeighborhood}. Merci de me confirmer la prise en compte pour l'achat en Chine !`;
+        const paymentLabel = currentPendingOrder.paymentMethod === 'CREDIT_CARD' 
+          ? 'Carte Bancaire' 
+          : (currentPendingOrder.paymentMethod === 'AIRTEL_MONEY' ? 'Airtel Money' : 'Moov Money');
+        const shippingLabel = currentPendingOrder.shippingMethod === 'express' ? 'Colis Rapide (1 sem)' : 'Colis Normal (2 sem)';
+        
+        const whatsappMsg = `Bonjour WuazeShop ! Je viens d'effectuer mon règlement par ${paymentLabel} de ${formatFCFA(currentPendingOrder.totalAmount)} pour la commande ${currentPendingOrder.orderNumber} (${currentPendingOrder.productTitle} — Fret ${shippingLabel}). Mon quartier de livraison au Gabon est ${currentPendingOrder.customerNeighborhood}. Merci de me confirmer la prise en compte pour l'achat en Chine !`;
         
         const whatsappLink = `https://wa.me/241074001122?text=${encodeURIComponent(whatsappMsg)}`;
         document.getElementById('success-whatsapp-link').href = whatsappLink;
@@ -448,6 +554,13 @@ async function loadSiteSettings() {
     if (!res.ok) return;
     const settings = await res.json();
 
+    // 0. Cargo Shipping Settings
+    if (settings.cargo_settings) {
+      cargoSettings = { ...cargoSettings, ...settings.cargo_settings };
+      updateCargoUiLabels();
+      updateCartUi();
+    }
+
     // 0. Top Announcement Bar (Ruban Défilant)
     if (settings.announcement_bar) {
       const ab = settings.announcement_bar;
@@ -457,7 +570,7 @@ async function loadSiteSettings() {
           bar.classList.add('hidden');
         } else {
           bar.classList.remove('hidden');
-          const t1 = ab.text || '🇨🇳 Import direct usine Shenzhen → 🇬🇦 Gabon | Fret cargo aérien inclus | Paiement sécurisé Mobile Money';
+          const t1 = ab.text || '🇨🇳 Import direct usine Shenzhen → 🇬🇦 Gabon | Fret cargo aérien au poids exact (10 000 FCFA/kg) | Airtel, Moov & Carte Bancaire';
           const t2 = ab.secondaryText || t1;
           document.querySelectorAll('.top-announcement-text-1').forEach(el => el.textContent = t1);
           document.querySelectorAll('.top-announcement-text-2').forEach(el => el.textContent = t2);
@@ -1013,7 +1126,7 @@ updateCartUi();
 setupOrderTracking();
 setupHamburgerMenu();
 
-// Check URL param ?track=WZ-XXXXXX
+// Check URL params
 const urlParams = new URLSearchParams(window.location.search);
 const trackParam = urlParams.get('track');
 if (trackParam) {
@@ -1022,4 +1135,11 @@ if (trackParam) {
   trackOrder(trackParam);
   const section = document.getElementById('tracking-section');
   if (section) section.scrollIntoView({ behavior: 'smooth' });
+} else if (urlParams.get('checkout') === 'open') {
+  setTimeout(() => {
+    if (cart.length > 0) openCheckoutModal();
+    else openCartDrawer();
+  }, 200);
+} else if (urlParams.get('cart') === 'open') {
+  setTimeout(() => openCartDrawer(), 200);
 }
