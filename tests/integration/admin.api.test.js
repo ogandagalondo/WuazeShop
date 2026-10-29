@@ -221,7 +221,7 @@ describe('Admin CMS API', () => {
     expect(res.body.hero_section).toBeDefined();
     expect(res.body.promo_section).toBeDefined();
     expect(res.body.contact_section).toBeDefined();
-    expect(res.body.hero_section.title).toContain('La technologie');
+    expect(res.body.hero_section.title).toContain('Shenzhen');
   });
 
   it('allows authenticated admin to update a showcase section', async () => {

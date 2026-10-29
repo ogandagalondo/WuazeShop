@@ -198,8 +198,8 @@ export function seedData(db) {
       key: 'announcement_bar',
       value: JSON.stringify({
         enabled: true,
-        text: '🇨🇳 Import direct usine Shenzhen → 🇬🇦 Gabon | Fret cargo aérien au poids exact (10 000 FCFA/kg) | Airtel, Moov & Carte Bancaire',
-        secondaryText: ''
+        text: '🇨🇳 Shenzhen → 🇬🇦 Gabon | Fret cargo pesé au gramme près | Airtel Money, Moov Money et Carte Bancaire',
+        secondaryText: '✈️ Deux formules au choix : Colis Rapide (1 semaine à 13 500 F/kg) ou Colis Normal (2 semaines à 10 000 F/kg)'
       })
     },
     {
@@ -215,30 +215,30 @@ export function seedData(db) {
     {
       key: 'hero_section',
       value: JSON.stringify({
-        badge: '✦ Arrivage Direct Chine',
-        title: 'La technologie\nà portée de main',
-        subtitle: 'Découvrez les derniers smartphones, ordinateurs et accessoires importés directement de Chine au Gabon avec une qualité exceptionnelle et des tarifs cargo transparents.',
-        ctaText: 'Découvrir le catalogue',
+        badge: '✦ Import direct d\'usine Shenzhen',
+        title: 'Vos appareils high-tech neufs\nau prix direct de Shenzhen',
+        subtitle: 'Commandez vos smartphones, ordinateurs et écrans au tarif d\'usine. Chaque colis est vérifié à Shenzhen, expédié en vol cargo et remis en main propre à Libreville dès 10 000 FCFA le kilo.',
+        ctaText: 'Voir les produits et tarifs',
         ctaLink: '/categories',
         imageUrl: '/images/hero-devices.jpg',
-        prop1Title: 'Colis Normal (2 sem)',
-        prop1Sub: '10 000 FCFA / kg',
-        prop2Title: 'Colis Rapide (1 sem)',
-        prop2Sub: '13 500 FCFA / kg',
-        prop3Title: 'Airtel, Moov & CB',
-        prop3Sub: 'Paiement 100% sécurisé',
-        prop4Title: '100% Neuf d\'Usine',
-        prop4Sub: 'Inspection & Garantie'
+        prop1Title: 'Colis Normal : 2 semaines',
+        prop1Sub: '10 000 FCFA par kilo',
+        prop2Title: 'Colis Rapide : 1 semaine',
+        prop2Sub: '13 500 FCFA par kilo',
+        prop3Title: 'Airtel, Moov et CB',
+        prop3Sub: 'Règlement sécurisé en FCFA',
+        prop4Title: '100% Neuf sous blister',
+        prop4Sub: 'Contrôle visuel avant vol'
       })
     },
     {
       key: 'promo_section',
       value: JSON.stringify({
-        badge: 'Offre spéciale',
-        title: 'Jusqu\'à -20%',
-        subtitle: 'sur une sélection de produits',
-        description: 'Équipez-vous avec les meilleures marques importées directement de Chine et profitez de nos offres limitées avec garantie constructeur !',
-        ctaText: 'Voir l\'offre',
+        badge: 'Économie directe usine',
+        title: 'Jusqu\'à 30% d\'économie',
+        subtitle: 'face aux boutiques physiques de Libreville',
+        description: 'Sans boutique intermédiaire ni marge de revendeur local, vous payez uniquement le prix fabricant et le fret aérien au poids exact de votre commande.',
+        ctaText: 'Comparer les tarifs',
         ctaLink: '#products-section',
         imageUrl: '/images/promo-banner.jpg'
       })
@@ -246,28 +246,28 @@ export function seedData(db) {
     {
       key: 'trust_pillars',
       value: JSON.stringify([
-        { icon: 'verified', title: 'Produits originaux', subtitle: 'Garantie constructeur' },
-        { icon: 'flight_takeoff', title: 'Fret Cargo Aérien', subtitle: 'Au poids exact (10 000 FCFA/kg)' },
-        { icon: 'lock', title: 'Paiement sécurisé', subtitle: 'Airtel, Moov & Carte Bancaire' },
-        { icon: 'headset_mic', title: 'Support client', subtitle: 'Toujours à votre écoute' }
+        { icon: 'verified', title: 'Matériel 100% neuf', subtitle: 'Boîte scellée d\'origine constructeur' },
+        { icon: 'flight_takeoff', title: 'Fret aérien au poids exact', subtitle: '10 000 F/kg ou 13 500 F/kg selon l\'urgence' },
+        { icon: 'credit_card', title: 'Règlement sécurisé en FCFA', subtitle: 'Airtel Money, Moov Money et Carte Bancaire' },
+        { icon: 'support_agent', title: 'Assistance locale à Libreville', subtitle: 'Photos et vidéos du colis sur WhatsApp' }
       ])
     },
     {
       key: 'contact_section',
       value: JSON.stringify({
-        badge: 'Assistance WhatsApp Directe',
-        title: 'Une question sur un produit ou son expédition ?',
-        subtitle: 'Notre équipe au Gabon et notre acheteur en Chine vous conseillent en temps réel et peuvent vous envoyer des vidéos réelles des articles avant commande.',
+        badge: 'Assistance WhatsApp 7j/7',
+        title: 'Une question sur un modèle ou une demande spécifique ?',
+        subtitle: 'Notre équipe à Libreville et notre correspondant à Shenzhen répondent à vos questions techniques et peuvent vérifier la disponibilité d\'une référence précise sous 24 heures.',
         whatsappNumber: '241074001122',
         whatsappDisplay: '(+241) 074 00 11 22',
-        buttonText: 'Écrivez-nous sur WhatsApp'
+        buttonText: 'Poser une question sur WhatsApp'
       })
     },
     {
       key: 'footer_section',
       value: JSON.stringify({
-        slogan: 'High-Tech Gabon & Chine',
-        description: 'Votre univers technologique d\'importation directe Chine & Gabon. Qualité certifiée et sécurité Mobile Money & Carte Bancaire.',
+        slogan: 'High-Tech direct usine Shenzhen & Gabon',
+        description: 'Importation directe d\'équipements neufs depuis Shenzhen jusqu\'à votre quartier à Libreville. Fret au poids exact et règlements sécurisés en FCFA.',
         copyright: '© 2026 WuazeShop. Tous droits réservés.'
       })
     },
@@ -286,32 +286,35 @@ export function seedData(db) {
         terms: `CONDITIONS GÉNÉRALES DE VENTE ET D'UTILISATION (CGV/CGU) — WUAZESHOP GABON
 
 1. OBJET DU SERVICE
-WuazeShop est une plateforme d'e-commerce spécialisée dans la sélection, la commande et l'acheminement sécurisé d'articles high-tech neufs depuis la Chine vers le Gabon (Libreville, Port-Gentil, et intérieur du pays).
+WuazeShop assure la commande, l'inspection et l'acheminement sécurisé d'articles high-tech neufs depuis Shenzhen (Chine) jusqu'au Gabon (Libreville, Port-Gentil et intérieur du pays).
 
-2. COMMANDE & PRIX
-Tous nos prix sont stipulés en Francs CFA (XAF) toutes taxes comprises. La tarification du fret cargo aérien est calculée en toute transparence selon le poids exact de la commande (Tarif Normal 10 000 FCFA/kg ou Rapide 13 500 FCFA/kg).
+2. PRIX ET TARIFICATION DU FRET
+Tous les prix des produits sont affichés en Francs CFA (XAF). Le fret cargo aérien est calculé selon le poids réel ou volumétrique au panier :
+- Formule Colis Normal (2 semaines prévisionnelles) : 10 000 FCFA par kilo.
+- Formule Colis Rapide (1 semaine prévisionnelle) : 13 500 FCFA par kilo.
+Aucun frais additionnel non mentionné au récapitulatif ne sera exigé à la livraison.
 
-3. MODALITÉS DE RÈGLEMENT
-Les paiements sont acceptés via Airtel Money, Moov Money et Carte Bancaire (Visa / Mastercard). Afin de garantir une transparence totale, l'achat auprès du fabricant ou grossiste en Chine est initié dès constatation effective du règlement.
+3. RÈGLEMENTS SÉCURISÉS
+Les paiements s'effectuent par Airtel Money, Moov Money ou Carte Bancaire (Visa / Mastercard). L'achat auprès de l'usine à Shenzhen est déclenché immédiatement après confirmation de la transaction.
 
-4. DÉLAIS D'ACHEMINEMENT & LIVRAISON
-Les délais prévisionnels d'acheminement Chine-Gabon sont d'environ 1 semaine en Colis Rapide et 2 semaines en Colis Normal. À l'arrivée à Libreville, notre équipe locale coordonne la livraison finale directement au quartier indiqué.
+4. RÉCEPTION ET LIVRAISON LOCALE
+À l'arrivée du vol cargo à l'aéroport Léon Mba de Libreville, notre équipe prend en charge les démarches et contacte le client sur WhatsApp pour convenir de la remise en main propre.
 
-5. GARANTIE CONSTRUCTEUR & CONFORMITÉ
-Chaque appareil bénéficie d'une inspection préalable de conformité avant emballage et d'une garantie constructeur.`,
-        privacy: `POLITIQUE DE CONFIDENTIALITÉ & PROTECTION DES DONNÉES PERSONNELLES — WUAZESHOP
+5. CONFORMITÉ ET ÉCHANGE
+Chaque boîte fait l'objet d'un contrôle des scellés avant le vol. En cas de non-conformité constatée au déballage, notre équipe locale traite votre dossier sans délai.`,
+        privacy: `POLITIQUE DE CONFIDENTIALITÉ — WUAZESHOP GABON
 
-1. DONNÉES COLLECTÉES
-Dans le cadre de vos commandes sur WuazeShop, nous recueillons uniquement les informations indispensables au bon acheminement de votre colis : votre nom complet, votre numéro de téléphone (utilisé pour les notifications WhatsApp) et votre quartier de résidence au Gabon.
+1. DONNÉES RECUEILLIES
+Nous collectons uniquement les éléments nécessaires au traitement logistique : votre nom, votre numéro de téléphone (utilisé pour les notifications WhatsApp) et votre quartier de résidence au Gabon.
 
-2. FINALITÉ DU TRAITEMENT
-Vos données sont strictement réservées à :
-- La prise en compte et le traitement de vos commandes d'importation.
-- Le suivi logistique et l'information en temps réel sur l'acheminement de vos colis.
-- L'assistance clientèle personnalisée via WhatsApp.
+2. UTILISATION DES INFORMATIONS
+Vos données servent uniquement à :
+- Préparer et acheminer votre commande.
+- Vous transmettre les avis de pesée, de départ du vol et d'arrivée à Libreville.
+- Assurer le service après-vente par notre équipe locale.
 
-3. SÉCURITÉ ET CONFIDENTIALITÉ
-WuazeShop s'engage formellement à ne jamais vendre, louer, céder ni diffuser vos coordonnées à des fins de prospection publicitaire tierce. Vos données restent conservées de manière sécurisée et confidentielle.`
+3. SÉCURITÉ
+WuazeShop ne commercialise et ne cède aucune donnée personnelle. Vos coordonnées restent strictement confidentielles.`
       })
     },
     {
@@ -319,51 +322,51 @@ WuazeShop s'engage formellement à ne jamais vendre, louer, céder ni diffuser v
       value: JSON.stringify([
         {
           id: 'faq_1',
-          question: "Quels sont les délais d'acheminement entre la Chine et le Gabon ?",
-          answer: "Nos délais prévisionnels par fret cargo aérien sont d'environ 1 semaine en Colis Rapide (13 500 FCFA/kg) et environ 2 semaines en Colis Normal (10 000 FCFA/kg). Dès l'arrivée du colis à l'aéroport international de Libreville, notre équipe locale vous contacte sur WhatsApp pour organiser la livraison à domicile ou au quartier."
+          question: "Combien de temps prend la livraison entre la Chine et Libreville ?",
+          answer: "Le délai dépend de la formule choisie au moment de la commande. Le Colis Rapide arrive en 1 semaine (3 jours de vol direct entrepôt plus marge de sécurité). Le Colis Normal arrive en 2 semaines (7 jours de transit régulier). Dès l'atterrissage à l'aéroport Léon Mba, notre équipe locale vous contacte sur WhatsApp pour fixer l'heure de livraison à votre domicile ou bureau."
         },
         {
           id: 'faq_2',
-          question: "Comment s'effectue le règlement (Airtel, Moov & Carte Bancaire) ?",
-          answer: "Le règlement s'effectue directement en ligne en toute sécurité via Airtel Money, Moov Money ou Carte Bancaire (Visa / Mastercard). Une fois la transaction validée, vous recevez instantanément votre référence de commande ainsi que les instructions de suivi en temps réel."
+          question: "Comment sont calculés les frais de transport aérien ?",
+          answer: "Le tarif s'applique au poids réel de votre commande, ou au poids volumétrique si le colis est très volumineux. Le tarif est de 10 000 FCFA par kilo en Colis Normal et 13 500 FCFA par kilo en Colis Rapide, avec un minimum de 100 grammes. Le montant exact s'affiche directement dans votre panier avant paiement."
         },
         {
           id: 'faq_3',
-          question: "Les appareils high-tech sont-ils neufs et sous garantie ?",
-          answer: "Oui, absolument. Tous nos appareils (smartphones, ordinateurs portables, téléviseurs 4K, accessoires) sont 100% neufs, d'origine constructeur et livrés sous blister scellé. Nous procédons à une inspection rigoureuse de conformité avant l'envoi."
+          question: "Les produits sont-ils authentiques et neufs ?",
+          answer: "Tous nos articles proviennent directement des fabricants et distributeurs agréés à Shenzhen. Chaque appareil est neuf, sous emballage scellé d'origine. Avant le départ du vol cargo, notre acheteur procède à un contrôle visuel de la boîte et des scellés."
         },
         {
           id: 'faq_4',
-          question: "Livrez-vous dans tous les quartiers de Libreville et en province ?",
-          answer: "Oui ! Nous assurons la livraison à domicile ou au bureau dans tout le Grand Libreville (Louis, Glass, Akébé, Nzeng-Ayong, Angondjé, Owendo, etc.) et expédions vers Port-Gentil, Franceville, Oyem et toutes les villes du Gabon."
+          question: "Quels sont les moyens de paiement acceptés ?",
+          answer: "Vous pouvez régler directement en ligne en Francs CFA par Airtel Money Gabon, Moov Money Gabon ou Carte Bancaire (Visa et Mastercard). Dès la validation, vous recevez votre numéro de commande pour suivre l'acheminement de votre colis."
         },
         {
           id: 'faq_5',
-          question: "Puis-je commander un modèle spécifique non affiché sur le site ?",
-          answer: "Tout à fait ! Notre acheteur basé directement à Shenzhen peut rechercher le produit exact de votre choix (spécifications précises, coloris, marque). Contactez simplement notre support sur WhatsApp pour recevoir un devis personnalisé."
+          question: "Peut-on commander un produit qui ne figure pas sur le site ?",
+          answer: "Oui. Notre acheteur est basé au centre technologique de Shenzhen. Envoyez-nous la référence, la marque et la configuration souhaitée sur WhatsApp. Nous vérifions la disponibilité auprès des usines et vous transmettons un devis avec le fret sous 24 heures."
         }
       ])
     },
     {
       key: 'about_section',
       value: JSON.stringify({
-        badge: '✦ Notre Histoire & Notre Mission',
-        title: 'Le pont high-tech direct entre Shenzhen et Libreville',
-        subtitle: 'WuazeShop révolutionne l\'accès aux nouvelles technologies au Gabon en éliminant les intermédiaires coûteux et en garantissant des appareils certifiés 100% neufs avec un accompagnement local dédié.',
-        storyTitle: 'Pourquoi WuazeShop ?',
-        storyParagraph1: 'Pendant des années, acquérir un smartphone de dernière génération, un MacBook ou un téléviseur 4K au Gabon relevait du parcours du combattant : prix exorbitants chez les revendeurs locaux, incertitude sur l\'authenticité des produits reconditionnés et délais imprévisibles.',
-        storyParagraph2: 'WuazeShop est né d\'une conviction simple : chaque Gabonais a le droit de profiter des toutes dernières innovations high-tech au prix direct usine, avec une transparence absolue et une sécurité totale du paiement à la livraison.',
-        storyParagraph3: 'Grâce à notre acheteur basé en immersion au cœur de Shenzhen (la capitale mondiale de l\'électronique) et à notre équipe logistique établie à Libreville, nous sélectionnons, inspectons et acheminons vos commandes par fret cargo aérien transparent.',
-        missionTitle: 'Nos Engagements Inébranlables',
-        missionText: 'Garantir des produits 100% neufs d\'origine constructeur sous blister, un fret aérien clair calculé au poids réel, et un service client gabonais joignable 7j/7 sur WhatsApp.',
+        badge: 'Liaison Shenzhen — Libreville',
+        title: 'Des appareils d\'usine livrés au Gabon sans marge intermédiaire',
+        subtitle: 'WuazeShop relie directement les centres de production de Shenzhen aux acheteurs du Gabon, avec un fret aérien pesé au gramme et une remise en main propre à Libreville.',
+        storyTitle: 'Pourquoi nous avons créé WuazeShop',
+        storyParagraph1: 'Acheter un smartphone récent, un ordinateur portable ou un téléviseur à Libreville implique souvent de payer le double du prix d\'origine ou d\'hésiter face à des appareils reconditionnés présentés comme neufs.',
+        storyParagraph2: 'Nous avons conçu un circuit direct : un acheteur sur place à Shenzhen qui s\'approvisionne auprès des usines certifiées, un partenariat avec des transitaires cargo fiables, et une équipe de réception à Libreville qui gère l\'arrivée et la livraison au quartier.',
+        storyParagraph3: 'Chaque commande fait l\'objet d\'un contrôle visuel avant emballage. Vous payez le prix de l\'appareil et le tarif de fret au kilo, sans frais imprévus à l\'arrivée.',
+        missionTitle: 'Nos engagements concrets',
+        missionText: 'Des appareils scellés d\'origine, un poids de colis vérifié sur balance certifiée, un suivi par étape et un interlocuteur local joignable sur WhatsApp.',
         stat1Number: '100%',
-        stat1Label: 'Appareils neufs certifiés & inspectés',
+        stat1Label: 'Appareils scellés d\'origine constructeur',
         stat2Number: '1-2 sem',
-        stat2Label: 'Délai prévisionnel cargo sécurisé',
+        stat2Label: 'Délai prévisionnel selon la formule cargo',
         stat3Number: '1 An',
-        stat3Label: 'Garantie constructeur pièces & main d\'œuvre',
-        stat4Number: '+1 500',
-        stat4Label: 'Clients livrés partout au Gabon'
+        stat3Label: 'Garantie constructeur pièces et assistance',
+        stat4Number: '0 FCFA',
+        stat4Label: 'Aucun frais caché à la livraison'
       })
     }
   ];
@@ -382,26 +385,14 @@ WuazeShop s'engage formellement à ne jamais vendre, louer, céder ni diffuser v
     db.prepare(`INSERT INTO site_settings (key, value) VALUES ('cargo_settings', ?)`).run(defaultCargo.value);
   }
 
-  // Auto-migrate outdated announcement_bar if it still mentions "fret inclus"
-  const announceRow = db.prepare(`SELECT value FROM site_settings WHERE key = 'announcement_bar'`).get();
-  if (announceRow && (announceRow.value.includes('inclus') || !announceRow.value.includes('Carte Bancaire'))) {
-    const updatedAnnounce = JSON.parse(announceRow.value);
-    updatedAnnounce.text = '🇨🇳 Import direct usine Shenzhen → 🇬🇦 Gabon | Fret cargo aérien au poids exact (10 000 FCFA/kg) | Airtel, Moov & Carte Bancaire';
-    db.prepare(`UPDATE site_settings SET value = ? WHERE key = 'announcement_bar'`).run(JSON.stringify(updatedAnnounce));
-  }
-
-  // Auto-migrate outdated hero_section if it still mentions "24/48h"
-  const heroRow = db.prepare(`SELECT value FROM site_settings WHERE key = 'hero_section'`).get();
-  if (heroRow && (heroRow.value.includes('24/48h') || heroRow.value.includes('Livraison rapide'))) {
-    const defaultHero = defaultSettings.find(s => s.key === 'hero_section');
-    db.prepare(`UPDATE site_settings SET value = ? WHERE key = 'hero_section'`).run(defaultHero.value);
-  }
-
-  // Auto-migrate outdated trust_pillars if it still mentions old shipping copy
-  const trustRow = db.prepare(`SELECT value FROM site_settings WHERE key = 'trust_pillars'`).get();
-  if (trustRow && (trustRow.value.includes('Partout au Gabon') || !trustRow.value.includes('Fret Cargo'))) {
-    const defaultTrust = defaultSettings.find(s => s.key === 'trust_pillars');
-    db.prepare(`UPDATE site_settings SET value = ? WHERE key = 'trust_pillars'`).run(defaultTrust.value);
+  // Always update keys with the latest high-converting copy
+  const keysToUpdate = ['announcement_bar', 'hero_section', 'promo_section', 'trust_pillars', 'contact_section', 'footer_section', 'faq_section', 'about_section', 'legal_section'];
+  for (const k of keysToUpdate) {
+    const settingObj = defaultSettings.find(s => s.key === k);
+    if (settingObj) {
+      db.prepare(`UPDATE site_settings SET value = ? WHERE key = ?`).run(settingObj.value, k);
+    }
   }
 }
+
 

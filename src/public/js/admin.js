@@ -2107,23 +2107,23 @@ document.getElementById('save-cms-faq-btn')?.addEventListener('click', () => {
 
 document.getElementById('save-cms-about-btn')?.addEventListener('click', () => {
   const payload = {
-    badge: document.getElementById('cms-about-badge')?.value.trim() || '✦ Notre Histoire & Notre Mission',
-    title: document.getElementById('cms-about-title')?.value.trim() || 'Le pont high-tech direct entre Shenzhen et Libreville',
+    badge: document.getElementById('cms-about-badge')?.value.trim() || 'Circuit Court Shenzhen - Gabon',
+    title: document.getElementById('cms-about-title')?.value.trim() || 'Vos équipements high-tech livrés au Gabon sans marge intermédiaire',
     subtitle: document.getElementById('cms-about-subtitle')?.value.trim() || '',
-    storyTitle: document.getElementById('cms-about-story-title')?.value.trim() || 'Pourquoi WuazeShop ?',
+    storyTitle: document.getElementById('cms-about-story-title')?.value.trim() || 'Pourquoi WuazeShop existe',
     storyParagraph1: document.getElementById('cms-about-story-p1')?.value.trim() || '',
     storyParagraph2: document.getElementById('cms-about-story-p2')?.value.trim() || '',
     storyParagraph3: document.getElementById('cms-about-story-p3')?.value.trim() || '',
-    missionTitle: document.getElementById('cms-about-mission-title')?.value.trim() || 'Nos Engagements Inébranlables',
+    missionTitle: document.getElementById('cms-about-mission-title')?.value.trim() || 'Nos engagements de service',
     missionText: document.getElementById('cms-about-mission-text')?.value.trim() || '',
     stat1Number: document.getElementById('cms-about-stat1-num')?.value.trim() || '100%',
-    stat1Label: document.getElementById('cms-about-stat1-label')?.value.trim() || 'Appareils neufs certifiés & inspectés',
-    stat2Number: document.getElementById('cms-about-stat2-num')?.value.trim() || '7-10 j',
-    stat2Label: document.getElementById('cms-about-stat2-label')?.value.trim() || 'Délai moyen de fret cargo express',
+    stat1Label: document.getElementById('cms-about-stat1-label')?.value.trim() || 'Appareils neufs sous blister d\'origine',
+    stat2Number: document.getElementById('cms-about-stat2-num')?.value.trim() || '1-2 sem',
+    stat2Label: document.getElementById('cms-about-stat2-label')?.value.trim() || 'Délai moyen selon formule cargo',
     stat3Number: document.getElementById('cms-about-stat3-num')?.value.trim() || '1 An',
-    stat3Label: document.getElementById('cms-about-stat3-label')?.value.trim() || 'Garantie constructeur pièces & main d\'œuvre',
-    stat4Number: document.getElementById('cms-about-stat4-num')?.value.trim() || '+1 500',
-    stat4Label: document.getElementById('cms-about-stat4-label')?.value.trim() || 'Clients livrés partout au Gabon'
+    stat3Label: document.getElementById('cms-about-stat3-label')?.value.trim() || 'Garantie constructeur appliquée',
+    stat4Number: document.getElementById('cms-about-stat4-num')?.value.trim() || '0 FCFA',
+    stat4Label: document.getElementById('cms-about-stat4-label')?.value.trim() || 'Frais cachés à l\'arrivée'
   };
   saveCmsSection('about_section', payload, 'cms-about-saved');
 });

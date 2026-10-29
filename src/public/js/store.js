@@ -507,7 +507,7 @@ if (simConfirmBtn) {
           : (currentPendingOrder.paymentMethod === 'AIRTEL_MONEY' ? 'Airtel Money' : 'Moov Money');
         const shippingLabel = currentPendingOrder.shippingMethod === 'express' ? 'Colis Rapide (1 sem)' : 'Colis Normal (2 sem)';
         
-        const whatsappMsg = `Bonjour WuazeShop ! Je viens d'effectuer mon règlement par ${paymentLabel} de ${formatFCFA(currentPendingOrder.totalAmount)} pour la commande ${currentPendingOrder.orderNumber} (${currentPendingOrder.productTitle} — Fret ${shippingLabel}). Mon quartier de livraison au Gabon est ${currentPendingOrder.customerNeighborhood}. Merci de me confirmer la prise en compte pour l'achat en Chine !`;
+        const whatsappMsg = `Bonjour WuazeShop, je viens d'effectuer mon règlement par ${paymentLabel} de ${formatFCFA(currentPendingOrder.totalAmount)} pour la commande ${currentPendingOrder.orderNumber} (${currentPendingOrder.productTitle} — Fret ${shippingLabel}). Mon quartier de livraison au Gabon est ${currentPendingOrder.customerNeighborhood}. Merci de me confirmer la prise en compte pour l'achat en Chine.`;
         
         const whatsappLink = `https://wa.me/241074001122?text=${encodeURIComponent(whatsappMsg)}`;
         document.getElementById('success-whatsapp-link').href = whatsappLink;
@@ -932,7 +932,7 @@ function renderTrackingResult(order) {
     minute: '2-digit'
   }) : 'Récemment';
 
-  const whatsappInquiryUrl = `https://wa.me/241074001122?text=${encodeURIComponent(`Bonjour WuazeShop ! Je consulte le suivi de ma commande ${order.orderNumber} (${order.productTitle}) pour ${order.customerNeighborhood}. Avez-vous une précision sur l'acheminement ?`)}`;
+  const whatsappInquiryUrl = `https://wa.me/241074001122?text=${encodeURIComponent(`Bonjour WuazeShop, je consulte le suivi de ma commande ${order.orderNumber} (${order.productTitle}) pour ${order.customerNeighborhood}. Avez-vous une précision sur l'acheminement ?`)}`;
 
   card.innerHTML = `
     <!-- Top Summary Row -->

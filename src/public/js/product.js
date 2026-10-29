@@ -340,7 +340,7 @@ function renderProductPage(product) {
   // Description
   const descEl = document.getElementById('detail-description');
   if (descEl) {
-    descEl.textContent = product.description || "Article haut de gamme importé directement d'usines partenaires certifiées en Chine avec expédition cargo rapide et sécurisée vers Libreville, Gabon.";
+    descEl.textContent = product.description || "Appareil neuf d'origine certifiée, expédié directement depuis Shenzhen vers le Gabon par fret cargo aérien avec suivi et dédouanement inclus.";
   }
 
   // Technical Characteristics / Specs
@@ -426,7 +426,7 @@ function updateWhatsAppInquiryLink() {
   if (!currentProduct) return;
 
   const colorName = resolveColorName(selectedColor);
-  const text = `Bonjour WuazeShop ! Je souhaite passer commande / avoir des conseils pour l'article : ${currentProduct.title} en finition ${colorName} (${formatFCFA(currentProduct.price)}). Est-il disponible pour expédition immédiate vers Libreville ?`;
+  const text = `Bonjour WuazeShop, je souhaite commander l'article suivant : ${currentProduct.title} en finition ${colorName} (${formatFCFA(currentProduct.price)}). Pouvez-vous me confirmer sa disponibilité à Shenzhen pour expédition vers Libreville ?`;
   const whatsappUrl = `https://wa.me/241074001122?text=${encodeURIComponent(text)}`;
 
   const btn = document.getElementById('btn-whatsapp-inquiry');
@@ -839,7 +839,7 @@ if (simConfirmBtn) {
         const isExp = currentPendingOrder.shippingMethod === 'express';
         const shippingLabel = isExp ? 'Colis Rapide (1 sem)' : 'Colis Normal (2 sem)';
         const paymentLabel = currentPendingOrder.paymentMethod === 'CREDIT_CARD' ? 'Carte Bancaire' : (currentPendingOrder.paymentMethod === 'MOOV_MONEY' ? 'Moov Money' : 'Airtel Money');
-        const whatsappMsg = `Bonjour WuazeShop ! Je viens de régler ${formatFCFA(currentPendingOrder.totalAmount)} par ${paymentLabel} pour la commande ${currentPendingOrder.orderNumber} (${currentPendingOrder.productTitle} — Fret ${shippingLabel}). Mon quartier est ${currentPendingOrder.customerNeighborhood}. Merci de me confirmer la prise en compte pour l'achat en Chine !`;
+        const whatsappMsg = `Bonjour WuazeShop, je viens de régler ${formatFCFA(currentPendingOrder.totalAmount)} par ${paymentLabel} pour la commande ${currentPendingOrder.orderNumber} (${currentPendingOrder.productTitle} — Fret ${shippingLabel}). Mon quartier est ${currentPendingOrder.customerNeighborhood}. Merci de me confirmer la prise en compte pour l'achat en Chine.`;
         document.getElementById('success-whatsapp-link').href = `https://wa.me/241074001122?text=${encodeURIComponent(whatsappMsg)}`;
 
         if (successModalOverlay) successModalOverlay.classList.remove('hidden');

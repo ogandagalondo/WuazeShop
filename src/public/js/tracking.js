@@ -237,7 +237,7 @@ function renderTrackingResult(order) {
     minute: '2-digit'
   }) : 'Récemment';
 
-  const whatsappInquiryUrl = `https://wa.me/241074001122?text=${encodeURIComponent(`Bonjour WuazeShop Gabon ! Je consulte le suivi de ma commande ${order.orderNumber} (${order.productTitle}) pour livraison à ${order.customerNeighborhood}. Avez-vous une mise à jour sur le vol cargo ?`)}`;
+  const whatsappInquiryUrl = `https://wa.me/241074001122?text=${encodeURIComponent(`Bonjour WuazeShop Gabon, je consulte le suivi de ma commande ${order.orderNumber} (${order.productTitle}) pour livraison à ${order.customerNeighborhood}. Pouvez-vous me donner l'état d'avancement du vol cargo ?`)}`;
 
   card.innerHTML = `
     <!-- Top Summary Row -->
@@ -256,7 +256,7 @@ function renderTrackingResult(order) {
         ${isPaid 
           ? `<span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-extrabold bg-[#e6f7f0] text-[#0d7252] border border-emerald-200">
                <span class="material-symbols-outlined text-sm">verified</span>
-               <span>Paiement Validé 100%</span>
+               <span>Paiement validé</span>
              </span>`
           : `<span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-extrabold bg-amber-50 text-amber-800 border border-amber-200">
                <span class="material-symbols-outlined text-sm">hourglass_top</span>
@@ -299,7 +299,7 @@ function renderTrackingResult(order) {
           <span>Acheminement Logistique (Shenzhen &rarr; Libreville)</span>
         </h4>
         <span class="text-[10px] font-bold text-[#0d7252] bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-          Délai moyen : 7 à 10 jours
+          Délai : 1 à 2 semaines selon formule
         </span>
       </div>
 

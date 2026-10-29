@@ -163,7 +163,7 @@ function renderCategoriesGrid(categories) {
 
         <!-- Bottom: Action Callout -->
         <div class="relative z-10 inline-flex items-center gap-1 text-[10px] sm:text-xs font-bold text-gray-400 group-hover:text-[#0d7252] transition-colors shrink-0">
-          <span>Explorer</span>
+          <span>Voir les produits</span>
           <span class="material-symbols-outlined text-xs sm:text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
         </div>
       </a>
