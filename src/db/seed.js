@@ -74,6 +74,7 @@ export function seedData(db) {
       ],
       specs: JSON.stringify(['Puce A17 Pro', 'Châssis Titane', 'Appareil Photo 48Mpx', 'Garantie 1 An']),
       colors: JSON.stringify(['#9c9589', '#39383b', '#293644']),
+      weight: 0.4,
       in_stock: 1
     },
     {
@@ -90,6 +91,7 @@ export function seedData(db) {
       ],
       specs: JSON.stringify(['Puce Apple M3', '18h Autonomie', 'Écran Liquid Retina 15.3"', 'Minuit / Argent']),
       colors: JSON.stringify(['#1e2530', '#d2d4d7', '#f0e4d3']),
+      weight: 2.2,
       in_stock: 1
     },
     {
@@ -105,6 +107,7 @@ export function seedData(db) {
       ],
       specs: JSON.stringify(['Dalle 4K UHD', 'Dolby Audio 20W', 'Android TV avec Netflix & YouTube', 'HDMI 2.1 & Wi-Fi']),
       colors: JSON.stringify(['#1e1e1e']),
+      weight: 14.5,
       in_stock: 1
     },
     {
@@ -120,6 +123,7 @@ export function seedData(db) {
       ],
       specs: JSON.stringify(['Réduction Active de Bruit Pro', 'Audio Haute Résolution LDAC', '30h Autonomie']),
       colors: JSON.stringify(['#1e1e1e', '#d7d5cb']),
+      weight: 0.8,
       in_stock: 1
     },
     {
@@ -135,6 +139,7 @@ export function seedData(db) {
       ],
       specs: JSON.stringify(['Boîtier Titane 49mm', 'Autonomie 72h', 'GPS Double Fréquence', 'Écran 3000 nits']),
       colors: JSON.stringify(['#9c9589', '#f97316']),
+      weight: 0.3,
       in_stock: 1
     },
     {
@@ -149,20 +154,22 @@ export function seedData(db) {
       ],
       specs: JSON.stringify(['Technologie GaN III', 'Charge Rapide 65W', 'Compatible iPhone & MacBook', 'Protection Surtension']),
       colors: JSON.stringify(['#ffffff', '#1e1e1e']),
+      weight: 0.2,
       in_stock: 1
     }
   ];
 
   const insertProduct = db.prepare(
-    `INSERT OR IGNORE INTO products (title, slug, category, price, original_price, image_url, images, specs, colors, in_stock)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    `INSERT OR IGNORE INTO products (title, slug, category, price, original_price, image_url, images, specs, colors, weight, in_stock)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   );
   for (const p of products) {
     const imagesVal = p.images ? JSON.stringify(p.images) : JSON.stringify([p.image_url]);
-    insertProduct.run(p.title, p.slug, p.category, p.price, p.original_price, p.image_url, imagesVal, p.specs, p.colors, p.in_stock);
+    insertProduct.run(p.title, p.slug, p.category, p.price, p.original_price, p.image_url, imagesVal, p.specs, p.colors, p.weight ?? 0.4, p.in_stock);
     
-    // Update existing products if images is null or empty
+    // Update existing products if images is null or empty, and update weight
     db.prepare(`UPDATE products SET images = ? WHERE slug = ? AND (images IS NULL OR images = '' OR images = '[]')`).run(imagesVal, p.slug);
+    db.prepare(`UPDATE products SET weight = ? WHERE slug = ? AND (weight IS NULL OR weight = 0.4 OR weight = 0)`).run(p.weight ?? 0.4, p.slug);
   }
 
   // 3. Seed default Admin User (Super Admin Founder)
@@ -191,8 +198,18 @@ export function seedData(db) {
       key: 'announcement_bar',
       value: JSON.stringify({
         enabled: true,
-        text: '🇨🇳 Import direct usine Shenzhen → 🇬🇦 Gabon | Fret cargo aérien inclus | Paiement sécurisé Mobile Money',
+        text: '🇨🇳 Import direct usine Shenzhen → 🇬🇦 Gabon | Fret cargo aérien au poids exact (10 000 FCFA/kg) | Airtel, Moov & Carte Bancaire',
         secondaryText: ''
+      })
+    },
+    {
+      key: 'cargo_settings',
+      value: JSON.stringify({
+        normalRate: 10000,
+        normalDelay: '2 semaines',
+        expressRate: 13500,
+        expressDelay: '1 semaine',
+        minWeight: 0.1
       })
     },
     {
@@ -230,8 +247,8 @@ export function seedData(db) {
       key: 'trust_pillars',
       value: JSON.stringify([
         { icon: 'verified', title: 'Produits originaux', subtitle: 'Garantie constructeur' },
-        { icon: 'local_shipping', title: 'Livraison rapide', subtitle: 'Partout au Gabon' },
-        { icon: 'lock', title: 'Paiement sécurisé', subtitle: '100% fiable Airtel & Moov' },
+        { icon: 'flight_takeoff', title: 'Fret Cargo Aérien', subtitle: 'Au poids exact (10 000 FCFA/kg)' },
+        { icon: 'lock', title: 'Paiement sécurisé', subtitle: 'Airtel, Moov & Carte Bancaire' },
         { icon: 'headset_mic', title: 'Support client', subtitle: 'Toujours à votre écoute' }
       ])
     },
@@ -250,7 +267,7 @@ export function seedData(db) {
       key: 'footer_section',
       value: JSON.stringify({
         slogan: 'High-Tech Gabon & Chine',
-        description: 'Votre univers technologique d\'importation directe Chine & Gabon. Qualité certifiée et sécurité Mobile Money.',
+        description: 'Votre univers technologique d\'importation directe Chine & Gabon. Qualité certifiée et sécurité Mobile Money & Carte Bancaire.',
         copyright: '© 2026 WuazeShop. Tous droits réservés.'
       })
     },
@@ -272,13 +289,13 @@ export function seedData(db) {
 WuazeShop est une plateforme d'e-commerce spécialisée dans la sélection, la commande et l'acheminement sécurisé d'articles high-tech neufs depuis la Chine vers le Gabon (Libreville, Port-Gentil, et intérieur du pays).
 
 2. COMMANDE & PRIX
-Tous nos prix sont stipulés en Francs CFA (XAF) toutes taxes comprises. La passation de commande s'effectue directement en ligne avec collecte des informations de livraison (nom, téléphone WhatsApp, quartier de résidence au Gabon).
+Tous nos prix sont stipulés en Francs CFA (XAF) toutes taxes comprises. La tarification du fret cargo aérien est calculée en toute transparence selon le poids exact de la commande (Tarif Normal 10 000 FCFA/kg ou Rapide 13 500 FCFA/kg).
 
-3. MODALITÉS DE RÈGLEMENT (MOBILE MONEY)
-Les paiements sont acceptés via Airtel Money et Moov Money. Afin de garantir une transparence totale, l'achat auprès du fabricant ou grossiste en Chine est initié dès constatation effective du règlement.
+3. MODALITÉS DE RÈGLEMENT
+Les paiements sont acceptés via Airtel Money, Moov Money et Carte Bancaire (Visa / Mastercard). Afin de garantir une transparence totale, l'achat auprès du fabricant ou grossiste en Chine est initié dès constatation effective du règlement.
 
 4. DÉLAIS D'ACHEMINEMENT & LIVRAISON
-Les délais habituels d'acheminement Chine-Gabon sont compris entre 7 et 14 jours ouvrés. À l'arrivée à Libreville, notre équipe locale coordonne la livraison finale directement au quartier indiqué.
+Les délais prévisionnels d'acheminement Chine-Gabon sont d'environ 1 semaine en Colis Rapide et 2 semaines en Colis Normal. À l'arrivée à Libreville, notre équipe locale coordonne la livraison finale directement au quartier indiqué.
 
 5. GARANTIE CONSTRUCTEUR & CONFORMITÉ
 Chaque appareil bénéficie d'une inspection préalable de conformité avant emballage et d'une garantie constructeur.`,
@@ -303,12 +320,12 @@ WuazeShop s'engage formellement à ne jamais vendre, louer, céder ni diffuser v
         {
           id: 'faq_1',
           question: "Quels sont les délais d'acheminement entre la Chine et le Gabon ?",
-          answer: "Nos délais habituels d'expédition par fret cargo aérien sont de 7 à 14 jours ouvrés. Dès l'arrivée du colis à l'aéroport international Léon Mba de Libreville, notre équipe locale prend le relais et vous contacte sur WhatsApp pour organiser la livraison à domicile ou au quartier."
+          answer: "Nos délais prévisionnels par fret cargo aérien sont d'environ 1 semaine en Colis Rapide (13 500 FCFA/kg) et environ 2 semaines en Colis Normal (10 000 FCFA/kg). Dès l'arrivée du colis à l'aéroport international de Libreville, notre équipe locale vous contacte sur WhatsApp pour organiser la livraison à domicile ou au quartier."
         },
         {
           id: 'faq_2',
-          question: "Comment s'effectue le règlement par Mobile Money (Airtel & Moov) ?",
-          answer: "Le règlement s'effectue directement en ligne en toute sécurité via Airtel Money ou Moov Money. Une fois la transaction validée, vous recevez instantanément votre référence de commande ainsi que les instructions de suivi en temps réel."
+          question: "Comment s'effectue le règlement (Airtel, Moov & Carte Bancaire) ?",
+          answer: "Le règlement s'effectue directement en ligne en toute sécurité via Airtel Money, Moov Money ou Carte Bancaire (Visa / Mastercard). Une fois la transaction validée, vous recevez instantanément votre référence de commande ainsi que les instructions de suivi en temps réel."
         },
         {
           id: 'faq_3',
@@ -336,13 +353,13 @@ WuazeShop s'engage formellement à ne jamais vendre, louer, céder ni diffuser v
         storyTitle: 'Pourquoi WuazeShop ?',
         storyParagraph1: 'Pendant des années, acquérir un smartphone de dernière génération, un MacBook ou un téléviseur 4K au Gabon relevait du parcours du combattant : prix exorbitants chez les revendeurs locaux, incertitude sur l\'authenticité des produits reconditionnés et délais imprévisibles.',
         storyParagraph2: 'WuazeShop est né d\'une conviction simple : chaque Gabonais a le droit de profiter des toutes dernières innovations high-tech au prix direct usine, avec une transparence absolue et une sécurité totale du paiement à la livraison.',
-        storyParagraph3: 'Grâce à notre acheteur basé en immersion au cœur de Shenzhen (la capitale mondiale de l\'électronique) et à notre équipe logistique établie à Libreville, nous sélectionnons, inspectons et acheminons vos commandes par fret cargo aérien express en 7 à 10 jours ouvrés.',
+        storyParagraph3: 'Grâce à notre acheteur basé en immersion au cœur de Shenzhen (la capitale mondiale de l\'électronique) et à notre équipe logistique établie à Libreville, nous sélectionnons, inspectons et acheminons vos commandes par fret cargo aérien transparent.',
         missionTitle: 'Nos Engagements Inébranlables',
-        missionText: 'Garantir des produits 100% neufs d\'origine constructeur sous blister, un dédouanement intégral sans mauvaise surprise à l\'arrivée, et un service client gabonais joignable 7j/7 sur WhatsApp.',
+        missionText: 'Garantir des produits 100% neufs d\'origine constructeur sous blister, un fret aérien clair calculé au poids réel, et un service client gabonais joignable 7j/7 sur WhatsApp.',
         stat1Number: '100%',
         stat1Label: 'Appareils neufs certifiés & inspectés',
-        stat2Number: '7-10 j',
-        stat2Label: 'Délai moyen de fret cargo express',
+        stat2Number: '1-2 sem',
+        stat2Label: 'Délai prévisionnel cargo sécurisé',
         stat3Number: '1 An',
         stat3Label: 'Garantie constructeur pièces & main d\'œuvre',
         stat4Number: '+1 500',
@@ -356,6 +373,21 @@ WuazeShop s'engage formellement à ne jamais vendre, louer, céder ni diffuser v
   `);
   for (const s of defaultSettings) {
     insertSetting.run(s.key, s.value);
+  }
+
+  // Ensure cargo_settings is always initialized
+  const cargoRow = db.prepare(`SELECT value FROM site_settings WHERE key = 'cargo_settings'`).get();
+  if (!cargoRow) {
+    const defaultCargo = defaultSettings.find(s => s.key === 'cargo_settings');
+    db.prepare(`INSERT INTO site_settings (key, value) VALUES ('cargo_settings', ?)`).run(defaultCargo.value);
+  }
+
+  // Auto-migrate outdated announcement_bar if it still mentions "fret inclus"
+  const announceRow = db.prepare(`SELECT value FROM site_settings WHERE key = 'announcement_bar'`).get();
+  if (announceRow && announceRow.value.includes('inclus')) {
+    const updatedAnnounce = JSON.parse(announceRow.value);
+    updatedAnnounce.text = '🇨🇳 Import direct usine Shenzhen → 🇬🇦 Gabon | Fret cargo aérien au poids exact (10 000 FCFA/kg) | Airtel, Moov & Carte Bancaire';
+    db.prepare(`UPDATE site_settings SET value = ? WHERE key = 'announcement_bar'`).run(JSON.stringify(updatedAnnounce));
   }
 }
 

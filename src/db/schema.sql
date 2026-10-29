@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS products (
   specs TEXT,                      -- JSON string of bullet points
   colors TEXT,                     -- JSON string of colors
   in_stock INTEGER DEFAULT 1,      -- 1 for in stock, 0 for out
+  weight REAL DEFAULT 0.4,         -- Estimated shipping weight in kg
   is_active INTEGER DEFAULT 1,     -- Soft delete flag
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -37,10 +38,13 @@ CREATE TABLE IF NOT EXISTS orders (
   product_id INTEGER NOT NULL,
   product_title TEXT NOT NULL,
   quantity INTEGER NOT NULL DEFAULT 1,
-  total_amount INTEGER NOT NULL,         -- FCFA
+  total_amount INTEGER NOT NULL,         -- FCFA (items + shipping)
+  shipping_method TEXT NOT NULL DEFAULT 'normal', -- normal (10000/kg) or express (13500/kg)
+  shipping_fee INTEGER NOT NULL DEFAULT 0,        -- FCFA
+  total_weight REAL NOT NULL DEFAULT 0.0,         -- Total weight in kg
   payment_status TEXT NOT NULL DEFAULT 'PENDING',  -- PENDING, CONFIRMED_CLEARED, FAILED
   fulfillment_status TEXT NOT NULL DEFAULT 'AWAITING_PROCUREMENT', -- AWAITING_PROCUREMENT, PURCHASED_IN_CHINA, IN_TRANSIT, ARRIVED_GABON, DELIVERED
-  payment_method TEXT NOT NULL,          -- AIRTEL_MONEY, MOOV_MONEY, SIMULATOR
+  payment_method TEXT NOT NULL,          -- AIRTEL_MONEY, MOOV_MONEY, CREDIT_CARD, SIMULATOR
   transaction_reference TEXT UNIQUE,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,

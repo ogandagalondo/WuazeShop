@@ -30,6 +30,7 @@ describe('E2E Purchasing, Settlement & CMS Management Lifecycle', () => {
         imageUrl: 'https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=600',
         specs: ['Leica Optics Quad-Cam', '16GB RAM + 512GB', 'Snapdragon 8 Gen 3'],
         colors: ['#0f172a', '#ffffff'],
+        weight: 0.5,
         inStock: true
       });
     expect(createProdRes.status).toBe(201);
@@ -43,6 +44,7 @@ describe('E2E Purchasing, Settlement & CMS Management Lifecycle', () => {
     expect(createdItem).toBeDefined();
     expect(createdItem.title).toContain('Xiaomi 14 Ultra');
     expect(createdItem.price).toBe(690000);
+    expect(createdItem.weight).toBe(0.5);
 
     // Step 4: Customer checks out with local Gabon details & Mobile Money
     const checkoutRes = await request(app).post('/api/orders/checkout').send({
@@ -51,13 +53,15 @@ describe('E2E Purchasing, Settlement & CMS Management Lifecycle', () => {
       customerName: 'Martial Obiang',
       customerPhone: '+24174889900',
       customerNeighborhood: 'Quartier Louis, Libreville',
+      shippingMethod: 'normal',
       paymentMethod: 'AIRTEL_MONEY'
     });
     expect(checkoutRes.status).toBe(201);
     const { orderNumber, transactionReference, totalAmount } = checkoutRes.body;
     expect(orderNumber).toMatch(/^WZ-\d+/);
     expect(transactionReference).toMatch(/^SIM-/);
-    expect(totalAmount).toBe(690000);
+    expect(checkoutRes.body.shippingFee).toBe(5000); // 0.5kg * 10000 FCFA/kg
+    expect(totalAmount).toBe(695000); // 690 000 + 5 000
     expect(checkoutRes.body.paymentStatus).toBe('PENDING');
 
     // Step 5: Simulation of Airtel Money push USSD approval (100% upfront settlement)

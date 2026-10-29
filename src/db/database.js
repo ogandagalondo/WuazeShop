@@ -31,6 +31,7 @@ CREATE TABLE IF NOT EXISTS products (
   specs TEXT,
   colors TEXT,
   in_stock INTEGER DEFAULT 1,
+  weight REAL DEFAULT 0.4,
   is_active INTEGER DEFAULT 1,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -47,6 +48,9 @@ CREATE TABLE IF NOT EXISTS orders (
   product_title TEXT NOT NULL,
   quantity INTEGER NOT NULL DEFAULT 1,
   total_amount INTEGER NOT NULL,
+  shipping_method TEXT NOT NULL DEFAULT 'normal',
+  shipping_fee INTEGER NOT NULL DEFAULT 0,
+  total_weight REAL NOT NULL DEFAULT 0.0,
   payment_status TEXT NOT NULL DEFAULT 'PENDING',
   fulfillment_status TEXT NOT NULL DEFAULT 'AWAITING_PROCUREMENT',
   payment_method TEXT NOT NULL,
@@ -177,11 +181,30 @@ export function initDb(dbPath = resolveDbPath()) {
     // Columns may already exist or table not ready
   }
 
-  // Migration: Ensure images column exists on products
+  // Migration: Ensure images and weight columns exist on products
   try {
     const prodInfo = db.prepare(`PRAGMA table_info(products)`).all();
     if (!prodInfo.some(col => col.name === 'images')) {
       db.exec(`ALTER TABLE products ADD COLUMN images TEXT;`);
+    }
+    if (!prodInfo.some(col => col.name === 'weight')) {
+      db.exec(`ALTER TABLE products ADD COLUMN weight REAL DEFAULT 0.4;`);
+    }
+  } catch (err) {
+    // Column may already exist or table not ready
+  }
+
+  // Migration: Ensure shipping columns exist on orders
+  try {
+    const orderInfo = db.prepare(`PRAGMA table_info(orders)`).all();
+    if (!orderInfo.some(col => col.name === 'shipping_method')) {
+      db.exec(`ALTER TABLE orders ADD COLUMN shipping_method TEXT DEFAULT 'normal';`);
+    }
+    if (!orderInfo.some(col => col.name === 'shipping_fee')) {
+      db.exec(`ALTER TABLE orders ADD COLUMN shipping_fee INTEGER DEFAULT 0;`);
+    }
+    if (!orderInfo.some(col => col.name === 'total_weight')) {
+      db.exec(`ALTER TABLE orders ADD COLUMN total_weight REAL DEFAULT 0.0;`);
     }
   } catch (err) {
     // Column may already exist or table not ready

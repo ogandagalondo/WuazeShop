@@ -8,7 +8,7 @@ describe('Checkout API', () => {
     initDb(':memory:');
   });
 
-  it('creates order with valid Gabon customer details and ignores tampered client price', async () => {
+  it('creates order with valid Gabon customer details, calculates normal cargo shipping and ignores tampered client price', async () => {
     const res = await request(app).post('/api/orders/checkout').send({
       productId: 1,
       quantity: 1,
@@ -16,14 +16,37 @@ describe('Checkout API', () => {
       customerName: 'Jean Mba',
       customerPhone: '+24174001122',
       customerNeighborhood: 'Louis / Libreville',
+      shippingMethod: 'normal',
       paymentMethod: 'AIRTEL_MONEY'
     });
     expect(res.status).toBe(201);
     expect(res.body.orderNumber).toMatch(/^WZ-\d+/);
     expect(res.body.paymentStatus).toBe('PENDING');
-    // Le prix réel de l'iPhone 15 Pro Max est 850 000 FCFA
-    expect(res.body.totalAmount).toBe(850000);
+    expect(res.body.shippingMethod).toBe('normal');
+    expect(res.body.shippingFee).toBe(4000); // 0.4kg * 10000 FCFA/kg
+    expect(res.body.totalWeight).toBe(0.4);
+    // Le prix réel de l'iPhone 15 Pro Max est 850 000 FCFA + 4 000 FCFA de fret
+    expect(res.body.totalAmount).toBe(854000);
     expect(res.body.transactionReference).toBeDefined();
+  });
+
+  it('calculates express cargo shipping fee and supports CREDIT_CARD payment method', async () => {
+    const res = await request(app).post('/api/orders/checkout').send({
+      productId: 1,
+      quantity: 2,
+      customerName: 'Marie Avomo',
+      customerPhone: '+24174112233',
+      customerNeighborhood: 'Angondjé',
+      shippingMethod: 'express',
+      paymentMethod: 'CREDIT_CARD'
+    });
+    expect(res.status).toBe(201);
+    expect(res.body.shippingMethod).toBe('express');
+    expect(res.body.totalWeight).toBe(0.8); // 2 * 0.4kg
+    expect(res.body.shippingFee).toBe(10800); // 0.8kg * 13500 FCFA/kg
+    expect(res.body.paymentMethod).toBe('CREDIT_CARD');
+    // 2 * 850 000 = 1 700 000 + 10 800 = 1 710 800
+    expect(res.body.totalAmount).toBe(1710800);
   });
 
   it('rejects order if WhatsApp phone number is missing or invalid', async () => {

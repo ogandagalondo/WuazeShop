@@ -10,6 +10,9 @@ export const orderRepository = {
     productTitle,
     quantity,
     totalAmount,
+    shippingMethod = 'normal',
+    shippingFee = 0,
+    totalWeight = 0.0,
     paymentMethod,
     transactionReference
   }) {
@@ -24,11 +27,14 @@ export const orderRepository = {
         product_title,
         quantity,
         total_amount,
+        shipping_method,
+        shipping_fee,
+        total_weight,
         payment_method,
         transaction_reference,
         payment_status,
         fulfillment_status
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'PENDING', 'AWAITING_PROCUREMENT')
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'PENDING', 'AWAITING_PROCUREMENT')
     `);
 
     stmt.run(
@@ -40,6 +46,9 @@ export const orderRepository = {
       productTitle,
       quantity,
       totalAmount,
+      shippingMethod,
+      shippingFee,
+      totalWeight,
       paymentMethod,
       transactionReference
     );
@@ -61,6 +70,9 @@ export const orderRepository = {
       productTitle: row.product_title,
       quantity: row.quantity,
       totalAmount: row.total_amount,
+      shippingMethod: row.shipping_method || 'normal',
+      shippingFee: row.shipping_fee || 0,
+      totalWeight: row.total_weight || 0.0,
       paymentStatus: row.payment_status,
       fulfillmentStatus: row.fulfillment_status,
       paymentMethod: row.payment_method,
@@ -83,6 +95,9 @@ export const orderRepository = {
       productTitle: row.product_title,
       quantity: row.quantity,
       totalAmount: row.total_amount,
+      shippingMethod: row.shipping_method || 'normal',
+      shippingFee: row.shipping_fee || 0,
+      totalWeight: row.total_weight || 0.0,
       paymentStatus: row.payment_status,
       fulfillmentStatus: row.fulfillment_status,
       paymentMethod: row.payment_method,

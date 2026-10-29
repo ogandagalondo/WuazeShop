@@ -111,7 +111,7 @@ adminRouter.post('/admin/upload', (req, res) => {
 // POST /api/admin/products - Créer un produit
 adminRouter.post('/admin/products', (req, res) => {
   try {
-    let { title, description, category, price, originalPrice, imageUrl, images, specs, colors, inStock } = req.body;
+    let { title, description, category, price, originalPrice, imageUrl, images, specs, colors, weight, inStock } = req.body;
 
     let imagesArr = [];
     if (Array.isArray(images) && images.length > 0) {
@@ -134,12 +134,13 @@ adminRouter.post('/admin/products', (req, res) => {
       return res.status(400).json({ error: 'Champs obligatoires manquants (title, category, price, imageUrl)' });
     }
 
+    const parsedWeight = weight !== undefined && weight !== '' && !isNaN(Number(weight)) ? Number(weight) : 0.4;
     const slug = `${title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now().toString().slice(-4)}`;
     const db = getDb();
     const stmt = db.prepare(`
       INSERT INTO products (
-        title, description, slug, category, price, original_price, image_url, images, specs, colors, in_stock, is_active
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
+        title, description, slug, category, price, original_price, image_url, images, specs, colors, weight, in_stock, is_active
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
     `);
 
     stmt.run(
@@ -153,6 +154,7 @@ adminRouter.post('/admin/products', (req, res) => {
       JSON.stringify(imagesArr),
       specs ? JSON.stringify(specs) : null,
       colors ? JSON.stringify(colors) : null,
+      parsedWeight,
       inStock === false ? 0 : 1
     );
 
@@ -193,13 +195,16 @@ adminRouter.put('/admin/products/:id', (req, res) => {
 
     const specs = req.body.specs !== undefined ? JSON.stringify(req.body.specs) : existing.specs;
     const colors = req.body.colors !== undefined ? JSON.stringify(req.body.colors) : existing.colors;
+    const weight = req.body.weight !== undefined && req.body.weight !== '' && !isNaN(Number(req.body.weight))
+      ? Number(req.body.weight)
+      : (existing.weight ?? 0.4);
     const inStock = req.body.inStock !== undefined ? (req.body.inStock ? 1 : 0) : existing.in_stock;
 
     db.prepare(`
       UPDATE products 
-      SET title = ?, description = ?, category = ?, price = ?, original_price = ?, image_url = ?, images = ?, specs = ?, colors = ?, in_stock = ?, updated_at = CURRENT_TIMESTAMP
+      SET title = ?, description = ?, category = ?, price = ?, original_price = ?, image_url = ?, images = ?, specs = ?, colors = ?, weight = ?, in_stock = ?, updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
-    `).run(title, description, category, price, originalPrice, imageUrl, imagesVal, specs, colors, inStock, id);
+    `).run(title, description, category, price, originalPrice, imageUrl, imagesVal, specs, colors, weight, inStock, id);
 
     const updated = db.prepare(`SELECT * FROM products WHERE id = ?`).get(id);
     res.json(updated);
