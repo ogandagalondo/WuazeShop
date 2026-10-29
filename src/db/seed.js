@@ -173,11 +173,12 @@ export function seedData(db) {
     db.prepare(`UPDATE products SET weight = ? WHERE slug = ? AND (weight IS NULL OR weight = 0.4 OR weight = 0)`).run(p.weight ?? 0.4, p.slug);
   }
 
-  // 3. Seed Super Admin (Fondateur) depuis les variables d'environnement (.env)
-  const targetUsername = config.adminUsername || 'admin';
-  const targetEmail = config.adminEmail || 'admin@wuazeshop.ga';
-  const targetFullName = config.adminFullName || 'Fondateur WuazeShop';
-  const targetPassword = config.adminPassword || 'adminpassword123';
+  // 3. Seed Super Admin (Fondateur) depuis .env ou fixtures en environnement de test
+  const isTest = process.env.NODE_ENV === 'test';
+  const targetUsername = isTest ? 'admin' : (config.adminUsername || 'admin');
+  const targetEmail = isTest ? 'admin@wuazeshop.ga' : (config.adminEmail || 'admin@wuazeshop.ga');
+  const targetFullName = isTest ? 'Fondateur WuazeShop' : (config.adminFullName || 'Fondateur WuazeShop');
+  const targetPassword = isTest ? 'adminpassword123' : (config.adminPassword || 'adminpassword123');
 
   const adminCheck = db.prepare(`
     SELECT id, email, username, role, full_name, password_hash 
@@ -197,9 +198,14 @@ export function seedData(db) {
     const updates = ['username = ?', 'email = ?', 'full_name = ?', "role = 'SUPER_ADMIN'", 'is_active = 1'];
     const params = [targetUsername, targetEmail, targetFullName];
 
-    if (process.env.ADMIN_PASSWORD && process.env.ADMIN_PASSWORD.trim().length >= 6) {
+    if (!isTest && process.env.ADMIN_PASSWORD && process.env.ADMIN_PASSWORD.trim().length >= 6) {
       const salt = bcrypt.genSaltSync(10);
       const hash = bcrypt.hashSync(process.env.ADMIN_PASSWORD.trim(), salt);
+      updates.push('password_hash = ?');
+      params.push(hash);
+    } else if (isTest) {
+      const salt = bcrypt.genSaltSync(10);
+      const hash = bcrypt.hashSync('adminpassword123', salt);
       updates.push('password_hash = ?');
       params.push(hash);
     }
@@ -207,6 +213,7 @@ export function seedData(db) {
     params.push(adminCheck.id);
     db.prepare(`UPDATE admin_users SET ${updates.join(', ')} WHERE id = ?`).run(...params);
   }
+
 
   // 4. Seed default Site Settings (CMS Sections)
   const defaultSettings = [
