@@ -586,6 +586,14 @@ async function syncWhatsAppLinks() {
   } catch (_) {}
 }
 
-init();
-syncWhatsAppLinks();
+function bootCategories() {
+  init();
+  try { syncWhatsAppLinks(); } catch (_) {}
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', bootCategories);
+} else {
+  bootCategories();
+}
 

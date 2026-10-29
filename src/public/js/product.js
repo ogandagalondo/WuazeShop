@@ -19,6 +19,11 @@ let cargoSettings = {
 const loadingEl = document.getElementById('product-loading');
 const errorEl = document.getElementById('product-error');
 const contentEl = document.getElementById('product-content');
+const cartDrawerOverlay = document.getElementById('cart-drawer-overlay');
+const checkoutModalOverlay = document.getElementById('checkout-modal-overlay');
+const simulatorModalOverlay = document.getElementById('simulator-modal-overlay');
+const successModalOverlay = document.getElementById('success-modal-overlay');
+const checkoutForm = document.getElementById('checkout-form');
 
 // Color Name Resolver
 const KNOWN_COLORS = {
@@ -70,11 +75,14 @@ function saveCartToStorage() {
 function getProductIdentifierFromUrl() {
   const pathParts = window.location.pathname.split('/').filter(Boolean);
   if (pathParts.length >= 2 && pathParts[0] === 'product') {
-    return pathParts[1];
+    return decodeURIComponent(pathParts[1]);
   }
 
   const urlParams = new URLSearchParams(window.location.search);
-  return urlParams.get('slug') || urlParams.get('id') || 'iphone-15-pro-max-256gb';
+  const slugOrId = urlParams.get('slug') || urlParams.get('id');
+  if (slugOrId) return decodeURIComponent(slugOrId);
+
+  return 'iphone-15-pro-max-256gb';
 }
 
 // 2. Fetch and Hydrate Product
@@ -882,7 +890,6 @@ if (mobileStickyAddBtn) mobileStickyAddBtn.addEventListener('click', handleAddTo
 
 // Buy Now Button
 const btnBuyNow = document.getElementById('btn-buy-now');
-const checkoutModalOverlay = document.getElementById('checkout-modal-overlay');
 const closeCheckoutBtn = document.getElementById('close-checkout-btn');
 
 if (btnBuyNow) {
@@ -944,9 +951,6 @@ if (simulatorModalOverlay) {
 }
 
 // 6. Checkout & Payment Flow
-const checkoutForm = document.getElementById('checkout-form');
-const simulatorModalOverlay = document.getElementById('simulator-modal-overlay');
-
 // Wire shipping method radio buttons in cart drawer
 document.querySelectorAll('input[name="cartShippingMethod"]').forEach(radio => {
   radio.addEventListener('change', (e) => {
@@ -1078,7 +1082,6 @@ if (checkoutForm) {
 // Simulator Confirmation
 const simConfirmBtn = document.getElementById('sim-confirm-btn');
 const simCloseBtn = document.getElementById('sim-close-btn');
-const successModalOverlay = document.getElementById('success-modal-overlay');
 
 if (simConfirmBtn) {
   simConfirmBtn.addEventListener('click', async () => {
@@ -1259,7 +1262,15 @@ async function syncWhatsAppLinks() {
 }
 
 // Initial Boot
-updateCartUi();
-loadProductDetails();
-setupHamburgerMenu();
-syncWhatsAppLinks();
+function initProductPage() {
+  try { updateCartUi(); } catch (e) { console.warn('Erreur updateCartUi:', e); }
+  loadProductDetails();
+  try { setupHamburgerMenu(); } catch (e) { console.warn('Erreur setupHamburgerMenu:', e); }
+  try { syncWhatsAppLinks(); } catch (e) { console.warn('Erreur syncWhatsAppLinks:', e); }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initProductPage);
+} else {
+  initProductPage();
+}

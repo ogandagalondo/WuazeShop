@@ -1204,26 +1204,34 @@ window.filterByCategory = function(category) {
 };
 
 // Initial boot
-loadSiteSettings();
-loadProducts('all');
-updateCartUi();
-setupOrderTracking();
-setupHamburgerMenu();
+function initStore() {
+  try { loadSiteSettings(); } catch (e) { console.warn('Erreur loadSiteSettings:', e); }
+  loadProducts('all');
+  try { updateCartUi(); } catch (e) { console.warn('Erreur updateCartUi:', e); }
+  try { setupOrderTracking(); } catch (e) { console.warn('Erreur setupOrderTracking:', e); }
+  try { setupHamburgerMenu(); } catch (e) { console.warn('Erreur setupHamburgerMenu:', e); }
 
-// Check URL params
-const urlParams = new URLSearchParams(window.location.search);
-const trackParam = urlParams.get('track');
-if (trackParam) {
-  const input = document.getElementById('tracking-search-input');
-  if (input) input.value = trackParam;
-  trackOrder(trackParam);
-  const section = document.getElementById('tracking-section');
-  if (section) section.scrollIntoView({ behavior: 'smooth' });
-} else if (urlParams.get('checkout') === 'open') {
-  setTimeout(() => {
-    if (cart.length > 0) openCheckoutModal();
-    else openCartDrawer();
-  }, 200);
-} else if (urlParams.get('cart') === 'open') {
-  setTimeout(() => openCartDrawer(), 200);
+  // Check URL params
+  const urlParams = new URLSearchParams(window.location.search);
+  const trackParam = urlParams.get('track');
+  if (trackParam) {
+    const input = document.getElementById('tracking-search-input');
+    if (input) input.value = trackParam;
+    trackOrder(trackParam);
+    const section = document.getElementById('tracking-section');
+    if (section) section.scrollIntoView({ behavior: 'smooth' });
+  } else if (urlParams.get('checkout') === 'open') {
+    setTimeout(() => {
+      if (cart.length > 0) openCheckoutModal();
+      else openCartDrawer();
+    }, 200);
+  } else if (urlParams.get('cart') === 'open') {
+    setTimeout(() => openCartDrawer(), 200);
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initStore);
+} else {
+  initStore();
 }

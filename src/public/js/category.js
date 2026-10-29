@@ -754,8 +754,16 @@ async function syncWhatsAppLinks() {
 }
 
 // Initial Boot
-initEventListeners();
-updateCartUi();
-loadCategoryPage();
-syncWhatsAppLinks();
+function initCategoryPage() {
+  try { initEventListeners(); } catch (e) { console.warn('Erreur initEventListeners:', e); }
+  try { updateCartUi(); } catch (e) { console.warn('Erreur updateCartUi:', e); }
+  loadCategoryPage();
+  try { syncWhatsAppLinks(); } catch (e) { console.warn('Erreur syncWhatsAppLinks:', e); }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initCategoryPage);
+} else {
+  initCategoryPage();
+}
 
