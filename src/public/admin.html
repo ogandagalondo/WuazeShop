@@ -398,6 +398,83 @@
           </div>
         </div>
 
+        <!-- CMS CARD: GRILLE TARIFAIRE CARGO & FRET AÉRIEN (CHINE → GABON) -->
+        <div class="bg-white rounded-3xl p-5 sm:p-6 border border-gray-100 shadow-sm space-y-5">
+          <div class="flex items-center justify-between pb-3 border-b border-gray-100">
+            <div class="flex items-center gap-2.5">
+              <span class="w-8 h-8 rounded-xl bg-emerald-50 text-[#0d7252] flex items-center justify-center font-bold text-sm">
+                <span class="material-symbols-outlined text-base">flight_takeoff</span>
+              </span>
+              <div>
+                <h4 class="font-extrabold text-sm sm:text-base text-gray-900">Grille Tarifaire Cargo &amp; Fret Aérien (Chine → Gabon)</h4>
+                <p class="text-[11px] text-gray-400">Configurez les tarifs au kilo et les délais annoncés pour les transitaires cargo aérien.</p>
+              </div>
+            </div>
+            <span id="cms-cargo-saved" class="hidden text-xs font-bold text-green-700 bg-green-50 px-3 py-1 rounded-full border border-green-200 flex items-center gap-1">
+              <span class="material-symbols-outlined text-sm">check_circle</span>
+              <span>Enregistré !</span>
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Option 1: Colis Normal -->
+            <div class="p-4 bg-emerald-50/40 rounded-2xl border border-emerald-100 space-y-3">
+              <div class="flex items-center gap-2 text-emerald-800 font-extrabold text-xs uppercase tracking-wider">
+                <span class="material-symbols-outlined text-base text-[#0d7252]">schedule</span>
+                <span>Option 1 : Colis Normal</span>
+              </div>
+              <div>
+                <label class="block font-bold text-xs text-gray-700 mb-1">Tarif au Kilo (FCFA / kg)</label>
+                <div class="relative">
+                  <input id="cms-cargo-normal-rate" type="number" min="1000" step="500" class="w-full bg-white border border-gray-200 rounded-xl px-3.5 py-2 text-xs font-bold text-gray-900 focus:outline-none focus:border-[#0d7252]" placeholder="10000" value="10000"/>
+                  <span class="absolute right-3 top-2 text-xs font-semibold text-gray-400">FCFA</span>
+                </div>
+              </div>
+              <div>
+                <label class="block font-bold text-xs text-gray-700 mb-1">Délai affiché au client</label>
+                <input id="cms-cargo-normal-delay" type="text" class="w-full bg-white border border-gray-200 rounded-xl px-3.5 py-2 text-xs text-gray-900 focus:outline-none focus:border-[#0d7252]" placeholder="2 semaines" value="2 semaines"/>
+              </div>
+            </div>
+
+            <!-- Option 2: Colis Rapide -->
+            <div class="p-4 bg-amber-50/40 rounded-2xl border border-amber-100 space-y-3">
+              <div class="flex items-center gap-2 text-amber-800 font-extrabold text-xs uppercase tracking-wider">
+                <span class="material-symbols-outlined text-base text-amber-600">bolt</span>
+                <span>Option 2 : Colis Rapide</span>
+              </div>
+              <div>
+                <label class="block font-bold text-xs text-gray-700 mb-1">Tarif au Kilo (FCFA / kg)</label>
+                <div class="relative">
+                  <input id="cms-cargo-express-rate" type="number" min="1000" step="500" class="w-full bg-white border border-gray-200 rounded-xl px-3.5 py-2 text-xs font-bold text-gray-900 focus:outline-none focus:border-[#0d7252]" placeholder="13500" value="13500"/>
+                  <span class="absolute right-3 top-2 text-xs font-semibold text-gray-400">FCFA</span>
+                </div>
+              </div>
+              <div>
+                <label class="block font-bold text-xs text-gray-700 mb-1">Délai affiché au client</label>
+                <input id="cms-cargo-express-delay" type="text" class="w-full bg-white border border-gray-200 rounded-xl px-3.5 py-2 text-xs text-gray-900 focus:outline-none focus:border-[#0d7252]" placeholder="1 semaine" value="1 semaine"/>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between p-3 bg-gray-50 rounded-2xl border border-gray-200">
+            <div>
+              <span class="text-xs font-bold text-gray-800">Poids minimum facturé (kg)</span>
+              <p class="text-[10px] text-gray-500">Seuil plancher pour les colis légers (ex: coques, câbles).</p>
+            </div>
+            <div class="w-28 flex items-center gap-1.5">
+              <input id="cms-cargo-min-weight" type="number" min="0.01" step="0.05" class="w-full bg-white border border-gray-200 rounded-xl px-2.5 py-1.5 text-xs font-bold text-right text-gray-900 focus:outline-none focus:border-[#0d7252]" placeholder="0.1" value="0.1"/>
+              <span class="text-xs font-semibold text-gray-400">kg</span>
+            </div>
+          </div>
+
+          <div class="pt-2 flex justify-end">
+            <button id="save-cms-cargo-btn" type="button" class="py-2.5 px-6 rounded-full bg-[#0d7252] hover:bg-[#08553d] text-white text-xs font-bold flex items-center gap-1.5 shadow-md transition-all cursor-pointer">
+              <span class="material-symbols-outlined text-sm">save</span>
+              <span>Enregistrer la Grille Cargo</span>
+            </button>
+          </div>
+        </div>
+
         <!-- 1. HERO SECTION CARD -->
         <div class="bg-white rounded-3xl p-5 sm:p-6 border border-gray-100 shadow-sm space-y-5">
           <div class="flex items-center justify-between pb-3 border-b border-gray-100">
@@ -1185,6 +1262,56 @@
               <span id="prod-base-price-help" class="text-[10px] text-gray-400 font-normal ml-1">(prix de référence)</span>
             </label>
             <input id="prod-price" required min="500" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-bold text-gray-900 focus:outline-none focus:border-[#0d7252] focus:bg-white" placeholder="Ex: 850000" type="number"/>
+          </div>
+        </div>
+
+        <!-- Poids d'expédition & Calculateur Volumétrique -->
+        <div class="rounded-2xl border border-gray-200 bg-gray-50/70 p-3.5 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <label class="block font-bold text-gray-700 text-xs">
+              <span class="flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-base text-[#0d7252]">scale</span>
+                <span>Poids d'expédition Fret Cargo (kg) *</span>
+              </span>
+            </label>
+            <button type="button" id="toggle-volumetric-calc-btn" class="text-[11px] font-bold text-[#0d7252] hover:underline flex items-center gap-1 cursor-pointer">
+              <span class="material-symbols-outlined text-xs">calculate</span>
+              <span id="volumetric-calc-btn-text">Calculateur volumétrique</span>
+            </button>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <input id="prod-weight" required min="0.05" step="0.01" value="0.4" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-bold text-gray-900 focus:outline-none focus:border-[#0d7252]" placeholder="Ex: 0.40" type="number"/>
+            <span class="text-xs font-bold text-gray-500 shrink-0">kg</span>
+          </div>
+          <p class="text-[10px] text-gray-400">Ce poids servira à calculer automatiquement le fret cargo aérien du client lors de la commande (ex: 0.4 kg smartphone, 2.2 kg laptop).</p>
+
+          <!-- Volumetric Calculator Panel (collapsible) -->
+          <div id="volumetric-calc-panel" class="hidden pt-2 border-t border-gray-200 space-y-2">
+            <div class="text-[11px] font-bold text-gray-700 flex items-center gap-1">
+              <span class="material-symbols-outlined text-xs text-amber-600">info</span>
+              <span>Règle Cargo IATA : (L × l × H en cm) ÷ 5000</span>
+            </div>
+            <div class="grid grid-cols-3 gap-2">
+              <div>
+                <label class="block text-[10px] text-gray-500 font-semibold mb-0.5">Long. (cm)</label>
+                <input id="vol-length" type="number" step="0.1" min="1" placeholder="Ex: 20" class="w-full bg-white border border-gray-200 rounded-lg px-2 py-1.5 text-xs"/>
+              </div>
+              <div>
+                <label class="block text-[10px] text-gray-500 font-semibold mb-0.5">Larg. (cm)</label>
+                <input id="vol-width" type="number" step="0.1" min="1" placeholder="Ex: 15" class="w-full bg-white border border-gray-200 rounded-lg px-2 py-1.5 text-xs"/>
+              </div>
+              <div>
+                <label class="block text-[10px] text-gray-500 font-semibold mb-0.5">Haut. (cm)</label>
+                <input id="vol-height" type="number" step="0.1" min="1" placeholder="Ex: 8" class="w-full bg-white border border-gray-200 rounded-lg px-2 py-1.5 text-xs"/>
+              </div>
+            </div>
+            <div class="flex items-center justify-between pt-1">
+              <span id="vol-calc-result" class="text-xs font-bold text-[#0d7252]">Poids calculé : -- kg</span>
+              <button type="button" id="apply-volumetric-btn" class="px-3 py-1.5 rounded-lg bg-[#0d7252] text-white text-[11px] font-bold hover:bg-[#08553d] transition-colors cursor-pointer">
+                Appliquer au produit
+              </button>
+            </div>
           </div>
         </div>
 

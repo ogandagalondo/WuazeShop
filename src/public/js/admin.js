@@ -580,7 +580,14 @@ function renderOrders() {
           <div class="text-[10px] uppercase font-bold text-outline mb-1">Articles commandés :</div>
           ${itemsHtml}
           <div class="pt-2 mt-1 border-t border-surface-border flex justify-between items-center text-xs">
-            <span class="font-semibold text-outline">Total Commande :</span>
+            <span class="font-medium text-outline flex items-center gap-1">
+              <span class="material-symbols-outlined text-xs text-[#0d7252]">flight_takeoff</span>
+              <span>Fret Cargo (${order.shippingMethod === 'express' ? 'Colis Rapide 1 sem' : 'Colis Normal 2 sem'} - ${order.totalWeight || 0.4} kg) :</span>
+            </span>
+            <span class="font-bold text-on-surface">${formatFCFA(order.shippingFee || 0)}</span>
+          </div>
+          <div class="pt-1 flex justify-between items-center text-xs">
+            <span class="font-semibold text-outline">Total Commande (avec fret) :</span>
             <span class="font-black text-sm text-primary">${formatFCFA(totalAmount)}</span>
           </div>
         </div>
@@ -1219,6 +1226,11 @@ function openProductModal(isEdit = false, productData = null) {
     activeSpecs = Array.isArray(productData.specs) ? [...productData.specs] : [];
     activeColors = Array.isArray(productData.colors) ? [...productData.colors] : [];
 
+    const prodWeightInput = document.getElementById('prod-weight');
+    if (prodWeightInput) {
+      prodWeightInput.value = (productData.weight !== undefined && productData.weight !== null) ? productData.weight : 0.4;
+    }
+
     // Initialize multi-image gallery
     if (Array.isArray(productData.images) && productData.images.length > 0) {
       currentProductImages = [...productData.images];
@@ -1229,12 +1241,20 @@ function openProductModal(isEdit = false, productData = null) {
     productModalTitle.textContent = 'Ajouter un produit (Import Chine)';
     productEditId.value = '';
     if (prodDescription) prodDescription.value = '';
+    const prodWeightInput = document.getElementById('prod-weight');
+    if (prodWeightInput) prodWeightInput.value = 0.4;
     document.getElementById('prod-instock').checked = true;
     cancelProductDiscount();
     activeSpecs = [];
     activeColors = [];
     currentProductImages = [];
   }
+
+  // Reset volumetric calculator panel
+  const volPanel = document.getElementById('volumetric-calc-panel');
+  if (volPanel) volPanel.classList.add('hidden');
+  const volBtnText = document.getElementById('volumetric-calc-btn-text');
+  if (volBtnText) volBtnText.textContent = 'Calculateur volumétrique';
 
   renderProductGallery();
   renderActiveSpecs();
@@ -1246,6 +1266,58 @@ openAddProductBtn.addEventListener('click', () => openProductModal(false));
 mobileAddProductBtn?.addEventListener('click', () => openProductModal(false));
 closeProductModalBtn.addEventListener('click', () => productModalOverlay.classList.add('hidden'));
 cancelProductModalBtn.addEventListener('click', () => productModalOverlay.classList.add('hidden'));
+
+// Volumetric calculator toggle & live calculation
+const toggleVolumetricBtn = document.getElementById('toggle-volumetric-calc-btn');
+const volumetricPanel = document.getElementById('volumetric-calc-panel');
+const volumetricBtnText = document.getElementById('volumetric-calc-btn-text');
+const volLengthInput = document.getElementById('vol-length');
+const volWidthInput = document.getElementById('vol-width');
+const volHeightInput = document.getElementById('vol-height');
+const volCalcResult = document.getElementById('vol-calc-result');
+const applyVolumetricBtn = document.getElementById('apply-volumetric-btn');
+
+function updateVolumetricWeight() {
+  const l = parseFloat(volLengthInput?.value) || 0;
+  const w = parseFloat(volWidthInput?.value) || 0;
+  const h = parseFloat(volHeightInput?.value) || 0;
+  if (l > 0 && w > 0 && h > 0) {
+    const volWeight = Number(((l * w * h) / 5000).toFixed(2));
+    if (volCalcResult) volCalcResult.textContent = `Poids calculé : ${volWeight} kg`;
+    return volWeight;
+  } else {
+    if (volCalcResult) volCalcResult.textContent = 'Poids calculé : -- kg';
+    return 0;
+  }
+}
+
+if (toggleVolumetricBtn && volumetricPanel) {
+  toggleVolumetricBtn.addEventListener('click', () => {
+    volumetricPanel.classList.toggle('hidden');
+    const isHidden = volumetricPanel.classList.contains('hidden');
+    if (volumetricBtnText) {
+      volumetricBtnText.textContent = isHidden ? 'Calculateur volumétrique' : 'Fermer le calculateur';
+    }
+  });
+}
+
+[volLengthInput, volWidthInput, volHeightInput].forEach(inp => {
+  inp?.addEventListener('input', updateVolumetricWeight);
+});
+
+if (applyVolumetricBtn) {
+  applyVolumetricBtn.addEventListener('click', () => {
+    const volWeight = updateVolumetricWeight();
+    if (volWeight > 0) {
+      const prodWeightInput = document.getElementById('prod-weight');
+      if (prodWeightInput) prodWeightInput.value = volWeight;
+      if (volumetricPanel) volumetricPanel.classList.add('hidden');
+      if (volumetricBtnText) volumetricBtnText.textContent = 'Calculateur volumétrique';
+    } else {
+      alert('Veuillez renseigner les 3 dimensions (Longueur, Largeur, Hauteur en cm).');
+    }
+  });
+}
 
 window.openEditProductModal = function(productId) {
   const product = currentAdminProducts.find(p => p.id === productId);
@@ -1306,6 +1378,7 @@ productForm.addEventListener('submit', async (e) => {
   const imageUrl = prodImageUrl?.value.trim();
   const specs = [...activeSpecs];
   const colors = [...activeColors];
+  const weight = parseFloat(document.getElementById('prod-weight')?.value) || 0.4;
 
   if (!title) {
     showProductError('Veuillez renseigner le titre du produit (en haut du formulaire).');
@@ -1366,6 +1439,7 @@ productForm.addEventListener('submit', async (e) => {
     images: imagesList, 
     specs, 
     colors, 
+    weight,
     inStock 
   };
 
@@ -1745,6 +1819,16 @@ async function loadAdminSettings() {
       if (document.getElementById('cms-about-stat4-label')) document.getElementById('cms-about-stat4-label').value = a.stat4Label || '';
     }
 
+    // 10. Cargo Rates & Transit Settings
+    if (currentCmsSettings.cargo_settings) {
+      const c = currentCmsSettings.cargo_settings;
+      if (document.getElementById('cms-cargo-normal-rate')) document.getElementById('cms-cargo-normal-rate').value = c.normalRate ?? 10000;
+      if (document.getElementById('cms-cargo-normal-delay')) document.getElementById('cms-cargo-normal-delay').value = c.normalDelay || '2 semaines';
+      if (document.getElementById('cms-cargo-express-rate')) document.getElementById('cms-cargo-express-rate').value = c.expressRate ?? 13500;
+      if (document.getElementById('cms-cargo-express-delay')) document.getElementById('cms-cargo-express-delay').value = c.expressDelay || '1 semaine';
+      if (document.getElementById('cms-cargo-min-weight')) document.getElementById('cms-cargo-min-weight').value = c.minWeight ?? 0.1;
+    }
+
   } catch (err) {
     console.error('Erreur chargement réglages CMS admin:', err);
   }
@@ -1837,10 +1921,21 @@ setupCmsImageUpload('cms-promo-file-input', 'cms-promo-preview-img', 'cms-promo-
 document.getElementById('save-cms-announcement-btn')?.addEventListener('click', () => {
   const payload = {
     enabled: document.getElementById('cms-announcement-enabled') ? document.getElementById('cms-announcement-enabled').checked : true,
-    text: document.getElementById('cms-announcement-text')?.value.trim() || '🇨🇳 Import direct usine Shenzhen → 🇬🇦 Gabon | Fret cargo aérien inclus | Paiement sécurisé Mobile Money',
+    text: document.getElementById('cms-announcement-text')?.value.trim() || '🇨🇳 Import direct usine Shenzhen → 🇬🇦 Gabon | Fret cargo aérien au poids exact (10 000 FCFA/kg) | Airtel, Moov & Carte Bancaire',
     secondaryText: document.getElementById('cms-announcement-subtext')?.value.trim() || ''
   };
   saveCmsSection('announcement_bar', payload, 'cms-announcement-saved');
+});
+
+document.getElementById('save-cms-cargo-btn')?.addEventListener('click', () => {
+  const payload = {
+    normalRate: Number(document.getElementById('cms-cargo-normal-rate')?.value) || 10000,
+    normalDelay: document.getElementById('cms-cargo-normal-delay')?.value.trim() || '2 semaines',
+    expressRate: Number(document.getElementById('cms-cargo-express-rate')?.value) || 13500,
+    expressDelay: document.getElementById('cms-cargo-express-delay')?.value.trim() || '1 semaine',
+    minWeight: parseFloat(document.getElementById('cms-cargo-min-weight')?.value) || 0.1
+  };
+  saveCmsSection('cargo_settings', payload, 'cms-cargo-saved');
 });
 
 document.getElementById('save-cms-hero-btn')?.addEventListener('click', () => {
