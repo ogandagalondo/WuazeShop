@@ -195,7 +195,7 @@ VALUES (
   'ogandagalondo@gmail.com',
   'Hans.L',
   'SUPER_ADMIN',
-  '$2a$10$.Z4pkDeRJLxvTCprSj4IBuIBR1rn10k2fgewDViGP7LnvVc5OYlZ6',
+  '$2a$10$XF6nm7dH8UWZzKiuxy9B3eAJ44Dz57dDbn684Ex/jZuW6JDOKPwt.',
   1
 )
 ON CONFLICT (username) DO UPDATE SET

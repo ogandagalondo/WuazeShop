@@ -19,8 +19,12 @@ export function isPostgresConfigured() {
 
 export function getPgPool() {
   if (!pgPool) {
-    const connectionString = process.env.POSTGRES_URL || process.env.DATABASE_URL;
+    let connectionString = process.env.POSTGRES_URL || process.env.DATABASE_URL || process.env.POSTGRES_PRISMA_URL || process.env.POSTGRES_URL_NON_POOLING;
     if (!connectionString) return null;
+
+    // Supprimer le paramètre sslmode de l'URL pour empêcher pg-connection-string de forcer verify-full
+    connectionString = connectionString.replace(/([?&])sslmode=[^&]+(&|$)/, '$1').replace(/[?&]$/, '');
+
     pgPool = new Pool({
       connectionString,
       ssl: { rejectUnauthorized: false }
