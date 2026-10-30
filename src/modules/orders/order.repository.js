@@ -1,7 +1,7 @@
 import { getDb } from '../../db/database.js';
 
 export const orderRepository = {
-  create({
+  async create({
     orderNumber,
     customerName,
     customerPhone,
@@ -37,7 +37,7 @@ export const orderRepository = {
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'PENDING', 'AWAITING_PROCUREMENT')
     `);
 
-    stmt.run(
+    await stmt.run(
       orderNumber,
       customerName,
       customerPhone,
@@ -53,12 +53,12 @@ export const orderRepository = {
       transactionReference
     );
 
-    return this.findByOrderNumber(orderNumber);
+    return await this.findByOrderNumber(orderNumber);
   },
 
-  findByOrderNumber(orderNumber) {
+  async findByOrderNumber(orderNumber) {
     const db = getDb();
-    const row = db.prepare(`SELECT * FROM orders WHERE order_number = ?`).get(orderNumber);
+    const row = await db.prepare(`SELECT * FROM orders WHERE order_number = ?`).get(orderNumber);
     if (!row) return null;
     return {
       id: row.id,
@@ -82,9 +82,9 @@ export const orderRepository = {
     };
   },
 
-  findAll() {
+  async findAll() {
     const db = getDb();
-    const rows = db.prepare(`SELECT * FROM orders ORDER BY id DESC`).all();
+    const rows = await db.prepare(`SELECT * FROM orders ORDER BY id DESC`).all();
     return rows.map(row => ({
       id: row.id,
       orderNumber: row.order_number,

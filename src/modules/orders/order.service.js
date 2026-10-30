@@ -21,7 +21,7 @@ export const orderService = {
     const validated = checkoutSchema.parse(inputData);
 
     // 2. Recherche du produit en base (pour garantir le prix authentique du serveur)
-    const product = productRepository.findById(validated.productId);
+    const product = await productRepository.findById(validated.productId);
     if (!product) {
       throw new Error('Produit non trouvé ou indisponible');
     }
@@ -30,7 +30,7 @@ export const orderService = {
     let cargoSettings = null;
     try {
       const db = getDb();
-      const row = db.prepare(`SELECT value FROM site_settings WHERE key = 'cargo_settings'`).get();
+      const row = await db.prepare(`SELECT value FROM site_settings WHERE key = 'cargo_settings'`).get();
       if (row && row.value) {
         cargoSettings = JSON.parse(row.value);
       }
@@ -61,7 +61,7 @@ export const orderService = {
     });
 
     // 8. Enregistrement en base de données avec détail fret cargo
-    const order = orderRepository.create({
+    const order = await orderRepository.create({
       orderNumber,
       customerName: validated.customerName,
       customerPhone: validated.customerPhone,
@@ -80,15 +80,15 @@ export const orderService = {
     return order;
   },
 
-  getOrderByNumber(orderNumber) {
-    const order = orderRepository.findByOrderNumber(orderNumber);
+  async getOrderByNumber(orderNumber) {
+    const order = await orderRepository.findByOrderNumber(orderNumber);
     if (!order) {
       throw new Error(`Commande ${orderNumber} non trouvée`);
     }
     return order;
   },
 
-  getAllOrders() {
-    return orderRepository.findAll();
+  async getAllOrders() {
+    return await orderRepository.findAll();
   }
 };

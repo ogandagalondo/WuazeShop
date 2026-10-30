@@ -25,25 +25,26 @@ function formatProduct(p) {
 }
 
 export const productService = {
-  getProducts({ category } = {}) {
-    const rows = productRepository.findAll({ category });
+  async getProducts({ category } = {}) {
+    const rows = await productRepository.findAll({ category });
     return rows.map(formatProduct);
   },
 
-  getProductById(id) {
-    const row = productRepository.findById(id);
+  async getProductById(id) {
+    const row = await productRepository.findById(id);
     return formatProduct(row);
   },
 
-  getProductBySlug(slug) {
-    const row = productRepository.findBySlug(slug);
+  async getProductBySlug(slug) {
+    const row = await productRepository.findBySlug(slug);
     return formatProduct(row);
   },
 
-  getCategories() {
-    const categories = productRepository.findAllCategories();
+  async getCategories() {
+    const categories = await productRepository.findAllCategories();
+    const allProducts = await productRepository.findAll();
     return categories.map(cat => {
-      const prods = productRepository.findAll({ category: cat.slug });
+      const prods = allProducts.filter(p => p.category === cat.slug);
       return {
         ...cat,
         productCount: prods.length
@@ -51,10 +52,10 @@ export const productService = {
     });
   },
 
-  getCategoryBySlug(slug) {
-    const category = productRepository.findCategoryBySlug(slug);
+  async getCategoryBySlug(slug) {
+    const category = await productRepository.findCategoryBySlug(slug);
     if (!category) return null;
-    const products = this.getProducts({ category: slug });
+    const products = await this.getProducts({ category: slug });
     return {
       ...category,
       products,
@@ -62,15 +63,15 @@ export const productService = {
     };
   },
 
-  createCategory(data) {
-    return productRepository.createCategory(data);
+  async createCategory(data) {
+    return await productRepository.createCategory(data);
   },
 
-  updateCategory(id, data) {
-    return productRepository.updateCategory(id, data);
+  async updateCategory(id, data) {
+    return await productRepository.updateCategory(id, data);
   },
 
-  deleteCategory(id) {
-    return productRepository.deleteCategory(id);
+  async deleteCategory(id) {
+    return await productRepository.deleteCategory(id);
   }
 };

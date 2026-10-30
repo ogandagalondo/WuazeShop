@@ -28,9 +28,9 @@ orderRouter.post('/orders/checkout', async (req, res) => {
 });
 
 // GET /api/orders/:orderNumber - Suivi de commande avec anonymisation PII
-orderRouter.get('/orders/:orderNumber', (req, res) => {
+orderRouter.get('/orders/:orderNumber', async (req, res) => {
   try {
-    const order = orderService.getOrderByNumber(req.params.orderNumber);
+    const order = await orderService.getOrderByNumber(req.params.orderNumber);
     
     // Détecter si la requête provient d'un collaborateur authentifié
     const authHeader = req.headers['authorization'];
@@ -47,4 +47,3 @@ orderRouter.get('/orders/:orderNumber', (req, res) => {
     res.status(404).json({ error: error.message });
   }
 });
-

@@ -1,56 +1,56 @@
 import { getDb } from '../../db/database.js';
 
 export const productRepository = {
-  findAll({ category } = {}) {
+  async findAll({ category } = {}) {
     const db = getDb();
     if (category && category !== 'all') {
-      return db.prepare(
+      return await db.prepare(
         `SELECT * FROM products WHERE is_active = 1 AND category = ? ORDER BY id DESC`
       ).all(category);
     }
-    return db.prepare(
+    return await db.prepare(
       `SELECT * FROM products WHERE is_active = 1 ORDER BY id DESC`
     ).all();
   },
 
-  findById(id) {
+  async findById(id) {
     const db = getDb();
-    return db.prepare(`SELECT * FROM products WHERE id = ? AND is_active = 1`).get(id);
+    return await db.prepare(`SELECT * FROM products WHERE id = ? AND is_active = 1`).get(id);
   },
 
-  findBySlug(slug) {
+  async findBySlug(slug) {
     const db = getDb();
-    return db.prepare(`SELECT * FROM products WHERE slug = ? AND is_active = 1`).get(slug);
+    return await db.prepare(`SELECT * FROM products WHERE slug = ? AND is_active = 1`).get(slug);
   },
 
-  findAllCategories() {
+  async findAllCategories() {
     const db = getDb();
-    return db.prepare(`SELECT * FROM categories ORDER BY id ASC`).all();
+    return await db.prepare(`SELECT * FROM categories ORDER BY id ASC`).all();
   },
 
-  findCategoryBySlug(slug) {
+  async findCategoryBySlug(slug) {
     const db = getDb();
-    return db.prepare(`SELECT * FROM categories WHERE slug = ?`).get(slug);
+    return await db.prepare(`SELECT * FROM categories WHERE slug = ?`).get(slug);
   },
 
-  findCategoryById(id) {
+  async findCategoryById(id) {
     const db = getDb();
-    return db.prepare(`SELECT * FROM categories WHERE id = ?`).get(id);
+    return await db.prepare(`SELECT * FROM categories WHERE id = ?`).get(id);
   },
 
-  createCategory({ name, slug, icon, description, banner_url }) {
+  async createCategory({ name, slug, icon, description, banner_url }) {
     const db = getDb();
     const cleanSlug = (slug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-')).toLowerCase();
-    db.prepare(`
+    await db.prepare(`
       INSERT INTO categories (name, slug, icon, description, banner_url)
       VALUES (?, ?, ?, ?, ?)
     `).run(name, cleanSlug, icon || 'category', description || null, banner_url || null);
-    return this.findCategoryBySlug(cleanSlug);
+    return await this.findCategoryBySlug(cleanSlug);
   },
 
-  updateCategory(id, { name, slug, icon, description, banner_url }) {
+  async updateCategory(id, { name, slug, icon, description, banner_url }) {
     const db = getDb();
-    const existing = this.findCategoryById(id);
+    const existing = await this.findCategoryById(id);
     if (!existing) return null;
 
     const newName = name !== undefined ? name : existing.name;
@@ -59,20 +59,20 @@ export const productRepository = {
     const newDesc = description !== undefined ? description : existing.description;
     const newBanner = banner_url !== undefined ? banner_url : existing.banner_url;
 
-    db.prepare(`
+    await db.prepare(`
       UPDATE categories
       SET name = ?, slug = ?, icon = ?, description = ?, banner_url = ?
       WHERE id = ?
     `).run(newName, newSlug, newIcon, newDesc, newBanner, id);
 
-    return this.findCategoryById(id);
+    return await this.findCategoryById(id);
   },
 
-  deleteCategory(id) {
+  async deleteCategory(id) {
     const db = getDb();
-    const existing = this.findCategoryById(id);
+    const existing = await this.findCategoryById(id);
     if (!existing) return false;
-    db.prepare(`DELETE FROM categories WHERE id = ?`).run(id);
+    await db.prepare(`DELETE FROM categories WHERE id = ?`).run(id);
     return true;
   }
 };

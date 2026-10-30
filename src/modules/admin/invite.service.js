@@ -13,7 +13,7 @@ export const inviteService = {
   },
 
   // Construire le pack d'invitation avec messages pré-formatés
-  buildInvitation({ collaborator, password, baseUrl }) {
+  async buildInvitation({ collaborator, password, baseUrl }) {
     const loginUrl = baseUrl ? `${baseUrl}/admin.html` : 'http://localhost:3000/admin.html';
     const roleLabels = {
       SUPER_ADMIN: 'Super Administrateur',
@@ -55,7 +55,7 @@ _WuazeShop Libreville_`;
     // Enregistrer dans la table collaborator_invitations
     try {
       const db = getDb();
-      db.prepare(`
+      await db.prepare(`
         INSERT INTO collaborator_invitations (collaborator_id, email, phone, role, invitation_url, status)
         VALUES (?, ?, ?, ?, ?, 'SENT')
       `).run(

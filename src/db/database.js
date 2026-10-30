@@ -2,12 +2,100 @@ import { DatabaseSync } from 'node:sqlite';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import pg from 'pg';
 import { seedData } from './seed.js';
 
+const { Pool } = pg;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 let globalDb = null;
+let pgPool = null;
+
+export function isPostgresConfigured() {
+  if (process.env.NODE_ENV === 'test') return false;
+  return Boolean(process.env.POSTGRES_URL || process.env.DATABASE_URL);
+}
+
+export function getPgPool() {
+  if (!pgPool) {
+    const connectionString = process.env.POSTGRES_URL || process.env.DATABASE_URL;
+    if (!connectionString) return null;
+    pgPool = new Pool({
+      connectionString,
+      ssl: { rejectUnauthorized: false }
+    });
+    pgPool.on('error', (err) => {
+      console.error('[PostgreSQL] Unexpected error on idle client:', err);
+    });
+  }
+  return pgPool;
+}
+
+function convertSqlToPg(sql) {
+  let paramIndex = 1;
+  return sql.replace(/\?/g, () => `$${paramIndex++}`);
+}
+
+function normalizeParams(args) {
+  if (args.length === 1 && Array.isArray(args[0])) {
+    return args[0];
+  }
+  return args;
+}
+
+class PgStatement {
+  constructor(sql) {
+    this.sql = sql;
+  }
+
+  async all(...args) {
+    const pool = getPgPool();
+    const params = normalizeParams(args);
+    const pgSql = convertSqlToPg(this.sql);
+    const result = await pool.query(pgSql, params);
+    return result.rows;
+  }
+
+  async get(...args) {
+    const pool = getPgPool();
+    const params = normalizeParams(args);
+    const pgSql = convertSqlToPg(this.sql);
+    const result = await pool.query(pgSql, params);
+    return result.rows[0];
+  }
+
+  async run(...args) {
+    const pool = getPgPool();
+    const params = normalizeParams(args);
+    let pgSql = convertSqlToPg(this.sql);
+    if (/^\s*insert\s+/i.test(pgSql) && !/returning/i.test(pgSql)) {
+      pgSql += ' RETURNING id';
+    }
+    const result = await pool.query(pgSql, params);
+    return {
+      changes: result.rowCount,
+      lastInsertRowid: result.rows && result.rows[0] ? result.rows[0].id : null
+    };
+  }
+}
+
+class PgDbWrapper {
+  constructor() {
+    this.isPostgres = true;
+  }
+
+  prepare(sql) {
+    return new PgStatement(sql);
+  }
+
+  async exec(sql) {
+    const pool = getPgPool();
+    return await pool.query(sql);
+  }
+}
+
+const pgWrapperInstance = new PgDbWrapper();
 
 const FALLBACK_SCHEMA_SQL = `
 CREATE TABLE IF NOT EXISTS categories (
@@ -94,6 +182,11 @@ export function resolveDbPath(requestedPath) {
 }
 
 export function initDb(dbPath = resolveDbPath()) {
+  if (dbPath !== ':memory:' && isPostgresConfigured()) {
+    console.log('[DB] Mode PostgreSQL actif (Supabase).');
+    return pgWrapperInstance;
+  }
+
   const targetPath = resolveDbPath(dbPath);
   const isServerless = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
 
@@ -218,9 +311,11 @@ export function initDb(dbPath = resolveDbPath()) {
 }
 
 export function getDb() {
+  if (isPostgresConfigured()) {
+    return pgWrapperInstance;
+  }
   if (!globalDb) {
     globalDb = initDb();
   }
   return globalDb;
 }
-

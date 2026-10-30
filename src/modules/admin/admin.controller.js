@@ -26,14 +26,14 @@ try {
 export const adminRouter = Router();
 
 // POST /api/admin/login
-adminRouter.post('/admin/login', (req, res) => {
+adminRouter.post('/admin/login', async (req, res) => {
   try {
     const { email, username, password } = req.body;
     const identifier = email || username;
     if (!identifier || !password) {
       return res.status(400).json({ error: 'Adresse e-mail (ou identifiant) et mot de passe requis' });
     }
-    const result = authService.login(identifier, password);
+    const result = await authService.login(identifier, password);
     res.json(result);
   } catch (error) {
     res.status(401).json({ error: error.message });
@@ -41,10 +41,10 @@ adminRouter.post('/admin/login', (req, res) => {
 });
 
 // GET /api/settings - Obtenir tous les paramètres du site (public)
-adminRouter.get('/settings', (req, res) => {
+adminRouter.get('/settings', async (req, res) => {
   try {
     const db = getDb();
-    const rows = db.prepare(`SELECT key, value FROM site_settings`).all();
+    const rows = await db.prepare(`SELECT key, value FROM site_settings`).all();
     const settings = {};
     for (const r of rows) {
       try {
@@ -150,7 +150,7 @@ adminRouter.post('/admin/upload', (req, res) => {
 
 
 // POST /api/admin/products - Créer un produit
-adminRouter.post('/admin/products', (req, res) => {
+adminRouter.post('/admin/products', async (req, res) => {
   try {
     let { title, description, category, price, originalPrice, imageUrl, images, specs, colors, weight, inStock } = req.body;
 
@@ -184,7 +184,7 @@ adminRouter.post('/admin/products', (req, res) => {
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
     `);
 
-    stmt.run(
+    await stmt.run(
       title,
       description || null,
       slug,
@@ -199,7 +199,7 @@ adminRouter.post('/admin/products', (req, res) => {
       inStock === false ? 0 : 1
     );
 
-    const created = db.prepare(`SELECT * FROM products WHERE slug = ?`).get(slug);
+    const created = await db.prepare(`SELECT * FROM products WHERE slug = ?`).get(slug);
     res.status(201).json(created);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -207,11 +207,11 @@ adminRouter.post('/admin/products', (req, res) => {
 });
 
 // PUT /api/admin/products/:id - Mettre à jour un produit
-adminRouter.put('/admin/products/:id', (req, res) => {
+adminRouter.put('/admin/products/:id', async (req, res) => {
   try {
     const id = Number(req.params.id);
     const db = getDb();
-    const existing = db.prepare(`SELECT * FROM products WHERE id = ? AND is_active = 1`).get(id);
+    const existing = await db.prepare(`SELECT * FROM products WHERE id = ? AND is_active = 1`).get(id);
     if (!existing) {
       return res.status(404).json({ error: 'Produit non trouvé' });
     }
@@ -241,13 +241,13 @@ adminRouter.put('/admin/products/:id', (req, res) => {
       : (existing.weight ?? 0.4);
     const inStock = req.body.inStock !== undefined ? (req.body.inStock ? 1 : 0) : existing.in_stock;
 
-    db.prepare(`
+    await db.prepare(`
       UPDATE products 
       SET title = ?, description = ?, category = ?, price = ?, original_price = ?, image_url = ?, images = ?, specs = ?, colors = ?, weight = ?, in_stock = ?, updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
     `).run(title, description, category, price, originalPrice, imageUrl, imagesVal, specs, colors, weight, inStock, id);
 
-    const updated = db.prepare(`SELECT * FROM products WHERE id = ?`).get(id);
+    const updated = await db.prepare(`SELECT * FROM products WHERE id = ?`).get(id);
     res.json(updated);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -255,11 +255,11 @@ adminRouter.put('/admin/products/:id', (req, res) => {
 });
 
 // PATCH /api/admin/products/:id/discount - Appliquer ou retirer une remise sur un produit
-adminRouter.patch('/admin/products/:id/discount', (req, res) => {
+adminRouter.patch('/admin/products/:id/discount', async (req, res) => {
   try {
     const id = Number(req.params.id);
     const db = getDb();
-    const product = db.prepare(`SELECT * FROM products WHERE id = ? AND is_active = 1`).get(id);
+    const product = await db.prepare(`SELECT * FROM products WHERE id = ? AND is_active = 1`).get(id);
     if (!product) {
       return res.status(404).json({ error: 'Produit non trouvé' });
     }
@@ -271,13 +271,13 @@ adminRouter.patch('/admin/products/:id/discount', (req, res) => {
         ? product.original_price 
         : product.price;
 
-      db.prepare(`
+      await db.prepare(`
         UPDATE products 
         SET price = ?, original_price = NULL, updated_at = CURRENT_TIMESTAMP
         WHERE id = ?
       `).run(restoredPrice, id);
 
-      const updated = db.prepare(`SELECT * FROM products WHERE id = ?`).get(id);
+      const updated = await db.prepare(`SELECT * FROM products WHERE id = ?`).get(id);
       return res.json({ success: true, message: 'Remise retirée avec succès', product: updated });
     }
 
@@ -302,13 +302,13 @@ adminRouter.patch('/admin/products/:id/discount', (req, res) => {
       return res.status(400).json({ error: 'Le prix remisé doit être inférieur au prix d’origine.' });
     }
 
-    db.prepare(`
+    await db.prepare(`
       UPDATE products 
       SET price = ?, original_price = ?, updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
     `).run(finalPrice, basePrice, id);
 
-    const updated = db.prepare(`SELECT * FROM products WHERE id = ?`).get(id);
+    const updated = await db.prepare(`SELECT * FROM products WHERE id = ?`).get(id);
     res.json({ success: true, message: 'Remise appliquée avec succès', product: updated });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -316,7 +316,7 @@ adminRouter.patch('/admin/products/:id/discount', (req, res) => {
 });
 
 // POST /api/admin/products/batch-discount - Appliquer ou retirer une remise groupée
-adminRouter.post('/admin/products/batch-discount', (req, res) => {
+adminRouter.post('/admin/products/batch-discount', async (req, res) => {
   try {
     const { category, discountPercent, action } = req.body;
     const db = getDb();
@@ -327,7 +327,7 @@ adminRouter.post('/admin/products/batch-discount', (req, res) => {
       query += ` AND category = ?`;
       params.push(category);
     }
-    const products = db.prepare(query).all(...params);
+    const products = await db.prepare(query).all(...params);
 
     if (products.length === 0) {
       return res.status(404).json({ error: 'Aucun produit actif trouvé pour cette sélection.' });
@@ -345,7 +345,7 @@ adminRouter.post('/admin/products/batch-discount', (req, res) => {
       `);
 
       for (const p of products) {
-        updateStmt.run(p.id);
+        await updateStmt.run(p.id);
         affectedCount++;
       }
 
@@ -370,7 +370,7 @@ adminRouter.post('/admin/products/batch-discount', (req, res) => {
     `);
 
     for (const p of products) {
-      updateStmt.run(pct, p.id);
+      await updateStmt.run(pct, p.id);
       affectedCount++;
     }
 
@@ -387,16 +387,16 @@ adminRouter.post('/admin/products/batch-discount', (req, res) => {
 });
 
 // DELETE /api/admin/products/:id - Suppression douce (soft-delete) pour préserver l'historique
-adminRouter.delete('/admin/products/:id', (req, res) => {
+adminRouter.delete('/admin/products/:id', async (req, res) => {
   try {
     const id = Number(req.params.id);
     const db = getDb();
-    const existing = db.prepare(`SELECT * FROM products WHERE id = ?`).get(id);
+    const existing = await db.prepare(`SELECT * FROM products WHERE id = ?`).get(id);
     if (!existing) {
       return res.status(404).json({ error: 'Produit non trouvé' });
     }
 
-    db.prepare(`UPDATE products SET is_active = 0, updated_at = CURRENT_TIMESTAMP WHERE id = ?`).run(id);
+    await db.prepare(`UPDATE products SET is_active = 0, updated_at = CURRENT_TIMESTAMP WHERE id = ?`).run(id);
     res.json({ success: true, message: 'Produit archivé avec succès' });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -404,7 +404,7 @@ adminRouter.delete('/admin/products/:id', (req, res) => {
 });
 
 // POST /api/admin/categories - Créer une catégorie
-adminRouter.post('/admin/categories', (req, res) => {
+adminRouter.post('/admin/categories', async (req, res) => {
   try {
     const { name, slug, icon, description, bannerUrl } = req.body;
     if (!name) {
@@ -412,17 +412,17 @@ adminRouter.post('/admin/categories', (req, res) => {
     }
     const cleanSlug = (slug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-')).toLowerCase();
     const db = getDb();
-    const existing = db.prepare(`SELECT * FROM categories WHERE slug = ?`).get(cleanSlug);
+    const existing = await db.prepare(`SELECT * FROM categories WHERE slug = ?`).get(cleanSlug);
     if (existing) {
       return res.status(400).json({ error: 'Une catégorie avec cet identifiant existe déjà' });
     }
 
-    db.prepare(`
+    await db.prepare(`
       INSERT INTO categories (name, slug, icon, description, banner_url)
       VALUES (?, ?, ?, ?, ?)
     `).run(name, cleanSlug, icon || 'category', description || null, bannerUrl || null);
 
-    const created = db.prepare(`SELECT * FROM categories WHERE slug = ?`).get(cleanSlug);
+    const created = await db.prepare(`SELECT * FROM categories WHERE slug = ?`).get(cleanSlug);
     res.status(201).json(created);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -430,11 +430,11 @@ adminRouter.post('/admin/categories', (req, res) => {
 });
 
 // PUT /api/admin/categories/:id - Modifier une catégorie
-adminRouter.put('/admin/categories/:id', (req, res) => {
+adminRouter.put('/admin/categories/:id', async (req, res) => {
   try {
     const id = Number(req.params.id);
     const db = getDb();
-    const existing = db.prepare(`SELECT * FROM categories WHERE id = ?`).get(id);
+    const existing = await db.prepare(`SELECT * FROM categories WHERE id = ?`).get(id);
     if (!existing) {
       return res.status(404).json({ error: 'Catégorie non trouvée' });
     }
@@ -446,13 +446,13 @@ adminRouter.put('/admin/categories/:id', (req, res) => {
     const newDesc = description !== undefined ? description : existing.description;
     const newBanner = bannerUrl !== undefined ? bannerUrl : existing.banner_url;
 
-    db.prepare(`
+    await db.prepare(`
       UPDATE categories
       SET name = ?, slug = ?, icon = ?, description = ?, banner_url = ?
       WHERE id = ?
     `).run(newName, newSlug, newIcon, newDesc, newBanner, id);
 
-    const updated = db.prepare(`SELECT * FROM categories WHERE id = ?`).get(id);
+    const updated = await db.prepare(`SELECT * FROM categories WHERE id = ?`).get(id);
     res.json(updated);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -460,21 +460,21 @@ adminRouter.put('/admin/categories/:id', (req, res) => {
 });
 
 // DELETE /api/admin/categories/:id - Supprimer une catégorie
-adminRouter.delete('/admin/categories/:id', (req, res) => {
+adminRouter.delete('/admin/categories/:id', async (req, res) => {
   try {
     const id = Number(req.params.id);
     const db = getDb();
-    const existing = db.prepare(`SELECT * FROM categories WHERE id = ?`).get(id);
+    const existing = await db.prepare(`SELECT * FROM categories WHERE id = ?`).get(id);
     if (!existing) {
       return res.status(404).json({ error: 'Catégorie non trouvée' });
     }
 
-    const prods = db.prepare(`SELECT COUNT(*) as count FROM products WHERE category = ? AND is_active = 1`).get(existing.slug);
+    const prods = await db.prepare(`SELECT COUNT(*) as count FROM products WHERE category = ? AND is_active = 1`).get(existing.slug);
     if (prods && prods.count > 0) {
       return res.status(400).json({ error: `Impossible de supprimer : ${prods.count} article(s) sont encore associés à ce rayon.` });
     }
 
-    db.prepare(`DELETE FROM categories WHERE id = ?`).run(id);
+    await db.prepare(`DELETE FROM categories WHERE id = ?`).run(id);
     res.json({ success: true, message: 'Catégorie supprimée avec succès' });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -482,10 +482,10 @@ adminRouter.delete('/admin/categories/:id', (req, res) => {
 });
 
 // GET /api/admin/orders - Lister toutes les commandes
-adminRouter.get('/admin/orders', (req, res) => {
+adminRouter.get('/admin/orders', async (req, res) => {
   try {
     const db = getDb();
-    const rows = db.prepare(`
+    const rows = await db.prepare(`
       SELECT o.*, p.image_url as product_image
       FROM orders o
       LEFT JOIN products p ON o.product_id = p.id
@@ -517,13 +517,13 @@ adminRouter.get('/admin/orders', (req, res) => {
 });
 
 // PATCH /api/admin/orders/:orderNumber/status - Mettre à jour statuts commande et paiement
-adminRouter.patch('/admin/orders/:orderNumber/status', (req, res) => {
+adminRouter.patch('/admin/orders/:orderNumber/status', async (req, res) => {
   try {
     const { orderNumber } = req.params;
     const { fulfillmentStatus, paymentStatus } = req.body;
     const db = getDb();
 
-    const existing = db.prepare(`SELECT * FROM orders WHERE order_number = ?`).get(orderNumber);
+    const existing = await db.prepare(`SELECT * FROM orders WHERE order_number = ?`).get(orderNumber);
     if (!existing) {
       return res.status(404).json({ error: 'Commande non trouvée' });
     }
@@ -531,13 +531,13 @@ adminRouter.patch('/admin/orders/:orderNumber/status', (req, res) => {
     const newFulfillment = fulfillmentStatus || existing.fulfillment_status;
     const newPayment = paymentStatus || existing.payment_status;
 
-    db.prepare(`
+    await db.prepare(`
       UPDATE orders 
       SET fulfillment_status = ?, payment_status = ?, updated_at = CURRENT_TIMESTAMP
       WHERE order_number = ?
     `).run(newFulfillment, newPayment, orderNumber);
 
-    const updated = db.prepare(`SELECT * FROM orders WHERE order_number = ?`).get(orderNumber);
+    const updated = await db.prepare(`SELECT * FROM orders WHERE order_number = ?`).get(orderNumber);
     res.json({
       ...updated,
       orderNumber: updated.order_number,
@@ -561,10 +561,10 @@ adminRouter.patch('/admin/orders/:orderNumber/status', (req, res) => {
 });
 
 // GET /api/admin/settings - Obtenir tous les réglages CMS pour l'admin
-adminRouter.get('/admin/settings', (req, res) => {
+adminRouter.get('/admin/settings', async (req, res) => {
   try {
     const db = getDb();
-    const rows = db.prepare(`SELECT key, value FROM site_settings`).all();
+    const rows = await db.prepare(`SELECT key, value FROM site_settings`).all();
     const settings = {};
     for (const r of rows) {
       try {
@@ -580,14 +580,14 @@ adminRouter.get('/admin/settings', (req, res) => {
 });
 
 // PUT /api/admin/settings/:key - Mettre à jour une section CMS spécifique
-adminRouter.put('/admin/settings/:key', (req, res) => {
+adminRouter.put('/admin/settings/:key', async (req, res) => {
   try {
     const { key } = req.params;
     const db = getDb();
     const payload = req.body.value !== undefined ? req.body.value : req.body;
     const valueStr = typeof payload === 'object' ? JSON.stringify(payload) : String(payload);
 
-    db.prepare(`
+    await db.prepare(`
       INSERT INTO site_settings (key, value, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP)
       ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = CURRENT_TIMESTAMP
     `).run(key, valueStr);
@@ -599,7 +599,7 @@ adminRouter.put('/admin/settings/:key', (req, res) => {
 });
 
 // PUT /api/admin/settings - Mettre à jour plusieurs sections CMS
-adminRouter.put('/admin/settings', (req, res) => {
+adminRouter.put('/admin/settings', async (req, res) => {
   try {
     const db = getDb();
     const updates = req.body;
@@ -614,7 +614,7 @@ adminRouter.put('/admin/settings', (req, res) => {
 
     for (const [key, val] of Object.entries(updates)) {
       const valStr = typeof val === 'object' ? JSON.stringify(val) : String(val);
-      stmt.run(key, valStr);
+      await stmt.run(key, valStr);
     }
 
     res.json({ success: true, message: 'Paramètres mis à jour' });
@@ -626,10 +626,10 @@ adminRouter.put('/admin/settings', (req, res) => {
 // ==================== COLLABORATORS MANAGEMENT ====================
 
 // GET /api/admin/collaborators - Lister tous les collaborateurs (réservé Super Admin)
-adminRouter.get('/admin/collaborators', requireSuperAdmin, (req, res) => {
+adminRouter.get('/admin/collaborators', requireSuperAdmin, async (req, res) => {
   try {
     const db = getDb();
-    const collaborators = db.prepare(`
+    const collaborators = await db.prepare(`
       SELECT id, email, username, full_name, phone, role, permissions, is_active, created_at, last_login_at
       FROM admin_users
       ORDER BY id ASC
@@ -641,7 +641,7 @@ adminRouter.get('/admin/collaborators', requireSuperAdmin, (req, res) => {
 });
 
 // POST /api/admin/collaborators - Créer un nouveau collaborateur & générer l'invitation (réservé Super Admin)
-adminRouter.post('/admin/collaborators', requireSuperAdmin, (req, res) => {
+adminRouter.post('/admin/collaborators', requireSuperAdmin, async (req, res) => {
   try {
     const { email, username, fullName, phone, role, permissions, password } = req.body;
     if (!email) {
@@ -656,7 +656,7 @@ adminRouter.post('/admin/collaborators', requireSuperAdmin, (req, res) => {
     const permissionsStr = permissions ? (typeof permissions === 'string' ? permissions : JSON.stringify(permissions)) : null;
 
     const db = getDb();
-    const existing = db.prepare(`
+    const existing = await db.prepare(`
       SELECT id FROM admin_users 
       WHERE LOWER(email) = LOWER(?) OR LOWER(username) = LOWER(?)
     `).get(cleanEmail, cleanUsername);
@@ -672,12 +672,12 @@ adminRouter.post('/admin/collaborators', requireSuperAdmin, (req, res) => {
     const salt = bcrypt.genSaltSync(10);
     const passwordHash = bcrypt.hashSync(effectivePassword, salt);
 
-    const result = db.prepare(`
+    const result = await db.prepare(`
       INSERT INTO admin_users (email, username, full_name, phone, role, permissions, password_hash, is_active)
       VALUES (?, ?, ?, ?, ?, ?, ?, 1)
     `).run(cleanEmail, cleanUsername, cleanFullName, cleanPhone, cleanRole, permissionsStr, passwordHash);
 
-    const newCollaborator = db.prepare(`
+    const newCollaborator = await db.prepare(`
       SELECT id, email, username, full_name, phone, role, permissions, is_active, created_at, last_login_at
       FROM admin_users
       WHERE id = ?
@@ -687,7 +687,7 @@ adminRouter.post('/admin/collaborators', requireSuperAdmin, (req, res) => {
     const protocol = req.headers['x-forwarded-proto'] || req.protocol || 'http';
     const host = req.get('host') || 'localhost:3000';
     const baseUrl = `${protocol}://${host}`;
-    const invitation = inviteService.buildInvitation({
+    const invitation = await inviteService.buildInvitation({
       collaborator: newCollaborator,
       password: effectivePassword,
       baseUrl
@@ -703,20 +703,21 @@ adminRouter.post('/admin/collaborators', requireSuperAdmin, (req, res) => {
 });
 
 // PUT /api/admin/collaborators/:id - Mettre à jour un collaborateur (réservé Super Admin)
-adminRouter.put('/admin/collaborators/:id', requireSuperAdmin, (req, res) => {
+adminRouter.put('/admin/collaborators/:id', requireSuperAdmin, async (req, res) => {
   try {
     const { id } = req.params;
     const { email, username, fullName, role, isActive, password } = req.body;
     const db = getDb();
 
-    const existing = db.prepare(`SELECT * FROM admin_users WHERE id = ?`).get(id);
+    const existing = await db.prepare(`SELECT * FROM admin_users WHERE id = ?`).get(id);
     if (!existing) {
       return res.status(404).json({ error: 'Collaborateur introuvable' });
     }
 
     // Protection : on ne peut pas rétrograder le dernier SUPER_ADMIN
     if (existing.role === 'SUPER_ADMIN' && role && role !== 'SUPER_ADMIN') {
-      const superAdminCount = db.prepare(`SELECT COUNT(*) as count FROM admin_users WHERE role = 'SUPER_ADMIN' AND is_active = 1`).get().count;
+      const superAdminRow = await db.prepare(`SELECT COUNT(*) as count FROM admin_users WHERE role = 'SUPER_ADMIN' AND is_active = 1`).get();
+      const superAdminCount = superAdminRow ? superAdminRow.count : 0;
       if (superAdminCount <= 1) {
         return res.status(400).json({ error: 'Impossible de changer le rôle du dernier Super Administrateur actif' });
       }
@@ -739,13 +740,13 @@ adminRouter.put('/admin/collaborators/:id', requireSuperAdmin, (req, res) => {
     const updatedRole = role !== undefined ? role : existing.role;
     const updatedIsActive = isActive !== undefined ? (isActive ? 1 : 0) : existing.is_active;
 
-    db.prepare(`
+    await db.prepare(`
       UPDATE admin_users
       SET email = ?, username = ?, full_name = ?, role = ?, is_active = ?, password_hash = ?
       WHERE id = ?
     `).run(updatedEmail, updatedUsername, updatedFullName, updatedRole, updatedIsActive, passwordHash, id);
 
-    const updated = db.prepare(`
+    const updated = await db.prepare(`
       SELECT id, email, username, full_name, role, is_active, created_at, last_login_at
       FROM admin_users
       WHERE id = ?
@@ -758,7 +759,7 @@ adminRouter.put('/admin/collaborators/:id', requireSuperAdmin, (req, res) => {
 });
 
 // DELETE /api/admin/collaborators/:id - Supprimer un collaborateur (réservé Super Admin)
-adminRouter.delete('/admin/collaborators/:id', requireSuperAdmin, (req, res) => {
+adminRouter.delete('/admin/collaborators/:id', requireSuperAdmin, async (req, res) => {
   try {
     const { id } = req.params;
     const db = getDb();
@@ -768,20 +769,21 @@ adminRouter.delete('/admin/collaborators/:id', requireSuperAdmin, (req, res) => 
       return res.status(400).json({ error: 'Vous ne pouvez pas supprimer votre propre compte' });
     }
 
-    const target = db.prepare(`SELECT * FROM admin_users WHERE id = ?`).get(id);
+    const target = await db.prepare(`SELECT * FROM admin_users WHERE id = ?`).get(id);
     if (!target) {
       return res.status(404).json({ error: 'Collaborateur introuvable' });
     }
 
     // Prevent deleting last SUPER_ADMIN
     if (target.role === 'SUPER_ADMIN') {
-      const superAdminCount = db.prepare(`SELECT COUNT(*) as count FROM admin_users WHERE role = 'SUPER_ADMIN'`).get().count;
+      const superAdminRow = await db.prepare(`SELECT COUNT(*) as count FROM admin_users WHERE role = 'SUPER_ADMIN'`).get();
+      const superAdminCount = superAdminRow ? superAdminRow.count : 0;
       if (superAdminCount <= 1) {
         return res.status(400).json({ error: 'Impossible de supprimer le dernier Super Administrateur' });
       }
     }
 
-    db.prepare(`DELETE FROM admin_users WHERE id = ?`).run(id);
+    await db.prepare(`DELETE FROM admin_users WHERE id = ?`).run(id);
     res.json({ success: true, message: 'Collaborateur supprimé avec succès' });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -789,12 +791,12 @@ adminRouter.delete('/admin/collaborators/:id', requireSuperAdmin, (req, res) => 
 });
 
 // POST /api/admin/collaborators/:id/resend-invite - Régénérer et renvoyer une invitation (réservé Super Admin)
-adminRouter.post('/admin/collaborators/:id/resend-invite', requireSuperAdmin, (req, res) => {
+adminRouter.post('/admin/collaborators/:id/resend-invite', requireSuperAdmin, async (req, res) => {
   try {
     const { id } = req.params;
     const db = getDb();
 
-    const collaborator = db.prepare(`
+    const collaborator = await db.prepare(`
       SELECT id, email, username, full_name, phone, role, permissions, is_active, created_at, last_login_at
       FROM admin_users
       WHERE id = ?
@@ -809,12 +811,12 @@ adminRouter.post('/admin/collaborators/:id/resend-invite', requireSuperAdmin, (r
     const salt = bcrypt.genSaltSync(10);
     const passwordHash = bcrypt.hashSync(tempPassword, salt);
 
-    db.prepare(`UPDATE admin_users SET password_hash = ? WHERE id = ?`).run(passwordHash, id);
+    await db.prepare(`UPDATE admin_users SET password_hash = ? WHERE id = ?`).run(passwordHash, id);
 
     const protocol = req.headers['x-forwarded-proto'] || req.protocol || 'http';
     const host = req.get('host') || 'localhost:3000';
     const baseUrl = `${protocol}://${host}`;
-    const invitation = inviteService.buildInvitation({
+    const invitation = await inviteService.buildInvitation({
       collaborator,
       password: tempPassword,
       baseUrl

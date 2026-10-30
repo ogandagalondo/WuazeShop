@@ -8,10 +8,10 @@ const activeSessions = new Map();
 const AUTH_SECRET = config.jwtSecret;
 
 export const authService = {
-  login(identifier, password) {
+  async login(identifier, password) {
     const db = getDb();
     const cleanId = (identifier || '').trim();
-    const user = db.prepare(`
+    const user = await db.prepare(`
       SELECT * FROM admin_users 
       WHERE LOWER(email) = LOWER(?) OR LOWER(username) = LOWER(?)
     `).get(cleanId, cleanId);
@@ -29,7 +29,7 @@ export const authService = {
     }
 
     try {
-      db.prepare(`UPDATE admin_users SET last_login_at = CURRENT_TIMESTAMP WHERE id = ?`).run(user.id);
+      await db.prepare(`UPDATE admin_users SET last_login_at = CURRENT_TIMESTAMP WHERE id = ?`).run(user.id);
     } catch {}
 
     const sessionPayload = {
@@ -95,7 +95,6 @@ export const authService = {
     return null;
   }
 };
-
 
 export function requireAdminAuth(req, res, next) {
   const authHeader = req.headers['authorization'];

@@ -31,7 +31,7 @@ paymentRouter.post('/payments/simulator/confirm', async (req, res) => {
            updated_at = CURRENT_TIMESTAMP
        WHERE transaction_reference = ?`
     );
-    updateOrder.run(transactionReference);
+    await updateOrder.run(transactionReference);
 
     res.json({
       success: true,
@@ -51,7 +51,7 @@ paymentRouter.post('/payments/webhook', async (req, res) => {
 
     if (result && result.status === 'CONFIRMED_CLEARED') {
       const db = getDb();
-      db.prepare(
+      await db.prepare(
         `UPDATE orders 
          SET payment_status = 'CONFIRMED_CLEARED', 
              fulfillment_status = 'AWAITING_PROCUREMENT', 
