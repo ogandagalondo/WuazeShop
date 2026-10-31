@@ -3425,13 +3425,211 @@ collabFilterPills.forEach(pill => {
   });
 });
 
-// Clic sur le profil en en-tête pour modifier ses identifiants personnels
+// ==================== MON PROFIL PERSONNEL MODAL ====================
+const myProfileModalOverlay = document.getElementById('my-profile-modal-overlay');
+const closeMyProfileModalBtn = document.getElementById('close-my-profile-modal-btn');
+const cancelMyProfileModalBtn = document.getElementById('cancel-my-profile-modal-btn');
+const myProfileForm = document.getElementById('my-profile-form');
+const myProfileError = document.getElementById('my-profile-error');
+const myProfileErrorText = document.getElementById('my-profile-error-text');
+const myProfileAvatarBadge = document.getElementById('my-profile-avatar-badge');
+const profileRoleDisplay = document.getElementById('profile-role-display');
+const profileFullname = document.getElementById('profile-fullname');
+const profileEmail = document.getElementById('profile-email');
+const profileUsername = document.getElementById('profile-username');
+const profilePhone = document.getElementById('profile-phone');
+const profileNewPassword = document.getElementById('profile-new-password');
+const profileConfirmPassword = document.getElementById('profile-confirm-password');
+const toggleProfileNewPassBtn = document.getElementById('toggle-profile-new-pass-btn');
+const toggleProfileConfPassBtn = document.getElementById('toggle-profile-conf-pass-btn');
+const saveMyProfileBtn = document.getElementById('save-my-profile-btn');
+const mobileTabProfileBtn = document.getElementById('mobile-tab-profile-btn');
+
+const ROLE_PRETTY_LABELS = {
+  SUPER_ADMIN: 'Super Administrateur (Fondateur)',
+  GESTIONNAIRE: 'Gestionnaire (Catalogue & Commandes)',
+  AGENT: 'Agent Logistique (Expéditions & Fret)'
+};
+
+function openMyProfileModal() {
+  if (!myProfileModalOverlay || !currentAdminUser) return;
+  if (myProfileError) myProfileError.classList.add('hidden');
+
+  const name = currentAdminUser.fullName || currentAdminUser.full_name || currentAdminUser.username || '';
+  const initial = name ? name.trim().charAt(0).toUpperCase() : 'A';
+  if (myProfileAvatarBadge) myProfileAvatarBadge.textContent = initial;
+
+  const role = currentAdminUser.role || 'SUPER_ADMIN';
+  if (profileRoleDisplay) {
+    profileRoleDisplay.textContent = ROLE_PRETTY_LABELS[role] || role;
+  }
+
+  if (profileFullname) profileFullname.value = currentAdminUser.fullName || currentAdminUser.full_name || '';
+  if (profileEmail) profileEmail.value = currentAdminUser.email || '';
+  if (profileUsername) profileUsername.value = currentAdminUser.username || '';
+  if (profilePhone) profilePhone.value = currentAdminUser.phone || '';
+
+  if (profileNewPassword) {
+    profileNewPassword.value = '';
+    profileNewPassword.type = 'password';
+  }
+  if (profileConfirmPassword) {
+    profileConfirmPassword.value = '';
+    profileConfirmPassword.type = 'password';
+  }
+
+  if (toggleProfileNewPassBtn) {
+    toggleProfileNewPassBtn.innerHTML = '<span class="material-symbols-outlined text-base">visibility</span>';
+  }
+  if (toggleProfileConfPassBtn) {
+    toggleProfileConfPassBtn.innerHTML = '<span class="material-symbols-outlined text-base">visibility</span>';
+  }
+
+  myProfileModalOverlay.classList.remove('hidden');
+}
+
+function closeMyProfileModal() {
+  if (myProfileModalOverlay) myProfileModalOverlay.classList.add('hidden');
+}
+
+if (closeMyProfileModalBtn) closeMyProfileModalBtn.addEventListener('click', closeMyProfileModal);
+if (cancelMyProfileModalBtn) cancelMyProfileModalBtn.addEventListener('click', closeMyProfileModal);
+if (myProfileModalOverlay) {
+  myProfileModalOverlay.addEventListener('click', (e) => {
+    if (e.target === myProfileModalOverlay) closeMyProfileModal();
+  });
+}
+
+if (toggleProfileNewPassBtn && profileNewPassword) {
+  toggleProfileNewPassBtn.addEventListener('click', () => {
+    const isPass = profileNewPassword.type === 'password';
+    profileNewPassword.type = isPass ? 'text' : 'password';
+    toggleProfileNewPassBtn.innerHTML = `<span class="material-symbols-outlined text-base">${isPass ? 'visibility_off' : 'visibility'}</span>`;
+  });
+}
+
+if (toggleProfileConfPassBtn && profileConfirmPassword) {
+  toggleProfileConfPassBtn.addEventListener('click', () => {
+    const isPass = profileConfirmPassword.type === 'password';
+    profileConfirmPassword.type = isPass ? 'text' : 'password';
+    toggleProfileConfPassBtn.innerHTML = `<span class="material-symbols-outlined text-base">${isPass ? 'visibility_off' : 'visibility'}</span>`;
+  });
+}
+
+if (myProfileForm) {
+  myProfileForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (myProfileError) myProfileError.classList.add('hidden');
+
+    const fullName = profileFullname?.value.trim();
+    const email = profileEmail?.value.trim();
+    const username = profileUsername?.value.trim();
+    const phone = profilePhone?.value.trim() || '';
+    const newPassword = profileNewPassword?.value || '';
+    const confirmPassword = profileConfirmPassword?.value || '';
+
+    if (!fullName || !email || !username) {
+      if (myProfileError && myProfileErrorText) {
+        myProfileErrorText.textContent = 'Veuillez renseigner votre nom complet, votre adresse e-mail et votre nom d\'utilisateur.';
+        myProfileError.classList.remove('hidden');
+      }
+      return;
+    }
+
+    if (newPassword.length > 0) {
+      if (newPassword.length < 6) {
+        if (myProfileError && myProfileErrorText) {
+          myProfileErrorText.textContent = 'Le nouveau mot de passe doit comporter au moins 6 caractères.';
+          myProfileError.classList.remove('hidden');
+        }
+        return;
+      }
+      if (newPassword !== confirmPassword) {
+        if (myProfileError && myProfileErrorText) {
+          myProfileErrorText.textContent = 'Les deux mots de passe saisis ne correspondent pas.';
+          myProfileError.classList.remove('hidden');
+        }
+        return;
+      }
+    }
+
+    try {
+      if (saveMyProfileBtn) {
+        saveMyProfileBtn.disabled = true;
+        saveMyProfileBtn.innerHTML = '<span class="material-symbols-outlined text-sm animate-spin">refresh</span><span>Enregistrement...</span>';
+      }
+
+      const payload = {
+        fullName,
+        email,
+        username,
+        phone
+      };
+      if (newPassword.length > 0) {
+        payload.password = newPassword;
+      }
+
+      const res = await fetch('/api/admin/me', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${adminToken}`
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        if (data.token) {
+          adminToken = data.token;
+          sessionStorage.setItem('wuazeshop_admin_token', data.token);
+        }
+        if (data.user) {
+          currentAdminUser = {
+            ...currentAdminUser,
+            ...data.user
+          };
+          renderAdminUserProfile();
+        }
+
+        closeMyProfileModal();
+        showToast('✓ Vos informations et votre mot de passe privé ont été enregistrés avec succès !', 'success');
+
+        if (currentAdminUser && currentAdminUser.role === 'SUPER_ADMIN') {
+          await loadCollaborators();
+        }
+      } else {
+        if (myProfileError && myProfileErrorText) {
+          myProfileErrorText.textContent = data.error || 'Erreur lors de la mise à jour du profil';
+          myProfileError.classList.remove('hidden');
+        }
+      }
+    } catch (err) {
+      console.error('Erreur mise à jour profil:', err);
+      if (myProfileError && myProfileErrorText) {
+        myProfileErrorText.textContent = 'Erreur réseau lors de la mise à jour de vos informations';
+        myProfileError.classList.remove('hidden');
+      }
+    } finally {
+      if (saveMyProfileBtn) {
+        saveMyProfileBtn.disabled = false;
+        saveMyProfileBtn.innerHTML = '<span class="material-symbols-outlined text-sm">save</span><span>Enregistrer mon profil</span>';
+      }
+    }
+  });
+}
+
+// Clic sur le profil en en-tête pour ouvrir son profil personnel
 if (adminUserPill) {
   adminUserPill.addEventListener('click', () => {
-    if (!currentAdminUser) return;
-    const myId = currentAdminUser.id || currentAdminUser.userId;
-    const found = currentCollaborators.find(c => c.id === myId) || currentAdminUser;
-    openCollaboratorModal(found);
+    openMyProfileModal();
+  });
+}
+
+if (mobileTabProfileBtn) {
+  mobileTabProfileBtn.addEventListener('click', () => {
+    openMyProfileModal();
   });
 }
 

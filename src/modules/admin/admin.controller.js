@@ -62,9 +62,126 @@ adminRouter.get('/settings', async (req, res) => {
 // Toutes les routes ci-dessous nécessitent une authentification admin
 adminRouter.use('/admin', requireAdminAuth);
 
-// GET /api/admin/me
-adminRouter.get('/admin/me', (req, res) => {
-  res.json({ authenticated: true, user: req.admin });
+// GET /api/admin/me - Récupérer les informations complètes du collaborateur connecté
+adminRouter.get('/admin/me', async (req, res) => {
+  try {
+    const db = getDb();
+    const user = await db.prepare(`
+      SELECT id, email, username, full_name, phone, role, is_active, created_at, last_login_at
+      FROM admin_users
+      WHERE id = ?
+    `).get(req.admin.userId);
+
+    if (!user) {
+      return res.status(404).json({ error: 'Compte collaborateur introuvable' });
+    }
+
+    res.json({
+      authenticated: true,
+      user: {
+        id: user.id,
+        userId: user.id,
+        email: user.email,
+        username: user.username,
+        fullName: user.full_name || user.username,
+        full_name: user.full_name || user.username,
+        phone: user.phone || '',
+        role: user.role || 'SUPER_ADMIN',
+        isActive: Boolean(user.is_active)
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// PUT /api/admin/me - Permet à CHAQUE collaborateur de modifier UNIQUEMENT ses propres informations (Nom, Email, Téléphone, Username, Mot de passe)
+adminRouter.put('/admin/me', async (req, res) => {
+  try {
+    const userId = req.admin.userId;
+    const { fullName, email, phone, username, password } = req.body;
+    const db = getDb();
+
+    const existing = await db.prepare(`SELECT * FROM admin_users WHERE id = ?`).get(userId);
+    if (!existing) {
+      return res.status(404).json({ error: 'Compte collaborateur introuvable' });
+    }
+
+    // 1. Validation de l'email si modifié
+    let updatedEmail = existing.email;
+    if (email !== undefined && email.trim().length > 0) {
+      const cleanEmail = email.trim().toLowerCase();
+      const emailConflict = await db.prepare(`SELECT id FROM admin_users WHERE LOWER(email) = LOWER(?) AND id != ?`).get(cleanEmail, userId);
+      if (emailConflict) {
+        return res.status(400).json({ error: 'Cette adresse e-mail est déjà utilisée par un autre collaborateur.' });
+      }
+      updatedEmail = cleanEmail;
+    }
+
+    // 2. Validation du nom d'utilisateur si modifié
+    let updatedUsername = existing.username;
+    if (username !== undefined && username.trim().length > 0) {
+      const cleanUsername = username.trim().toLowerCase();
+      const userConflict = await db.prepare(`SELECT id FROM admin_users WHERE LOWER(username) = LOWER(?) AND id != ?`).get(cleanUsername, userId);
+      if (userConflict) {
+        return res.status(400).json({ error: 'Cet identifiant / nom d\'utilisateur est déjà pris.' });
+      }
+      updatedUsername = cleanUsername;
+    }
+
+    // 3. Validation et hachage du nouveau mot de passe privé
+    let passwordHash = existing.password_hash;
+    if (password !== undefined && password.trim().length > 0) {
+      if (password.trim().length < 6) {
+        return res.status(400).json({ error: 'Le nouveau mot de passe doit contenir au moins 6 caractères.' });
+      }
+      const salt = bcrypt.genSaltSync(10);
+      passwordHash = bcrypt.hashSync(password.trim(), salt);
+    }
+
+    const updatedFullName = fullName !== undefined ? fullName.trim() : existing.full_name;
+    const updatedPhone = phone !== undefined ? phone.trim() : existing.phone;
+
+    // Mise à jour en base : rôle et statut restent strictement inchangés pour préserver la sécurité
+    await db.prepare(`
+      UPDATE admin_users
+      SET email = ?, username = ?, full_name = ?, phone = ?, password_hash = ?
+      WHERE id = ?
+    `).run(updatedEmail, updatedUsername, updatedFullName, updatedPhone, passwordHash, userId);
+
+    const updatedUser = await db.prepare(`
+      SELECT id, email, username, full_name, phone, role, is_active, created_at, last_login_at
+      FROM admin_users
+      WHERE id = ?
+    `).get(userId);
+
+    // Générer une session et token actualisés
+    const session = authService.createSession(updatedUser);
+
+    res.json({
+      success: true,
+      message: 'Vos informations personnelles et votre mot de passe privé ont été mis à jour avec succès.',
+      token: session.token,
+      user: {
+        id: updatedUser.id,
+        userId: updatedUser.id,
+        email: updatedUser.email,
+        username: updatedUser.username,
+        fullName: updatedUser.full_name || updatedUser.username,
+        full_name: updatedUser.full_name || updatedUser.username,
+        phone: updatedUser.phone || '',
+        role: updatedUser.role || 'SUPER_ADMIN'
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Alias PUT /api/admin/profile
+adminRouter.put('/admin/profile', (req, res, next) => {
+  req.url = '/admin/me';
+  adminRouter.handle(req, res, next);
 });
 
 // Whitelist stricte des types MIME d'images autorisés

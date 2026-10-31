@@ -42,6 +42,10 @@ export const authService = {
       await db.prepare(`UPDATE admin_users SET last_login_at = CURRENT_TIMESTAMP WHERE id = ?`).run(user.id);
     } catch {}
 
+    return this.createSession(user);
+  },
+
+  createSession(user) {
     const sessionPayload = {
       userId: user.id,
       username: user.username,
@@ -59,6 +63,7 @@ export const authService = {
 
     return { 
       token, 
+      userId: user.id,
       username: user.username, 
       email: user.email,
       fullName: user.full_name || user.username,

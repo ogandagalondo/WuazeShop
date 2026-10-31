@@ -561,6 +561,56 @@ describe('Admin CMS API', () => {
     expect(createRes.status).toBe(403);
   });
 
+  it('allows collaborator to retrieve and update their own profile and private password (PUT /api/admin/me)', async () => {
+    // 1. GET /api/admin/me
+    const getRes = await request(app)
+      .get('/api/admin/me')
+      .set('Authorization', `Bearer ${collabToken}`);
+
+    expect(getRes.status).toBe(200);
+    expect(getRes.body.authenticated).toBe(true);
+    expect(getRes.body.user.email).toBe('collaborateur@wuazeshop.ga');
+    expect(getRes.body.user.role).toBe('GESTIONNAIRE');
+
+    // 2. PUT /api/admin/me - Update profile & private password
+    const putRes = await request(app)
+      .put('/api/admin/me')
+      .set('Authorization', `Bearer ${collabToken}`)
+      .send({
+        fullName: 'Marc Ndong (Profil Modifié)',
+        phone: '+241 77 99 88 77',
+        password: 'MyPrivatePassword#99',
+        role: 'SUPER_ADMIN' // Attempt privilege escalation, must be ignored!
+      });
+
+    expect(putRes.status).toBe(200);
+    expect(putRes.body.success).toBe(true);
+    expect(putRes.body.user.fullName).toBe('Marc Ndong (Profil Modifié)');
+    expect(putRes.body.user.phone).toBe('+241 77 99 88 77');
+    expect(putRes.body.user.role).toBe('GESTIONNAIRE'); // Role must remain unchanged!
+    expect(putRes.body.token).toBeDefined();
+
+    // 3. Old password must now fail
+    const oldLogin = await request(app)
+      .post('/api/admin/login')
+      .send({
+        email: 'collaborateur@wuazeshop.ga',
+        password: 'collabpassword123'
+      });
+    expect(oldLogin.status).toBe(401);
+
+    // 4. New private password must now succeed
+    const newLogin = await request(app)
+      .post('/api/admin/login')
+      .send({
+        email: 'collaborateur@wuazeshop.ga',
+        password: 'MyPrivatePassword#99'
+      });
+    expect(newLogin.status).toBe(200);
+    expect(newLogin.body.fullName).toBe('Marc Ndong (Profil Modifié)');
+    collabToken = newLogin.body.token;
+  });
+
   it('allows admin to update collaborator role and status', async () => {
     const res = await request(app)
       .put(`/api/admin/collaborators/${newCollaboratorId}`)

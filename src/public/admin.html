@@ -1201,6 +1201,10 @@
       <span class="material-symbols-outlined text-xl">group</span>
       <span>Équipe</span>
     </button>
+    <button id="mobile-tab-profile-btn" type="button" class="flex flex-col items-center gap-0.5 text-gray-400 hover:text-purple-700 text-[10px] font-medium cursor-pointer" title="Mon Profil">
+      <span class="material-symbols-outlined text-xl">account_circle</span>
+      <span>Profil</span>
+    </button>
     <button id="mobile-add-product-btn" class="flex flex-col items-center gap-0.5 text-[#10b981] text-[10px] font-bold">
       <span class="material-symbols-outlined text-xl">add_circle</span>
       <span>+ Produit</span>
@@ -2102,6 +2106,139 @@
     </div>
   </div>
 
+  <!-- ==================== MY PROFILE & SECURITY MODAL ==================== -->
+  <div id="my-profile-modal-overlay" class="modal-overlay hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="modal-card bg-white rounded-t-3xl sm:rounded-3xl w-full max-w-lg max-h-[92vh] flex flex-col shadow-2xl border border-gray-100 overflow-hidden">
+      
+      <!-- Modal Header -->
+      <div class="p-5 border-b border-gray-100 flex items-center justify-between shrink-0 bg-gray-50/70">
+        <div class="flex items-center gap-3">
+          <div id="my-profile-avatar-badge" class="w-11 h-11 rounded-2xl bg-purple-100 text-purple-700 font-black text-sm flex items-center justify-center uppercase shadow-2xs">
+            A
+          </div>
+          <div>
+            <h3 class="font-extrabold text-base sm:text-lg text-gray-900 leading-tight">Mon Profil Collaborateur</h3>
+            <p class="text-[11px] text-gray-500">Modifiez vos coordonnées et votre mot de passe confidentiel</p>
+          </div>
+        </div>
+        <button id="close-my-profile-modal-btn" type="button" class="w-8 h-8 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center hover:bg-gray-200 transition-colors cursor-pointer" title="Fermer">
+          <span class="material-symbols-outlined text-lg">close</span>
+        </button>
+      </div>
+
+      <!-- Modal Body (Scrollable Form) -->
+      <form id="my-profile-form" class="p-5 sm:p-6 overflow-y-auto space-y-4 text-xs sm:text-sm">
+        
+        <div id="my-profile-error" class="hidden p-3 rounded-xl bg-red-50 text-red-700 text-xs font-semibold border border-red-200 flex items-center gap-2">
+          <span class="material-symbols-outlined text-base shrink-0">error</span>
+          <span id="my-profile-error-text"></span>
+        </div>
+
+        <!-- Rôle attribué (Lecture seule) -->
+        <div class="p-3.5 bg-gray-50/80 rounded-2xl border border-gray-200/80 flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-[#0d7252]">
+              <span class="material-symbols-outlined text-base">verified_user</span>
+            </div>
+            <div>
+              <span class="text-[10px] font-bold uppercase text-gray-400 block">Poste &amp; Accès attribué</span>
+              <span id="profile-role-display" class="font-black text-xs text-gray-900">Gestionnaire</span>
+            </div>
+          </div>
+          <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-[#0d7252]">Actif</span>
+        </div>
+
+        <!-- Nom complet & Email -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <div>
+            <label class="block font-bold text-gray-700 mb-1">Nom complet *</label>
+            <div class="flex items-center bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2.5 focus-within:border-[#0d7252] focus-within:bg-white">
+              <span class="material-symbols-outlined text-gray-400 text-base mr-2">badge</span>
+              <input id="profile-fullname" required class="w-full bg-transparent text-xs sm:text-sm text-gray-900 focus:outline-none font-medium" placeholder="Ex: Marc Ndong" type="text"/>
+            </div>
+          </div>
+          <div>
+            <label class="block font-bold text-gray-700 mb-1">Adresse e-mail (Login) *</label>
+            <div class="flex items-center bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2.5 focus-within:border-[#0d7252] focus-within:bg-white">
+              <span class="material-symbols-outlined text-gray-400 text-base mr-2">mail</span>
+              <input id="profile-email" required class="w-full bg-transparent text-xs sm:text-sm text-gray-900 focus:outline-none font-medium" placeholder="marc@wuazeshop.ga" type="email"/>
+            </div>
+          </div>
+        </div>
+
+        <!-- Identifiant & Téléphone -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <div>
+            <label class="block font-bold text-gray-700 mb-1">Nom d'utilisateur (Pseudo) *</label>
+            <div class="flex items-center bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2.5 focus-within:border-[#0d7252] focus-within:bg-white">
+              <span class="material-symbols-outlined text-gray-400 text-base mr-2">alternate_email</span>
+              <input id="profile-username" required class="w-full bg-transparent text-xs sm:text-sm text-gray-900 focus:outline-none font-medium" placeholder="ex: marc_ndong" type="text"/>
+            </div>
+          </div>
+          <div>
+            <label class="block font-bold text-gray-700 mb-1">Téléphone / WhatsApp</label>
+            <div class="flex items-center bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2.5 focus-within:border-[#0d7252] focus-within:bg-white">
+              <span class="material-symbols-outlined text-gray-400 text-base mr-2">call</span>
+              <input id="profile-phone" class="w-full bg-transparent text-xs sm:text-sm text-gray-900 focus:outline-none font-medium" placeholder="+241 77 12 34 56" type="tel"/>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section Sécurité & Mot de passe personnel -->
+        <div class="p-4 bg-emerald-50/50 rounded-2xl border border-emerald-100 space-y-3 mt-2">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-[#0d7252] text-lg">lock_reset</span>
+            <div>
+              <span class="text-xs font-extrabold text-gray-900 block">Changer mon mot de passe privé</span>
+              <span class="text-[11px] text-gray-500">Laissez ces champs vides si vous ne souhaitez pas modifier votre mot de passe actuel.</span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+            <div>
+              <label class="block font-bold text-gray-700 text-xs mb-1">Nouveau mot de passe</label>
+              <div class="relative flex items-center bg-white border border-gray-200 rounded-xl px-3.5 py-2 focus-within:border-[#0d7252]">
+                <input id="profile-new-password" class="w-full bg-transparent text-xs sm:text-sm text-gray-900 focus:outline-none pr-8 font-mono" placeholder="Min. 6 caractères" type="password" minlength="6" autocomplete="new-password"/>
+                <button type="button" id="toggle-profile-new-pass-btn" class="absolute right-2.5 text-gray-400 hover:text-gray-600 cursor-pointer" title="Afficher/Masquer">
+                  <span class="material-symbols-outlined text-base">visibility</span>
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label class="block font-bold text-gray-700 text-xs mb-1">Confirmer le mot de passe</label>
+              <div class="relative flex items-center bg-white border border-gray-200 rounded-xl px-3.5 py-2 focus-within:border-[#0d7252]">
+                <input id="profile-confirm-password" class="w-full bg-transparent text-xs sm:text-sm text-gray-900 focus:outline-none pr-8 font-mono" placeholder="Retapez à l'identique" type="password" minlength="6" autocomplete="new-password"/>
+                <button type="button" id="toggle-profile-conf-pass-btn" class="absolute right-2.5 text-gray-400 hover:text-gray-600 cursor-pointer" title="Afficher/Masquer">
+                  <span class="material-symbols-outlined text-base">visibility</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Privacy Notice -->
+          <div class="flex items-start gap-2 pt-1 text-[11px] text-gray-500 leading-relaxed">
+            <span class="material-symbols-outlined text-emerald-600 text-sm shrink-0 mt-0.5">security</span>
+            <span>Votre mot de passe est chiffré de façon irréversible. Une fois modifié, personne (y compris le Super Admin) ne pourra le lire.</span>
+          </div>
+        </div>
+
+        <!-- Modal Footer Actions -->
+        <div class="pt-4 border-t border-gray-100 flex items-center justify-end gap-2.5">
+          <button id="cancel-my-profile-modal-btn" type="button" class="py-2.5 px-4 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs transition-colors cursor-pointer">
+            Annuler
+          </button>
+          <button id="save-my-profile-btn" type="submit" class="py-2.5 px-6 rounded-full bg-[#0d7252] hover:bg-[#08553d] text-white font-bold text-xs shadow-md transition-all flex items-center gap-1.5 cursor-pointer active:scale-95">
+            <span class="material-symbols-outlined text-sm">save</span>
+            <span>Enregistrer mon profil</span>
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+
   <!-- ==================== CUSTOM IN-APP CONFIRM & ALERT MODAL ==================== -->
   <div id="admin-dialog-overlay" class="modal-overlay hidden fixed inset-0 z-[120] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div id="admin-dialog-card" class="modal-card bg-white rounded-3xl w-full max-w-md shadow-2xl border border-gray-100 overflow-hidden">
@@ -2152,6 +2289,6 @@
   <!-- ==================== TOAST NOTIFICATIONS CONTAINER ==================== -->
   <div id="admin-toast-container" class="fixed bottom-5 right-5 z-[130] flex flex-col gap-2.5 pointer-events-none max-w-sm w-full px-4 sm:px-0"></div>
 
-  <script src="/js/admin.js?v=2.6"></script>
+  <script src="/js/admin.js?v=2.7"></script>
 </body>
 </html>
