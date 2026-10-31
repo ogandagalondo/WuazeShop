@@ -163,6 +163,245 @@ function escapeHtml(str) {
     .replace(/'/g, '&#039;');
 }
 
+// ==================== CUSTOM IN-APP CONFIRM & ALERT MODAL ====================
+let adminDialogResolver = null;
+
+const adminDialogOverlay = document.getElementById('admin-dialog-overlay');
+const adminDialogBadge = document.getElementById('admin-dialog-badge');
+const adminDialogBadgeIcon = document.getElementById('admin-dialog-badge-icon');
+const adminDialogBadgeText = document.getElementById('admin-dialog-badge-text');
+const adminDialogCloseBtn = document.getElementById('admin-dialog-close-btn');
+const adminDialogIconBox = document.getElementById('admin-dialog-icon-box');
+const adminDialogIcon = document.getElementById('admin-dialog-icon');
+const adminDialogTitle = document.getElementById('admin-dialog-title');
+const adminDialogMessage = document.getElementById('admin-dialog-message');
+const adminDialogCancelBtn = document.getElementById('admin-dialog-cancel-btn');
+const adminDialogConfirmBtn = document.getElementById('admin-dialog-confirm-btn');
+const adminDialogConfirmIcon = document.getElementById('admin-dialog-confirm-icon');
+const adminDialogConfirmText = document.getElementById('admin-dialog-confirm-text');
+
+function closeAdminDialog(result) {
+  if (adminDialogOverlay) {
+    adminDialogOverlay.classList.add('hidden');
+  }
+  if (adminDialogResolver) {
+    const fn = adminDialogResolver;
+    adminDialogResolver = null;
+    fn(result);
+  }
+}
+
+if (adminDialogCloseBtn) {
+  adminDialogCloseBtn.addEventListener('click', () => closeAdminDialog(false));
+}
+if (adminDialogCancelBtn) {
+  adminDialogCancelBtn.addEventListener('click', () => closeAdminDialog(false));
+}
+if (adminDialogConfirmBtn) {
+  adminDialogConfirmBtn.addEventListener('click', () => closeAdminDialog(true));
+}
+if (adminDialogOverlay) {
+  adminDialogOverlay.addEventListener('click', (e) => {
+    if (e.target === adminDialogOverlay) {
+      closeAdminDialog(false);
+    }
+  });
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && adminDialogOverlay && !adminDialogOverlay.classList.contains('hidden')) {
+    closeAdminDialog(false);
+  }
+});
+
+window.showConfirmDialog = function({
+  title = 'Confirmation requise',
+  message = 'Êtes-vous sûr de vouloir effectuer cette action ?',
+  confirmText = 'Confirmer',
+  cancelText = 'Annuler',
+  isDestructive = true,
+  badgeText = isDestructive ? 'Action Irréversible' : 'Confirmation',
+  icon = isDestructive ? 'delete_forever' : 'help_outline'
+} = {}) {
+  return new Promise((resolve) => {
+    adminDialogResolver = resolve;
+
+    if (adminDialogTitle) adminDialogTitle.textContent = title;
+    if (adminDialogMessage) {
+      adminDialogMessage.innerHTML = typeof message === 'string'
+        ? escapeHtml(message).replace(/\n/g, '<br>')
+        : message;
+    }
+    if (adminDialogConfirmText) adminDialogConfirmText.textContent = confirmText;
+    if (adminDialogCancelBtn) {
+      adminDialogCancelBtn.textContent = cancelText;
+      adminDialogCancelBtn.classList.remove('hidden');
+    }
+    if (adminDialogBadgeText) adminDialogBadgeText.textContent = badgeText;
+    if (adminDialogIcon) adminDialogIcon.textContent = icon;
+    if (adminDialogBadgeIcon) adminDialogBadgeIcon.textContent = isDestructive ? 'warning' : 'help';
+
+    if (isDestructive) {
+      if (adminDialogBadge) {
+        adminDialogBadge.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-rose-50 text-rose-700 border border-rose-200/60';
+      }
+      if (adminDialogIconBox) {
+        adminDialogIconBox.className = 'w-16 h-16 rounded-2xl mx-auto flex items-center justify-center mb-4 shadow-xs bg-rose-50 text-rose-600 border border-rose-100';
+      }
+      if (adminDialogConfirmBtn) {
+        adminDialogConfirmBtn.className = 'py-2.5 px-5 rounded-full bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs shadow-md shadow-rose-600/25 transition-all cursor-pointer active:scale-95 flex items-center gap-1.5';
+      }
+      if (adminDialogConfirmIcon) adminDialogConfirmIcon.textContent = 'delete';
+    } else {
+      if (adminDialogBadge) {
+        adminDialogBadge.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-emerald-50 text-[#0d7252] border border-emerald-200/60';
+      }
+      if (adminDialogIconBox) {
+        adminDialogIconBox.className = 'w-16 h-16 rounded-2xl mx-auto flex items-center justify-center mb-4 shadow-xs bg-[#e6f7f0] text-[#0d7252] border border-emerald-100';
+      }
+      if (adminDialogConfirmBtn) {
+        adminDialogConfirmBtn.className = 'py-2.5 px-5 rounded-full bg-[#0d7252] hover:bg-[#08553d] text-white font-extrabold text-xs shadow-md shadow-emerald-700/25 transition-all cursor-pointer active:scale-95 flex items-center gap-1.5';
+      }
+      if (adminDialogConfirmIcon) adminDialogConfirmIcon.textContent = 'check';
+    }
+
+    if (adminDialogOverlay) {
+      adminDialogOverlay.classList.remove('hidden');
+      setTimeout(() => {
+        if (isDestructive && adminDialogCancelBtn) {
+          adminDialogCancelBtn.focus();
+        } else if (adminDialogConfirmBtn) {
+          adminDialogConfirmBtn.focus();
+        }
+      }, 50);
+    }
+  });
+};
+
+window.showAlertDialog = function({
+  title = 'Information',
+  message = '',
+  type = 'info', // 'info' | 'warning' | 'error' | 'success'
+  confirmText = 'Compris'
+} = {}) {
+  return new Promise((resolve) => {
+    adminDialogResolver = resolve;
+
+    if (adminDialogTitle) adminDialogTitle.textContent = title;
+    if (adminDialogMessage) {
+      adminDialogMessage.innerHTML = typeof message === 'string'
+        ? escapeHtml(message).replace(/\n/g, '<br>')
+        : message;
+    }
+    if (adminDialogConfirmText) adminDialogConfirmText.textContent = confirmText;
+    if (adminDialogCancelBtn) adminDialogCancelBtn.classList.add('hidden');
+
+    const isError = type === 'error' || type === 'warning';
+    const isSuccess = type === 'success';
+
+    if (isError) {
+      if (adminDialogBadgeText) adminDialogBadgeText.textContent = type === 'error' ? 'Erreur' : 'Attention';
+      if (adminDialogBadgeIcon) adminDialogBadgeIcon.textContent = 'warning';
+      if (adminDialogIcon) adminDialogIcon.textContent = type === 'error' ? 'error' : 'warning';
+      if (adminDialogBadge) adminDialogBadge.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-rose-50 text-rose-700 border border-rose-200/60';
+      if (adminDialogIconBox) adminDialogIconBox.className = 'w-16 h-16 rounded-2xl mx-auto flex items-center justify-center mb-4 shadow-xs bg-rose-50 text-rose-600 border border-rose-100';
+      if (adminDialogConfirmBtn) adminDialogConfirmBtn.className = 'py-2.5 px-5 rounded-full bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs shadow-md shadow-rose-600/25 transition-all cursor-pointer active:scale-95 flex items-center gap-1.5';
+      if (adminDialogConfirmIcon) adminDialogConfirmIcon.textContent = 'check';
+    } else if (isSuccess) {
+      if (adminDialogBadgeText) adminDialogBadgeText.textContent = 'Succès';
+      if (adminDialogBadgeIcon) adminDialogBadgeIcon.textContent = 'check_circle';
+      if (adminDialogIcon) adminDialogIcon.textContent = 'check_circle';
+      if (adminDialogBadge) adminDialogBadge.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-emerald-50 text-[#0d7252] border border-emerald-200/60';
+      if (adminDialogIconBox) adminDialogIconBox.className = 'w-16 h-16 rounded-2xl mx-auto flex items-center justify-center mb-4 shadow-xs bg-[#e6f7f0] text-[#0d7252] border border-emerald-100';
+      if (adminDialogConfirmBtn) adminDialogConfirmBtn.className = 'py-2.5 px-5 rounded-full bg-[#0d7252] hover:bg-[#08553d] text-white font-extrabold text-xs shadow-md shadow-emerald-700/25 transition-all cursor-pointer active:scale-95 flex items-center gap-1.5';
+      if (adminDialogConfirmIcon) adminDialogConfirmIcon.textContent = 'check';
+    } else {
+      if (adminDialogBadgeText) adminDialogBadgeText.textContent = 'Information';
+      if (adminDialogBadgeIcon) adminDialogBadgeIcon.textContent = 'info';
+      if (adminDialogIcon) adminDialogIcon.textContent = 'info';
+      if (adminDialogBadge) adminDialogBadge.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-blue-50 text-blue-700 border border-blue-200/60';
+      if (adminDialogIconBox) adminDialogIconBox.className = 'w-16 h-16 rounded-2xl mx-auto flex items-center justify-center mb-4 shadow-xs bg-blue-50 text-blue-600 border border-blue-100';
+      if (adminDialogConfirmBtn) adminDialogConfirmBtn.className = 'py-2.5 px-5 rounded-full bg-[#0d7252] hover:bg-[#08553d] text-white font-extrabold text-xs shadow-md shadow-emerald-700/25 transition-all cursor-pointer active:scale-95 flex items-center gap-1.5';
+      if (adminDialogConfirmIcon) adminDialogConfirmIcon.textContent = 'check';
+    }
+
+    if (adminDialogOverlay) {
+      adminDialogOverlay.classList.remove('hidden');
+      setTimeout(() => adminDialogConfirmBtn?.focus(), 50);
+    }
+  });
+};
+
+// ==================== TOAST NOTIFICATIONS ====================
+window.showToast = function(message, type = 'info', duration = 3800) {
+  const container = document.getElementById('admin-toast-container');
+  if (!container) return;
+
+  const toast = document.createElement('div');
+  const typeStyles = {
+    success: {
+      border: 'border-emerald-200/80',
+      iconBg: 'bg-emerald-100 text-[#0d7252]',
+      icon: 'check_circle'
+    },
+    error: {
+      border: 'border-rose-200/80',
+      iconBg: 'bg-rose-100 text-rose-600',
+      icon: 'error'
+    },
+    warning: {
+      border: 'border-amber-200/80',
+      iconBg: 'bg-amber-100 text-amber-600',
+      icon: 'warning'
+    },
+    info: {
+      border: 'border-blue-200/80',
+      iconBg: 'bg-blue-100 text-blue-600',
+      icon: 'info'
+    }
+  };
+  const style = typeStyles[type] || typeStyles.info;
+
+  toast.className = `toast-item pointer-events-auto flex items-center gap-3 p-3.5 bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border ${style.border} text-xs text-gray-800 transition-all duration-300`;
+  toast.innerHTML = `
+    <div class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${style.iconBg} shadow-2xs">
+      <span class="material-symbols-outlined text-lg">${style.icon}</span>
+    </div>
+    <div class="flex-1 font-semibold leading-snug">
+      ${escapeHtml(message)}
+    </div>
+    <button type="button" class="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer" title="Fermer">
+      <span class="material-symbols-outlined text-base">close</span>
+    </button>
+  `;
+
+  const closeBtn = toast.querySelector('button');
+  const removeToast = () => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateY(12px)';
+    setTimeout(() => toast.remove(), 250);
+  };
+  closeBtn?.addEventListener('click', removeToast);
+
+  container.appendChild(toast);
+
+  if (duration > 0) {
+    setTimeout(removeToast, duration);
+  }
+};
+
+// Safe fallback for window.alert in back-office
+window.alert = function(msg) {
+  const str = String(msg);
+  if (str.startsWith('✓') || str.toLowerCase().includes('succès')) {
+    window.showToast(str, 'success');
+  } else if (str.toLowerCase().includes('erreur') || str.toLowerCase().includes('impossible') || str.toLowerCase().includes('invalide')) {
+    window.showToast(str, 'error');
+  } else {
+    window.showToast(str, 'info');
+  }
+};
+
 const PRESET_COLOR_LABELS = {
   '#9c9589': 'Titane Naturel',
   '#1e1e1e': 'Noir Sidéral',
@@ -1326,7 +1565,16 @@ window.openEditProductModal = function(productId) {
 
 // Delete / Archive Product
 window.deleteProduct = async function(productId) {
-  if (!confirm('Confirmez-vous le retrait de ce produit du catalogue ?')) return;
+  const confirmed = await showConfirmDialog({
+    title: 'Retirer ce produit ?',
+    message: 'Confirmez-vous le retrait de ce produit du catalogue ? Il ne sera plus visible par les clients sur la boutique.',
+    confirmText: 'Oui, retirer le produit',
+    cancelText: 'Annuler',
+    isDestructive: true,
+    badgeText: 'Retrait Catalogue',
+    icon: 'inventory_2'
+  });
+  if (!confirmed) return;
 
   try {
     const res = await fetch(`/api/admin/products/${productId}`, {
@@ -1334,13 +1582,14 @@ window.deleteProduct = async function(productId) {
       headers: { 'Authorization': `Bearer ${adminToken}` }
     });
     if (res.ok) {
+      showToast('Produit retiré du catalogue avec succès.', 'success');
       await loadAdminProducts();
     } else {
-      alert('Impossible d’archiver le produit.');
+      showToast('Impossible d’archiver le produit.', 'error');
     }
   } catch (err) {
     console.error('Erreur suppression produit:', err);
-    alert('Erreur réseau.');
+    showToast('Erreur réseau.', 'error');
   }
 };
 
@@ -1600,11 +1849,24 @@ window.setCategoryIcon = function(icon) {
 
 window.handleDeleteCategory = async function(id, name, count) {
   if (count > 0) {
-    alert(`Impossible de supprimer le rayon "${name}" car ${count} produit(s) y sont rattachés.\nVeuillez modifier ou supprimer ces produits au préalable.`);
+    await showAlertDialog({
+      title: 'Suppression impossible',
+      message: `Impossible de supprimer le rayon "${name}" car ${count} produit(s) y sont rattachés.\nVeuillez d'abord modifier ou supprimer ces produits.`,
+      type: 'warning'
+    });
     return;
   }
 
-  if (!confirm(`Confirmez-vous la suppression du rayon "${name}" ?`)) return;
+  const confirmed = await showConfirmDialog({
+    title: 'Supprimer ce rayon ?',
+    message: `Confirmez-vous la suppression définitive du rayon "${name}" ?`,
+    confirmText: 'Oui, supprimer le rayon',
+    cancelText: 'Annuler',
+    isDestructive: true,
+    badgeText: 'Suppression Rayon',
+    icon: 'category'
+  });
+  if (!confirmed) return;
 
   try {
     const res = await fetch(`/api/admin/categories/${id}`, {
@@ -1612,13 +1874,14 @@ window.handleDeleteCategory = async function(id, name, count) {
       headers: { 'Authorization': `Bearer ${adminToken}` }
     });
     if (res.ok) {
+      showToast(`Le rayon "${name}" a été supprimé.`, 'success');
       await loadAdminCategories();
     } else {
       const err = await res.json();
-      alert(`Erreur: ${err.error || 'Impossible de supprimer ce rayon'}`);
+      showToast(`Erreur: ${err.error || 'Impossible de supprimer ce rayon'}`, 'error');
     }
   } catch (err) {
-    alert('Erreur réseau lors de la suppression.');
+    showToast('Erreur réseau lors de la suppression.', 'error');
   }
 };
 
@@ -2262,7 +2525,16 @@ if (saveQuickDiscountBtn) {
 if (quickDiscountRemoveBtn) {
   quickDiscountRemoveBtn.addEventListener('click', async () => {
     if (!quickDiscountProduct) return;
-    if (!confirm(`Supprimer la remise sur "${quickDiscountProduct.title}" et revenir au prix normal ?`)) return;
+    const confirmed = await showConfirmDialog({
+      title: 'Supprimer la remise',
+      message: `Supprimer la remise sur "${quickDiscountProduct.title}" et revenir au prix normal initial ?`,
+      confirmText: 'Réinitialiser le prix',
+      cancelText: 'Annuler',
+      isDestructive: false,
+      badgeText: 'Prix Normal',
+      icon: 'price_check'
+    });
+    if (!confirmed) return;
 
     try {
       const res = await fetch(`/api/admin/products/${quickDiscountProduct.id}/discount`, {
@@ -2276,14 +2548,15 @@ if (quickDiscountRemoveBtn) {
 
       if (res.ok) {
         quickDiscountModalOverlay?.classList.add('hidden');
+        showToast('Remise supprimée avec succès.', 'success');
         await loadAdminProducts();
       } else {
         const err = await res.json();
-        alert(err.error || 'Erreur lors de la suppression de la remise');
+        showToast(err.error || 'Erreur lors de la suppression de la remise', 'error');
       }
     } catch (e) {
       console.error(e);
-      alert('Erreur réseau');
+      showToast('Erreur réseau', 'error');
     }
   });
 }
@@ -2325,14 +2598,21 @@ if (submitBatchDiscountBtn) {
     const discountPercent = Number(batchDiscountPctInput?.value);
 
     if (!discountPercent || discountPercent <= 0 || discountPercent >= 100) {
-      alert('Veuillez saisir un pourcentage valide (entre 1% et 99%).');
+      showToast('Veuillez saisir un pourcentage valide (entre 1% et 99%).', 'warning');
       return;
     }
 
     const catName = batchDiscountCategory ? batchDiscountCategory.options[batchDiscountCategory.selectedIndex].text : 'les articles';
-    if (!confirm(`Confirmez-vous l'application d'une remise de -${discountPercent}% sur ${catName} ?`)) {
-      return;
-    }
+    const confirmed = await showConfirmDialog({
+      title: 'Appliquer la remise groupée',
+      message: `Confirmez-vous l'application d'une remise de -${discountPercent}% sur ${catName} ?`,
+      confirmText: `Appliquer -${discountPercent}%`,
+      cancelText: 'Annuler',
+      isDestructive: false,
+      badgeText: 'Opération Promo',
+      icon: 'percent'
+    });
+    if (!confirmed) return;
 
     try {
       submitBatchDiscountBtn.disabled = true;
@@ -2350,14 +2630,14 @@ if (submitBatchDiscountBtn) {
       const data = await res.json();
       if (res.ok) {
         batchDiscountModalOverlay?.classList.add('hidden');
-        alert(data.message || 'Remises appliquées avec succès !');
+        showToast(data.message || 'Remises appliquées avec succès !', 'success');
         await loadAdminProducts();
       } else {
-        alert(data.error || 'Erreur lors de l’opération');
+        showToast(data.error || 'Erreur lors de l’opération', 'error');
       }
     } catch (e) {
       console.error(e);
-      alert('Erreur réseau');
+      showToast('Erreur réseau', 'error');
     } finally {
       submitBatchDiscountBtn.disabled = false;
       submitBatchDiscountBtn.innerHTML = '<span class="material-symbols-outlined text-sm">bolt</span><span>Appliquer l\'opération</span>';
@@ -2370,9 +2650,16 @@ if (batchDiscountRemoveAllBtn) {
     const category = batchDiscountCategory?.value || 'all';
     const catName = batchDiscountCategory ? batchDiscountCategory.options[batchDiscountCategory.selectedIndex].text : 'la sélection';
 
-    if (!confirm(`Voulez-vous réinitialiser et retirer TOUTES les remises sur ${catName} ? Tous les articles reviendront à leur prix normal.`)) {
-      return;
-    }
+    const confirmed = await showConfirmDialog({
+      title: 'Réinitialiser toutes les remises',
+      message: `Voulez-vous réinitialiser et retirer TOUTES les remises sur ${catName} ? Tous les articles reviendront à leur prix normal.`,
+      confirmText: 'Tout réinitialiser',
+      cancelText: 'Annuler',
+      isDestructive: true,
+      badgeText: 'Remise à zéro',
+      icon: 'restart_alt'
+    });
+    if (!confirmed) return;
 
     try {
       const res = await fetch('/api/admin/products/batch-discount', {
@@ -2387,14 +2674,14 @@ if (batchDiscountRemoveAllBtn) {
       const data = await res.json();
       if (res.ok) {
         batchDiscountModalOverlay?.classList.add('hidden');
-        alert(data.message || 'Toutes les remises ont été réinitialisées.');
+        showToast(data.message || 'Toutes les remises ont été réinitialisées.', 'success');
         await loadAdminProducts();
       } else {
-        alert(data.error || 'Erreur');
+        showToast(data.error || 'Erreur', 'error');
       }
     } catch (e) {
       console.error(e);
-      alert('Erreur réseau');
+      showToast('Erreur réseau', 'error');
     }
   });
 }
@@ -2873,11 +3160,11 @@ window.resendInvite = async function(collabId) {
       const collab = currentCollaborators.find(c => c.id === collabId);
       showInviteModal(data.invitation, collab?.full_name || collab?.username, collab?.role);
     } else {
-      alert(data.error || 'Impossible de générer l\'invitation.');
+      showToast(data.error || 'Impossible de générer l\'invitation.', 'error');
     }
   } catch (err) {
     console.error('Erreur renvoi invitation:', err);
-    alert('Erreur réseau');
+    showToast('Erreur réseau lors de la génération de l\'accès.', 'error');
   }
 };
 
@@ -2892,8 +3179,26 @@ window.toggleCollaboratorStatus = async function(id, currentStatus) {
   if (!adminToken) return;
   const isCurrent = currentAdminUser && (currentAdminUser.id === id || currentAdminUser.userId === id);
   if (isCurrent && currentStatus) {
-    alert('Vous ne pouvez pas désactiver votre propre compte.');
+    await showAlertDialog({
+      title: 'Action impossible',
+      message: 'Vous ne pouvez pas désactiver votre propre compte administrateur.',
+      type: 'warning'
+    });
     return;
+  }
+
+  // If currently active, confirm before deactivating
+  if (currentStatus) {
+    const confirmed = await showConfirmDialog({
+      title: 'Désactiver ce collaborateur ?',
+      message: 'Ce collaborateur ne pourra plus se connecter au back-office tant que son compte ne sera pas réactivé.',
+      confirmText: 'Désactiver le compte',
+      cancelText: 'Annuler',
+      isDestructive: false,
+      badgeText: 'Suspension temporaire',
+      icon: 'block'
+    });
+    if (!confirmed) return;
   }
 
   try {
@@ -2907,13 +3212,14 @@ window.toggleCollaboratorStatus = async function(id, currentStatus) {
     });
     const data = await res.json();
     if (res.ok) {
+      showToast(currentStatus ? 'Compte collaborateur désactivé.' : 'Compte collaborateur réactivé avec succès.', 'success');
       await loadCollaborators();
     } else {
-      alert(data.error || 'Erreur lors du changement de statut');
+      showToast(data.error || 'Erreur lors du changement de statut', 'error');
     }
   } catch (err) {
     console.error('Erreur toggle statut:', err);
-    alert('Erreur réseau');
+    showToast('Erreur réseau', 'error');
   }
 };
 
@@ -2921,13 +3227,24 @@ window.deleteCollaborator = async function(id, name) {
   if (!adminToken) return;
   const isCurrent = currentAdminUser && (currentAdminUser.id === id || currentAdminUser.userId === id);
   if (isCurrent) {
-    alert('Vous ne pouvez pas supprimer votre propre compte.');
+    await showAlertDialog({
+      title: 'Action impossible',
+      message: 'Vous ne pouvez pas supprimer votre propre compte administrateur.',
+      type: 'warning'
+    });
     return;
   }
 
-  if (!confirm(`Confirmez-vous la suppression définitive du compte de "${name}" ?`)) {
-    return;
-  }
+  const confirmed = await showConfirmDialog({
+    title: 'Supprimer ce collaborateur',
+    message: `Confirmez-vous la suppression définitive du compte de "${name}" ? Cette action est irréversible et révoquera immédiatement tous ses accès.`,
+    confirmText: 'Oui, supprimer définitivement',
+    cancelText: 'Annuler',
+    isDestructive: true,
+    badgeText: 'Action Irréversible',
+    icon: 'person_remove'
+  });
+  if (!confirmed) return;
 
   try {
     const res = await fetch(`/api/admin/collaborators/${id}`, {
@@ -2938,13 +3255,18 @@ window.deleteCollaborator = async function(id, name) {
     });
     const data = await res.json();
     if (res.ok) {
+      showToast(`Le compte de "${name}" a été définitivement supprimé.`, 'success');
       await loadCollaborators();
     } else {
-      alert(data.error || 'Erreur lors de la suppression');
+      await showAlertDialog({
+        title: 'Erreur de suppression',
+        message: data.error || 'Erreur lors de la suppression du collaborateur.',
+        type: 'error'
+      });
     }
   } catch (err) {
     console.error('Erreur suppression collaborateur:', err);
-    alert('Erreur réseau');
+    showToast('Erreur réseau lors de la suppression.', 'error');
   }
 };
 
