@@ -73,14 +73,30 @@ class PgStatement {
     const pool = getPgPool();
     const params = normalizeParams(args);
     let pgSql = convertSqlToPg(this.sql);
-    if (/^\s*insert\s+/i.test(pgSql) && !/returning/i.test(pgSql)) {
-      pgSql += ' RETURNING id';
+
+    const isInsert = /^\s*insert\s+/i.test(pgSql);
+    const hasReturning = /returning/i.test(pgSql);
+    const isSiteSettings = /insert\s+into\s+site_settings\b/i.test(pgSql);
+
+    const appendReturning = isInsert && !hasReturning && !isSiteSettings;
+    const querySql = appendReturning ? `${pgSql} RETURNING id` : pgSql;
+
+    try {
+      const result = await pool.query(querySql, params);
+      return {
+        changes: result.rowCount,
+        lastInsertRowid: result.rows && result.rows[0] && result.rows[0].id !== undefined ? result.rows[0].id : null
+      };
+    } catch (err) {
+      if (appendReturning && err.message && err.message.includes('column "id" does not exist')) {
+        const fallbackResult = await pool.query(pgSql, params);
+        return {
+          changes: fallbackResult.rowCount,
+          lastInsertRowid: null
+        };
+      }
+      throw err;
     }
-    const result = await pool.query(pgSql, params);
-    return {
-      changes: result.rowCount,
-      lastInsertRowid: result.rows && result.rows[0] ? result.rows[0].id : null
-    };
   }
 }
 

@@ -265,6 +265,23 @@ describe('Admin CMS API', () => {
     expect(publicRes.body.hero_section.title).toBe('Le meilleur de la tech chinoise au Gabon');
   });
 
+  it('allows authenticated admin to update the announcement_bar (ruban défilant) in site_settings', async () => {
+    const res = await request(app)
+      .put('/api/admin/settings/announcement_bar')
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({
+        enabled: true,
+        text: '🇨🇳 Shenzhen → 🇬🇦 Gabon | Fret cargo pesé au gramme près',
+        secondaryText: '✈️ Colis Rapide (1 semaine) ou Colis Normal (2 semaines)'
+      });
+
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.key).toBe('announcement_bar');
+    expect(res.body.value.enabled).toBe(true);
+    expect(res.body.value.text).toContain('Shenzhen');
+  });
+
   it('allows authenticated admin to update social media links', async () => {
     const updateRes = await request(app)
       .put('/api/admin/settings/social_links')
